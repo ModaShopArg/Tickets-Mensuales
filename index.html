@@ -3,61 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tickets PVS - Local Concordia</title>
+    <title>Tickets PVS - Moda Shop</title>
     
-    <!-- 🔥 NUEVO: Icono de la empresa en la pestaña (Favicon) 🔥 -->
+    <!-- Favicon de la empresa -->
     <link rel="icon" type="image/png" href="logo.png">
+    
+    <!-- Tipografía corporativa (Alternativa web a Gotham Rounded) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Configuración de Tailwind con Colores de Moda Shop -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            magenta: '#ec008c', // Process Magenta C
+                            magentaHover: '#c40074',
+                            black: '#111111',   // Process Black
+                            darkGray: '#333333',
+                            lightGray: '#999999', // 60% Black approx
+                            pinkBg: '#fdf2f8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'], // Aplicación de fuente redondeada
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f8fafc; font-family: 'Nunito', sans-serif; }
         .card-hover { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease; }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
-<body class="text-slate-800 p-4 md:p-8">
+<body class="text-brand-black p-4 md:p-8">
 
     <div id="dashboard-content" class="max-w-7xl mx-auto space-y-8 bg-[#f8fafc] pb-4">
         
         <!-- Header -->
-        <header class="bg-white rounded-2xl shadow-sm p-6 md:p-8 flex items-center justify-between border-l-8 border-blue-600">
+        <header class="bg-white rounded-2xl shadow-sm p-6 md:p-8 flex items-center justify-between border-l-8 border-brand-magenta">
             <div>
-                <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight flex flex-wrap items-center gap-2">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-brand-black tracking-tight flex flex-wrap items-center gap-2">
                     Tablero de Control: 
-                    <select id="selectorLocal" onchange="cambiarLocal(this.value)" class="bg-transparent border-b-4 border-blue-600 text-blue-600 cursor-pointer focus:outline-none hover:text-blue-800 transition-colors pb-1">
+                    <select id="selectorLocal" onchange="cambiarLocal(this.value)" class="bg-transparent border-b-4 border-brand-magenta text-brand-magenta cursor-pointer focus:outline-none hover:text-brand-magentaHover transition-colors pb-1">
                         <option value="Concordia">Local Concordia</option>
                         <option value="Chajarí">Local Chajarí</option>
                         <option value="Tendens">Local Tendens</option>
                     </select>
                 </h1>
-                <p class="text-slate-500 mt-2 text-lg"><i class="far fa-calendar-alt mr-2"></i> Período Analizado: <span id="periodo-text">Conectando...</span></p>
+                <p class="text-brand-lightGray mt-2 text-lg font-semibold"><i class="far fa-calendar-alt mr-2"></i> Período Analizado: <span id="periodo-text">Conectando...</span></p>
             </div>
             <div class="flex items-center gap-4">
-                <!-- Indicador de Nube Mejorado -->
-                <div id="cloud-status" class="hidden md:flex items-center text-sm font-bold bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
-                    <i class="fas fa-cloud text-slate-400 mr-2"></i> <span class="text-slate-600">Conectando...</span>
+                <!-- Indicador de Nube -->
+                <div id="cloud-status" class="hidden md:flex items-center text-sm font-bold bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
+                    <i class="fas fa-cloud text-gray-400 mr-2"></i> <span class="text-gray-600">Conectando...</span>
                 </div>
                 
-                <button id="btnExport" onclick="exportarPDF()" data-html2canvas-ignore="true" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center border border-slate-700">
-                    <i class="fas fa-file-pdf text-red-500 text-xl mr-3"></i>
+                <button id="btnExport" onclick="exportarPDF()" data-html2canvas-ignore="true" class="bg-brand-black hover:bg-brand-darkGray text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center border border-gray-800">
+                    <i class="fas fa-file-pdf text-brand-magenta text-xl mr-3"></i>
                     Exportar para CEO
                 </button>
             </div>
         </header>
 
         <!-- PANEL DE CARGA DE DATOS (No aparece en el PDF) -->
-        <div data-html2canvas-ignore="true" class="bg-indigo-50 border border-indigo-200 rounded-2xl p-6 shadow-sm">
-            <h2 class="text-xl font-bold text-indigo-900 mb-4 flex items-center">
-                <i class="fas fa-keyboard mr-2"></i> Cargar Nuevos Meses (Uso Interno)
+        <div data-html2canvas-ignore="true" class="bg-brand-pinkBg border border-pink-200 rounded-2xl p-6 shadow-sm">
+            <h2 class="text-xl font-bold text-brand-black mb-4 flex items-center">
+                <i class="fas fa-keyboard mr-2 text-brand-magenta"></i> Cargar Nuevos Meses (Uso Interno)
             </h2>
             <form id="formCarga" onsubmit="agregarNuevoMes(event)" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                     <div>
-                        <label class="block text-sm font-semibold text-indigo-800 mb-1">Mes</label>
-                        <select id="inputMes" class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Mes</label>
+                        <select id="inputMes" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta font-bold text-gray-800">
                             <option value="Enero">Enero</option>
                             <option value="Febrero">Febrero</option>
                             <option value="Marzo">Marzo</option>
@@ -73,71 +102,71 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-indigo-800 mb-1">Venta Total ($)</label>
-                        <input type="text" id="inputVenta" placeholder="Ej: 1.500.000,50" class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Venta Total ($)</label>
+                        <input type="text" id="inputVenta" placeholder="Ej: 1.500.000,50" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-indigo-800 mb-1">Venta Turno Mañana ($)</label>
-                        <input type="text" id="inputVentaManana" placeholder="Ej: 600.000,00" class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="El turno tarde se calculará automáticamente restando esto al Total.">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Venta Turno Mañana ($)</label>
+                        <input type="text" id="inputVentaManana" placeholder="Ej: 600.000,00" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta" title="El turno tarde se calculará automáticamente restando esto al Total.">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-indigo-800 mb-1">Total de Tickets</label>
-                        <input type="text" id="inputTickets" placeholder="Ej: 950" class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Total de Tickets</label>
+                        <input type="text" id="inputTickets" placeholder="Ej: 950" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-indigo-800 mb-1">Tickets Mañana</label>
-                        <input type="text" id="inputTicketsManana" placeholder="Ej: 450" class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="El turno tarde se calculará automáticamente.">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Tickets Mañana</label>
+                        <input type="text" id="inputTicketsManana" placeholder="Ej: 450" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta" title="El turno tarde se calculará automáticamente.">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-indigo-800 mb-1">Breve Diagnóstico</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Breve Diagnóstico</label>
                     <div class="flex flex-col md:flex-row gap-2">
-                        <input type="text" id="inputDiagnostico" placeholder="Ej: Las ventas repuntaron..." class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button type="submit" id="btnAgregar" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-all whitespace-nowrap shadow-md">
+                        <input type="text" id="inputDiagnostico" placeholder="Ej: Las ventas repuntaron..." class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta">
+                        <button type="submit" id="btnAgregar" class="bg-brand-magenta hover:bg-brand-magentaHover text-white font-bold py-3 px-6 rounded-lg transition-all whitespace-nowrap shadow-md">
                             <i class="fas fa-plus mr-1"></i> Agregar
                         </button>
                     </div>
                 </div>
             </form>
-            <p class="text-xs text-indigo-600 mt-3"><i class="fas fa-info-circle"></i> Los meses ya registrados se bloquearán para evitar sobreescrituras por error. Al generar el PDF, este recuadro azul no será visible.</p>
+            <p class="text-xs text-brand-lightGray font-semibold mt-3"><i class="fas fa-info-circle"></i> Los meses ya registrados se bloquearán para evitar sobreescrituras por error. Al generar el PDF, este recuadro no será visible.</p>
         </div>
 
         <!-- Global KPIs -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-blue-500 card-hover">
+            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-magenta card-hover">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm text-slate-500 font-bold uppercase tracking-wider">Facturación Total</p>
-                        <h2 id="kpi-ventas" class="text-3xl font-black text-slate-800 mt-2">$0</h2>
+                        <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Facturación Total</p>
+                        <h2 id="kpi-ventas" class="text-3xl font-black text-brand-black mt-2">$0</h2>
                     </div>
-                    <i class="fas fa-dollar-sign text-blue-200 text-3xl"></i>
+                    <i class="fas fa-dollar-sign text-pink-200 text-3xl"></i>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-emerald-500 card-hover">
+            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-black card-hover">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm text-slate-500 font-bold uppercase tracking-wider">Tráfico (Tickets)</p>
-                        <h2 id="kpi-tickets" class="text-3xl font-black text-slate-800 mt-2">0</h2>
+                        <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Tráfico (Tickets)</p>
+                        <h2 id="kpi-tickets" class="text-3xl font-black text-brand-black mt-2">0</h2>
                     </div>
-                    <i class="fas fa-users text-emerald-200 text-3xl"></i>
+                    <i class="fas fa-users text-gray-200 text-3xl"></i>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-purple-500 card-hover">
+            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-pink-400 card-hover">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm text-slate-500 font-bold uppercase tracking-wider">Ticket Prom. Global</p>
-                        <h2 id="kpi-ticket-prom" class="text-3xl font-black text-slate-800 mt-2">$0</h2>
+                        <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Ticket Prom. Global</p>
+                        <h2 id="kpi-ticket-prom" class="text-3xl font-black text-brand-black mt-2">$0</h2>
                     </div>
-                    <i class="fas fa-receipt text-purple-200 text-3xl"></i>
+                    <i class="fas fa-receipt text-pink-100 text-3xl"></i>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-amber-500 card-hover">
+            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-gray-400 card-hover">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm text-slate-500 font-bold uppercase tracking-wider">Venta Diaria Prom.</p>
-                        <h2 id="kpi-diaria" class="text-3xl font-black text-slate-800 mt-2">$0</h2>
+                        <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Venta Diaria Prom.</p>
+                        <h2 id="kpi-diaria" class="text-3xl font-black text-brand-black mt-2">$0</h2>
                     </div>
-                    <i class="fas fa-store text-amber-200 text-3xl"></i>
+                    <i class="fas fa-store text-gray-200 text-3xl"></i>
                 </div>
             </div>
         </div>
@@ -145,14 +174,14 @@
         <!-- Charts Section -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
-                <h3 class="text-xl font-bold text-slate-800 mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-blue-500"></i>Evolución: Ventas vs Ticket Promedio</h3>
+                <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
                 <div class="relative h-80 w-full">
                     <canvas id="mixedChart"></canvas>
                 </div>
             </div>
             
             <div class="bg-white rounded-xl shadow-sm p-6">
-                <h3 class="text-xl font-bold text-slate-800 mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-blue-500"></i>Distribución de Ingresos</h3>
+                <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-brand-magenta"></i>Distribución de Ingresos</h3>
                 <div class="relative h-80 w-full flex justify-center">
                     <canvas id="pieChart"></canvas>
                 </div>
@@ -161,78 +190,78 @@
 
         <!-- Chart Section (Análisis de Turnos) -->
         <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
-            <h3 class="text-xl font-bold text-slate-800 mb-6 border-b pb-2 flex items-center">
-                <i class="fas fa-clock mr-2 text-indigo-600"></i> 
+            <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
+                <i class="fas fa-clock mr-2 text-brand-black"></i> 
                 Rendimiento Operativo: Turno Mañana vs. Turno Tarde
             </h3>
             <div class="relative h-80 w-full">
                 <canvas id="turnosChart"></canvas>
             </div>
-            <p class="text-sm text-slate-500 mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
+            <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
         </div>
 
         <!-- Desglose Mensual Detallado -->
         <div class="mt-10">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
-                <i class="fas fa-calendar-check mr-3 text-blue-600"></i> Desglose Mensual Detallado
+            <h2 class="text-2xl font-bold text-brand-black mb-6 flex items-center">
+                <i class="fas fa-calendar-check mr-3 text-brand-magenta"></i> Desglose Mensual Detallado
             </h2>
             <div id="monthly-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Se inyectan las tarjetas por JS -->
             </div>
         </div>
 
-        <!-- Diagnóstico Ejecutivo Global -->
-        <div class="mt-8 bg-slate-900 rounded-2xl shadow-xl p-8 text-white">
-            <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-slate-700 pb-4">
-                <i class="fas fa-comment-dots mr-3 text-indigo-400"></i> Diagnóstico Ejecutivo
+        <!-- Diagnóstico Ejecutivo Global (Modo Oscuro Corporativo) -->
+        <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white">
+            <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
+                <i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo
             </h2>
-            <div class="bg-slate-800 rounded-xl border border-slate-700 hover:border-indigo-500 transition-colors">
-                <div id="texto-diagnostico" contenteditable="true" onblur="guardarDiagnostico(this.innerText)" class="text-slate-300 leading-relaxed outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-slate-800 rounded-xl p-6 transition-all min-h-[100px] whitespace-pre-wrap" title="Haz clic para escribir el diagnóstico">
+            <div class="bg-[#222222] rounded-xl border border-brand-darkGray hover:border-brand-magenta transition-colors">
+                <div id="texto-diagnostico" contenteditable="true" onblur="guardarDiagnostico(this.innerText)" class="text-gray-300 leading-relaxed outline-none focus:ring-2 focus:ring-brand-magenta focus:bg-[#222222] rounded-xl p-6 transition-all min-h-[100px] whitespace-pre-wrap" title="Haz clic para escribir el diagnóstico">
                     [Sincronizando diagnóstico...]
                 </div>
             </div>
         </div>
 
-        <!-- Conclusiones Globales -->
-        <div class="mt-8 bg-slate-900 rounded-2xl shadow-xl p-8 text-white">
-            <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-slate-700 pb-4">
-                <i class="fas fa-chess-knight mr-3 text-amber-400"></i> Foco y Plan de Acción
+        <!-- Conclusiones Globales (Modo Oscuro Corporativo) -->
+        <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white">
+            <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
+                <i class="fas fa-heart mr-3 text-brand-magenta"></i> Foco y Plan de Acción
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div>
                     <div class="flex items-center mb-3">
-                        <div class="bg-slate-800 p-2 rounded-lg mr-3"><i class="fas fa-chart-line text-blue-400 text-xl"></i></div>
+                        <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-chart-line text-brand-magenta text-xl"></i></div>
                         <h3 class="font-bold text-lg">1. Cuidar el Tráfico</h3>
                     </div>
-                    <p class="text-slate-400 text-sm leading-relaxed">
+                    <p class="text-gray-400 text-sm leading-relaxed font-semibold">
                         Observar de cerca el volumen de tickets. Si la cantidad de ingresos al local baja considerablemente, se requiere activación de marketing inmediato.
                     </p>
                 </div>
                 <div>
                     <div class="flex items-center mb-3">
-                        <div class="bg-slate-800 p-2 rounded-lg mr-3"><i class="fas fa-hand-holding-usd text-emerald-400 text-xl"></i></div>
+                        <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-hand-holding-usd text-brand-magenta text-xl"></i></div>
                         <h3 class="font-bold text-lg">2. Up-Selling Constante</h3>
                     </div>
-                    <p class="text-slate-400 text-sm leading-relaxed">
+                    <p class="text-gray-400 text-sm leading-relaxed font-semibold">
                         El ticket promedio es la métrica de eficiencia. Capacitar en "venta cruzada" en caja es vital para superar la barrera mínima estable mensual.
                     </p>
                 </div>
                 <div>
                     <div class="flex items-center mb-3">
-                        <div class="bg-slate-800 p-2 rounded-lg mr-3"><i class="fas fa-bullseye text-red-400 text-xl"></i></div>
+                        <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-bullseye text-brand-magenta text-xl"></i></div>
                         <h3 class="font-bold text-lg">3. Metas del Mes</h3>
                     </div>
-                    <p class="text-slate-400 text-sm leading-relaxed">
+                    <p class="text-gray-400 text-sm leading-relaxed font-semibold">
                         Establecer el "Ticket Objetivo Mensual" para los vendedores por turno y atar un incentivo si logran ese monto promedio.
                     </p>
                 </div>
                 <div>
                     <div class="flex items-center mb-3">
-                        <div class="bg-slate-800 p-2 rounded-lg mr-3"><i class="fas fa-users-cog text-amber-400 text-xl"></i></div>
+                        <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-users-cog text-brand-magenta text-xl"></i></div>
                         <h3 class="font-bold text-lg">4. Balance de Turnos</h3>
                     </div>
-                    <p class="text-slate-400 text-sm leading-relaxed">
-                        Utilizar el análisis "Mañana vs Tarde" para redistribuir el staff. Reforzar con vendedores top el turno de mayor volumen y crear "Happy Hours" en el más débil.
+                    <p class="text-gray-400 text-sm leading-relaxed font-semibold">
+                        Utilizar el análisis "Mañana vs Tarde" para redistribuir el staff. Reforzar con vendedores top el turno de mayor volumen.
                     </p>
                 </div>
             </div>
@@ -279,7 +308,7 @@
         };
         let localActual = 'Concordia';
 
-        // 🚨 WATCHDOG: SEGURO ANTI-CONGELAMIENTO PARA C/USERS/...
+        // 🚨 WATCHDOG: SEGURO ANTI-CONGELAMIENTO
         setTimeout(() => {
             if (!datosSincronizados) {
                 console.warn("⚠️ Firebase bloqueado. Iniciando en Modo Local.");
@@ -291,14 +320,12 @@
 
         // Autenticación Segura
         const initAuth = async () => {
-            console.log("1. Intentando iniciar sesión...");
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
-                console.log("2. Inicio de sesión exitoso.");
             } catch (error) {
                 console.error("❌ Error CRÍTICO de Autenticación:", error.code, error.message);
                 actualizarStatusNube('Error Conexión', 'text-red-500');
@@ -308,7 +335,6 @@
         };
 
         onAuthStateChanged(auth, (user) => {
-            console.log("3. Estado de autenticación cambió. Usuario:", user ? user.uid : "Ninguno");
             if (user) {
                 userId = user.uid;
                 iniciarEscuchaNube();
@@ -322,20 +348,15 @@
         function actualizarStatusNube(texto, colorTexto) {
             const statusEl = document.getElementById('cloud-status');
             if (statusEl) {
-                // Actualizamos siempre con el icono fa-cloud y el color solicitado
-                statusEl.innerHTML = `<i class="fas fa-cloud ${colorTexto} mr-2"></i> <span class="text-slate-600">${texto}</span>`;
+                statusEl.innerHTML = `<i class="fas fa-cloud ${colorTexto} mr-2"></i> <span class="text-gray-600">${texto}</span>`;
             }
         }
 
         function iniciarEscuchaNube() {
-            console.log("4. Iniciando conexión a la base de datos Firestore...");
             try {
-                // 🔥 CAMBIO CLAVE: Cambiamos 'users', userId por 'public', 'data'
-                // Esto hace que la carpeta sea global para todos los que tengan el enlace
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboard_compartido', 'mis_datos');
                 
                 onSnapshot(docRef, (documento) => {
-                    console.log("5. Lectura de base de datos exitosa.");
                     datosSincronizados = true;
                     if (documento.exists()) {
                         const datosNube = documento.data();
@@ -344,13 +365,11 @@
                     } else {
                         guardarEnLaNubeSilencioso();
                     }
-                    // ✅ Éxito: Nube Verde
                     actualizarStatusNube('Guardado', 'text-emerald-500');
                     document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual];
                     renderDashboard();
                 }, (error) => {
                     console.error("❌ Error CRÍTICO leyendo nube:", error.code, error.message);
-                    // ❌ Error: Nube Roja
                     actualizarStatusNube('Error de Nube', 'text-red-500');
                     datosSincronizados = true;
                     renderDashboard();
@@ -364,7 +383,7 @@
         }
 
         async function guardarEnLaNubeSilencioso() {
-            // 🔥 CAMBIO CLAVE: Misma ruta global compartida aquí
+            if (!userId) return;
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboard_compartido', 'mis_datos');
             try {
                 await setDoc(docRef, {
@@ -372,17 +391,14 @@
                     diagnosticosLocales: diagnosticosLocales,
                     ultimaModificacion: new Date().toISOString()
                 });
-                // Al guardar con éxito volvemos a poner la nube en verde
                 actualizarStatusNube('Guardado', 'text-emerald-500');
             } catch (e) {
                 console.error("Fallo guardado:", e);
-                // Si falla el guardado, nube roja
                 actualizarStatusNube('Fallo Guardado', 'text-red-500');
             }
         }
 
         async function guardarEnLaNube() {
-            // Mientras guarda, ponemos la nube azul (indicando proceso)
             actualizarStatusNube('Sincronizando...', 'text-blue-500');
             await guardarEnLaNubeSilencioso();
         }
@@ -410,15 +426,16 @@
         const formatNumber = (value) => isNaN(value) ? '0' : new Intl.NumberFormat('es-AR').format(value);
         const formatMillones = (value) => isNaN(value) ? '$0M' : '$' + (value / 1000000).toFixed(1) + 'M';
 
+        // 🔥 PALETA DE COLORES CORPORATIVA PARA LAS TARJETAS DINÁMICAS 🔥
         const colores = {
-            blue: { bg: '#3b82f6', light: 'bg-blue-50', border: 'border-blue-100', leftBorder: 'border-blue-400', textLight: 'text-blue-600', textDark: 'text-slate-800' },
-            emerald: { bg: '#10b981', light: 'bg-emerald-50', border: 'border-emerald-100', leftBorder: 'border-emerald-400', textLight: 'text-emerald-600', textDark: 'text-emerald-900' },
-            amber: { bg: '#f59e0b', light: 'bg-amber-50', border: 'border-amber-100', leftBorder: 'border-amber-400', textLight: 'text-amber-600', textDark: 'text-amber-900' },
-            red: { bg: '#ef4444', light: 'bg-red-50', border: 'border-red-100', leftBorder: 'border-red-400', textLight: 'text-red-600', textDark: 'text-red-900' },
-            purple: { bg: '#8b5cf6', light: 'bg-purple-50', border: 'border-purple-100', leftBorder: 'border-purple-400', textLight: 'text-purple-600', textDark: 'text-purple-900' }
+            magenta: { bg: '#ec008c', light: 'bg-pink-50', border: 'border-pink-100', leftBorder: 'border-brand-magenta', textLight: 'text-brand-magenta', textDark: 'text-brand-black' },
+            black: { bg: '#111111', light: 'bg-gray-50', border: 'border-gray-200', leftBorder: 'border-brand-black', textLight: 'text-brand-black', textDark: 'text-brand-black' },
+            gray: { bg: '#666666', light: 'bg-slate-50', border: 'border-slate-200', leftBorder: 'border-gray-500', textLight: 'text-gray-700', textDark: 'text-gray-900' },
+            pink: { bg: '#f472b6', light: 'bg-fuchsia-50', border: 'border-fuchsia-100', leftBorder: 'border-pink-400', textLight: 'text-pink-600', textDark: 'text-gray-800' },
+            darkgray: { bg: '#333333', light: 'bg-zinc-50', border: 'border-zinc-200', leftBorder: 'border-zinc-600', textLight: 'text-zinc-700', textDark: 'text-zinc-900' }
         };
 
-        const listadoColores = ['purple', 'blue', 'emerald', 'amber', 'red'];
+        const listadoColores = ['magenta', 'black', 'gray', 'pink', 'darkgray'];
 
         function parseExcelNumber(str) {
             if (!str) return 0;
@@ -428,7 +445,6 @@
             return isNaN(resultado) ? 0 : resultado;
         }
 
-        // --- NUEVA FUNCIONALIDAD: Bloqueo de Meses Cargados ---
         function actualizarDropdownMeses(datosLocales) {
             const mesesCargados = datosLocales.map(d => d.mes);
             const selectMes = document.getElementById('inputMes');
@@ -436,36 +452,31 @@
             let primerMesLibre = null;
 
             Array.from(selectMes.options).forEach(option => {
-                // Removemos el texto "(Ya cargado)" si estaba para resetear
                 let valorReal = option.value;
-                
                 if (mesesCargados.includes(valorReal)) {
-                    // Si ya está cargado, lo bloqueamos visualmente
                     option.disabled = true;
                     option.text = valorReal + ' (Ya cargado)';
-                    option.classList.add('bg-slate-200', 'text-slate-400');
+                    option.classList.add('bg-gray-200', 'text-gray-400');
                 } else {
-                    // Si está libre, lo habilitamos
                     option.disabled = false;
                     option.text = valorReal;
-                    option.classList.remove('bg-slate-200', 'text-slate-400');
+                    option.classList.remove('bg-gray-200', 'text-gray-400');
                     if (!primerMesLibre) primerMesLibre = valorReal;
                 }
             });
 
-            // Comportamiento del botón y selección automática
             if (primerMesLibre) {
-                selectMes.value = primerMesLibre; // Auto-posiciona en el próximo mes a cargar
+                selectMes.value = primerMesLibre; 
                 btnAgregar.disabled = false;
                 btnAgregar.innerHTML = '<i class="fas fa-plus mr-1"></i> Agregar';
-                btnAgregar.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-500');
-                btnAgregar.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+                btnAgregar.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-500');
+                btnAgregar.classList.add('bg-brand-magenta', 'hover:bg-brand-magentaHover');
             } else {
-                selectMes.value = "Enero"; // Solo para que no quede en blanco visualmente
-                btnAgregar.disabled = true; // Bloquea el botón
+                selectMes.value = "Enero"; 
+                btnAgregar.disabled = true; 
                 btnAgregar.innerHTML = '<i class="fas fa-lock mr-1"></i> Año Completo';
-                btnAgregar.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
-                btnAgregar.classList.add('bg-slate-500', 'opacity-50', 'cursor-not-allowed');
+                btnAgregar.classList.remove('bg-brand-magenta', 'hover:bg-brand-magentaHover');
+                btnAgregar.classList.add('bg-gray-500', 'opacity-50', 'cursor-not-allowed');
             }
         }
 
@@ -474,7 +485,6 @@
 
             let datosMensuales = baseDatosLocales[localActual] || [];
 
-            // Actualizamos el menú desplegable bloqueando meses ya cargados
             actualizarDropdownMeses(datosMensuales);
 
             if (datosMensuales.length === 0) {
@@ -483,7 +493,7 @@
                 document.getElementById('kpi-tickets').innerText = '0';
                 document.getElementById('kpi-ticket-prom').innerText = '$0';
                 document.getElementById('kpi-diaria').innerText = '$0';
-                document.getElementById('monthly-container').innerHTML = '<div class="col-span-1 md:col-span-2 text-center p-8 text-slate-500 bg-white rounded-xl border border-dashed border-slate-300">Aún no hay datos cargados. Utiliza el formulario superior para agregar tu primer mes.</div>';
+                document.getElementById('monthly-container').innerHTML = '<div class="col-span-1 md:col-span-2 text-center p-8 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300 font-bold">Aún no hay datos cargados. Utiliza el formulario superior para agregar tu primer mes.</div>';
                 
                 if (chartMixto) chartMixto.destroy();
                 if (chartTorta) chartTorta.destroy();
@@ -515,16 +525,16 @@
                         </div>
                         <div class="p-6 flex-grow">
                             <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div><span class="text-slate-500 text-sm block">Venta Total</span><span class="font-bold text-lg ${theme.textLight}">${formatCurrency(data.ventas)}</span></div>
-                                <div><span class="text-slate-500 text-sm block">Ticket Promedio</span><span class="font-bold text-lg ${theme.textLight}">${formatCurrency(data.ticketPromedio)}</span></div>
-                                <div><span class="text-slate-500 text-sm block">Total Tickets</span><span class="font-bold text-lg">${formatNumber(data.tickets)}</span></div>
-                                <div><span class="text-slate-500 text-sm block">Prom. Tickets/Día</span><span class="font-bold text-lg">${data.ticketsDiarios}</span></div>
-                                <div class="col-span-2 text-xs text-slate-500 border-t pt-2 mt-1">
-                                    <span class="font-semibold text-amber-600">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)} (${data.ticketsManana} tkts) <span class="mx-2">|</span> 
-                                    <span class="font-semibold text-indigo-600">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)} (${data.tickets - data.ticketsManana} tkts)
+                                <div><span class="text-gray-500 text-sm block font-bold">Venta Total</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ventas)}</span></div>
+                                <div><span class="text-gray-500 text-sm block font-bold">Ticket Promedio</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ticketPromedio)}</span></div>
+                                <div><span class="text-gray-500 text-sm block font-bold">Total Tickets</span><span class="font-bold text-lg">${formatNumber(data.tickets)}</span></div>
+                                <div><span class="text-gray-500 text-sm block font-bold">Prom. Tickets/Día</span><span class="font-bold text-lg">${data.ticketsDiarios}</span></div>
+                                <div class="col-span-2 text-xs text-gray-500 border-t pt-2 mt-1">
+                                    <span class="font-bold text-brand-magenta">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)} (${data.ticketsManana} tkts) <span class="mx-2">|</span> 
+                                    <span class="font-bold text-brand-black">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)} (${data.tickets - data.ticketsManana} tkts)
                                 </div>
                             </div>
-                            <div class="${theme.light} rounded p-4 border-l-4 ${theme.leftBorder} text-sm text-slate-700">
+                            <div class="${theme.light} rounded p-4 border-l-4 ${theme.leftBorder} text-sm text-gray-700">
                                 <strong>Diagnóstico:</strong> ${data.diagnostico}
                             </div>
                         </div>
@@ -540,13 +550,16 @@
             const dataTkts = datosMensuales.map(d => d.ticketPromedio);
             const bgs = datosMensuales.map(d => colores[d.colorTema].bg);
 
+            // 🔥 GRÁFICOS CON COLORES CORPORATIVOS 🔥
+            Chart.defaults.font.family = "'Nunito', sans-serif";
+            
             chartMixto = new Chart(document.getElementById('mixedChart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Facturación ($)', data: dataVts, backgroundColor: '#3b82f6', borderRadius: 8, yAxisID: 'y' },
-                        { label: 'Ticket Promedio ($)', data: dataTkts, type: 'line', borderColor: '#f59e0b', backgroundColor: '#f59e0b', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' }
+                        { label: 'Facturación ($)', data: dataVts, backgroundColor: '#111111', borderRadius: 8, yAxisID: 'y' },
+                        { label: 'Ticket Promedio ($)', data: dataTkts, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' }
                     ]
                 },
                 options: {
@@ -572,8 +585,8 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Ventas Turno Mañana ($)', data: dataManana, backgroundColor: '#fbbf24', borderRadius: 6 },
-                        { label: 'Ventas Turno Tarde ($)', data: dataTarde, backgroundColor: '#3730a3', borderRadius: 6 }
+                        { label: 'Ventas Turno Mañana ($)', data: dataManana, backgroundColor: '#ec008c', borderRadius: 6 },
+                        { label: 'Ventas Turno Tarde ($)', data: dataTarde, backgroundColor: '#111111', borderRadius: 6 }
                     ]
                 },
                 options: {
@@ -619,8 +632,8 @@
             guardarEnLaNube(); 
             
             let cajaDiagnostico = document.getElementById('texto-diagnostico').parentElement;
-            cajaDiagnostico.classList.add('ring-2', 'ring-indigo-500', 'bg-slate-700');
-            setTimeout(() => { cajaDiagnostico.classList.remove('ring-2', 'ring-indigo-500', 'bg-slate-700'); }, 500);
+            cajaDiagnostico.classList.add('ring-2', 'ring-brand-magenta', 'bg-[#222222]');
+            setTimeout(() => { cajaDiagnostico.classList.remove('ring-2', 'ring-brand-magenta', 'bg-[#222222]'); }, 500);
         }
 
         window.agregarNuevoMes = function(event) {
@@ -655,7 +668,6 @@
 
                 const indexExistente = datosMensuales.findIndex(d => d.mes === mes);
                 
-                // --- SEGURIDAD: Doble check por si alguien fuerza el navegador ---
                 if (indexExistente >= 0) { 
                     const seguro = confirm(`⚠️ ATENCIÓN: El mes de ${mes} ya tiene datos cargados.\n\n¿Estás absolutamente seguro de que deseas SOBRESCRIBIR la información existente? (Esta acción no se puede deshacer)`);
                     if(!seguro) return;
@@ -678,8 +690,8 @@
                 if (btn) {
                     const original = btn.innerHTML;
                     btn.innerHTML = '<i class="fas fa-check"></i> ¡Guardado!';
-                    btn.classList.replace('bg-indigo-600', 'bg-green-600');
-                    setTimeout(() => { btn.innerHTML = original; btn.classList.replace('bg-green-600', 'bg-indigo-600'); }, 2500);
+                    btn.classList.replace('bg-brand-magenta', 'bg-green-600');
+                    setTimeout(() => { btn.innerHTML = original; btn.classList.replace('bg-green-600', 'bg-brand-magenta'); }, 2500);
                 }
             } catch (error) {
                 alert("❌ Ocurrió un error: " + error.message);
@@ -693,7 +705,7 @@
 
             const btn = document.getElementById('btnExport');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xl mr-3 text-blue-400"></i> Generando PDF...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xl mr-3 text-brand-magenta"></i> Generando PDF...';
             const element = document.getElementById('dashboard-content');
             
             const labels = datosMensuales.map(d => d.mes);
@@ -703,7 +715,6 @@
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
                 jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' },
-                // 🔥 NUEVO: Evita que los gráficos o bloques se corten por la mitad
                 pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
