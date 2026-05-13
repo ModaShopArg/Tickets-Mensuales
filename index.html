@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Integral - Local Concordia</title>
+    <title>Tickets PVS - Local Concordia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -262,7 +262,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'mi-dashboard-gerencial';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tickets-pvs';
         
         let userId = null;
         let datosSincronizados = false;
@@ -383,7 +383,7 @@
 
         window.cambiarLocal = function(nuevoLocal) {
             localActual = nuevoLocal;
-            document.title = `Dashboard Integral - Local ${localActual}`;
+            document.title = `Tickets PVS - Local ${localActual}`;
             document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual];
             renderDashboard();
         };
