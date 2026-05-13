@@ -325,7 +325,8 @@
         function iniciarEscuchaNube() {
             console.log("4. Iniciando conexión a la base de datos Firestore...");
             try {
-                const docRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_data');
+                // 🔥 CORRECCIÓN AQUÍ: Agregamos 'mis_datos' al final para que sean 6 segmentos (par)
+                const docRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_data', 'mis_datos');
                 
                 onSnapshot(docRef, (documento) => {
                     console.log("5. Lectura de base de datos exitosa.");
@@ -355,7 +356,8 @@
 
         async function guardarEnLaNubeSilencioso() {
             if (!userId) return;
-            const docRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_data');
+            // 🔥 CORRECCIÓN AQUÍ: Agregamos 'mis_datos' al final también
+            const docRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_data', 'mis_datos');
             try {
                 await setDoc(docRef, {
                     baseDatosLocales: baseDatosLocales,
