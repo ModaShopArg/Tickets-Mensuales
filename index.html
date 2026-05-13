@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tickets PVS - Local Concordia</title>
+    
+    <!-- 🔥 NUEVO: Icono de la empresa en la pestaña (Favicon) 🔥 -->
+    <link rel="icon" type="image/png" href="logo.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -165,6 +169,18 @@
                 <canvas id="turnosChart"></canvas>
             </div>
             <p class="text-sm text-slate-500 mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
+        </div>
+
+        <!-- NUEVO GRÁFICO: Calidad de Venta por Turno -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
+            <h3 class="text-xl font-bold text-slate-800 mb-6 border-b pb-2 flex items-center">
+                <i class="fas fa-balance-scale mr-2 text-teal-600"></i> 
+                Calidad de Venta: Ticket Promedio Mañana vs. Tarde
+            </h3>
+            <div class="relative h-80 w-full">
+                <canvas id="ticketTurnosChart"></canvas>
+            </div>
+            <p class="text-sm text-slate-500 mt-4 text-center">Compara qué turno logra un mayor nivel de "up-selling" (gasto promedio por cada cliente que atiende).</p>
         </div>
 
         <!-- Desglose Mensual Detallado -->
@@ -390,6 +406,7 @@
         let chartMixto = null;
         let chartTorta = null;
         let chartTurnos = null;
+        let chartTicketTurnos = null; // <-- NUEVA VARIABLE
 
         const formatCurrency = (value) => {
             if(isNaN(value)) return '$0';
@@ -476,6 +493,7 @@
                 if (chartMixto) chartMixto.destroy();
                 if (chartTorta) chartTorta.destroy();
                 if (chartTurnos) chartTurnos.destroy();
+                if (chartTicketTurnos) chartTicketTurnos.destroy(); // <-- LIMPIEZA
                 return;
             }
 
@@ -522,6 +540,7 @@
             if (chartMixto) chartMixto.destroy();
             if (chartTorta) chartTorta.destroy();
             if (chartTurnos) chartTurnos.destroy(); 
+            if (chartTicketTurnos) chartTicketTurnos.destroy(); // <-- LIMPIEZA
 
             const labels = datosMensuales.map(d => d.mes);
             const dataVts = datosMensuales.map(d => d.ventas);
@@ -568,6 +587,42 @@
                     responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
                     plugins: { tooltip: { callbacks: { label: function(context) { return (context.dataset.label + ': ' + formatCurrency(context.parsed.y)); } } } },
                     scales: { y: { beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } } }
+                }
+            });
+
+            // NUEVO: Generación del Gráfico de Ticket Promedio por Turno
+            const dataTicketManana = datosMensuales.map(d => d.ticketsManana > 0 ? (d.ventasManana / d.ticketsManana) : 0);
+            const dataTicketTarde = datosMensuales.map(d => (d.tickets - d.ticketsManana) > 0 ? ((d.ventas - d.ventasManana) / (d.tickets - d.ticketsManana)) : 0);
+
+            chartTicketTurnos = new Chart(document.getElementById('ticketTurnosChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { 
+                            label: 'Ticket Prom. Mañana ($)', 
+                            data: dataTicketManana, 
+                            borderColor: '#fbbf24', 
+                            backgroundColor: '#fbbf24', 
+                            borderWidth: 4, 
+                            tension: 0.3, 
+                            pointRadius: 6 
+                        },
+                        { 
+                            label: 'Ticket Prom. Tarde ($)', 
+                            data: dataTicketTarde, 
+                            borderColor: '#3730a3', 
+                            backgroundColor: '#3730a3', 
+                            borderWidth: 4, 
+                            tension: 0.3, 
+                            pointRadius: 6 
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    plugins: { tooltip: { callbacks: { label: function(context) { return (context.dataset.label + ': ' + formatCurrency(context.parsed.y)); } } } },
+                    scales: { y: { beginAtZero: false, ticks: { callback: function(val) { return formatCurrency(val); } } } }
                 }
             });
         }
