@@ -446,6 +446,7 @@
         }
 
         function actualizarDropdownMeses(datosLocales) {
+            // ... (el código de esta función queda igual) ...
             const mesesCargados = datosLocales.map(d => d.mes);
             const selectMes = document.getElementById('inputMes');
             const btnAgregar = document.getElementById('btnAgregar');
@@ -517,7 +518,9 @@
             container.innerHTML = ''; 
             
             datosMensuales.forEach(data => {
-                const theme = colores[data.colorTema];
+                // 🔥 SOLUCIÓN: Si el color guardado es viejo y ya no existe, usa "magenta" por defecto para que no colapse
+                const theme = colores[data.colorTema] || colores['magenta'];
+                
                 container.innerHTML += `
                     <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
                         <div class="${theme.light} p-4 border-b ${theme.border}">
@@ -548,7 +551,8 @@
             const labels = datosMensuales.map(d => d.mes);
             const dataVts = datosMensuales.map(d => d.ventas);
             const dataTkts = datosMensuales.map(d => d.ticketPromedio);
-            const bgs = datosMensuales.map(d => colores[d.colorTema].bg);
+            // 🔥 SOLUCIÓN: Fallback también para los colores del gráfico de torta
+            const bgs = datosMensuales.map(d => (colores[d.colorTema] || colores['magenta']).bg);
 
             // 🔥 GRÁFICOS CON COLORES CORPORATIVOS 🔥
             Chart.defaults.font.family = "'Nunito', sans-serif";
