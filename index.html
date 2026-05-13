@@ -29,12 +29,12 @@
                         <option value="Tendens">Local Tendens</option>
                     </select>
                 </h1>
-                <p class="text-slate-500 mt-2 text-lg"><i class="far fa-calendar-alt mr-2"></i> Período Analizado: <span id="periodo-text">Conectando a la nube...</span></p>
+                <p class="text-slate-500 mt-2 text-lg"><i class="far fa-calendar-alt mr-2"></i> Período Analizado: <span id="periodo-text">Conectando...</span></p>
             </div>
             <div class="flex items-center gap-4">
-                <!-- Indicador de Nube -->
-                <div id="cloud-status" class="hidden md:flex items-center text-sm font-semibold text-slate-500 bg-slate-100 px-4 py-2 rounded-lg border border-slate-200">
-                    <i class="fas fa-spinner fa-spin text-blue-500 mr-2"></i> Conectando...
+                <!-- Indicador de Nube Mejorado -->
+                <div id="cloud-status" class="hidden md:flex items-center text-sm font-bold bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+                    <i class="fas fa-cloud text-slate-400 mr-2"></i> <span class="text-slate-600">Conectando...</span>
                 </div>
                 
                 <button id="btnExport" onclick="exportarPDF()" data-html2canvas-ignore="true" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center border border-slate-700">
@@ -280,10 +280,10 @@
             if (!datosSincronizados) {
                 console.warn("⚠️ Firebase bloqueado. Iniciando en Modo Local.");
                 datosSincronizados = true;
-                actualizarStatusNube('Modo Local', 'text-amber-500', 'fa-hdd');
+                actualizarStatusNube('Modo Local', 'text-amber-500');
                 renderDashboard();
             }
-        }, 5000); // Lo subí a 5 segs para darle más tiempo a GitHub Pages
+        }, 5000);
 
         // Autenticación Segura
         const initAuth = async () => {
@@ -297,7 +297,7 @@
                 console.log("2. Inicio de sesión exitoso.");
             } catch (error) {
                 console.error("❌ Error CRÍTICO de Autenticación:", error.code, error.message);
-                actualizarStatusNube('Error Auth', 'text-red-500', 'fa-cloud-xmark');
+                actualizarStatusNube('Error Conexión', 'text-red-500');
                 datosSincronizados = true;
                 renderDashboard();
             }
@@ -315,17 +315,17 @@
 
         initAuth();
 
-        function actualizarStatusNube(texto, colorTexto, icono) {
+        function actualizarStatusNube(texto, colorTexto) {
             const statusEl = document.getElementById('cloud-status');
             if (statusEl) {
-                statusEl.innerHTML = `<i class="fas ${icono} ${colorTexto} mr-2"></i> <span class="text-slate-600">${texto}</span>`;
+                // Actualizamos siempre con el icono fa-cloud y el color solicitado
+                statusEl.innerHTML = `<i class="fas fa-cloud ${colorTexto} mr-2"></i> <span class="text-slate-600">${texto}</span>`;
             }
         }
 
         function iniciarEscuchaNube() {
             console.log("4. Iniciando conexión a la base de datos Firestore...");
             try {
-                // 🔥 CORRECCIÓN AQUÍ: Agregamos 'mis_datos' al final para que sean 6 segmentos (par)
                 const docRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_data', 'mis_datos');
                 
                 onSnapshot(docRef, (documento) => {
@@ -338,17 +338,20 @@
                     } else {
                         guardarEnLaNubeSilencioso();
                     }
-                    actualizarStatusNube('Guardado', 'text-emerald-500', 'fa-cloud-check');
+                    // ✅ Éxito: Nube Verde
+                    actualizarStatusNube('Guardado', 'text-emerald-500');
                     document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual];
                     renderDashboard();
                 }, (error) => {
                     console.error("❌ Error CRÍTICO leyendo nube:", error.code, error.message);
-                    actualizarStatusNube('Error DB', 'text-amber-500', 'fa-cloud-exclamation');
+                    // ❌ Error: Nube Roja
+                    actualizarStatusNube('Error de Nube', 'text-red-500');
                     datosSincronizados = true;
                     renderDashboard();
                 });
             } catch (err) {
                 console.error("❌ Error al intentar conectar a Firestore:", err);
+                actualizarStatusNube('Error de Nube', 'text-red-500');
                 datosSincronizados = true;
                 renderDashboard();
             }
@@ -356,7 +359,6 @@
 
         async function guardarEnLaNubeSilencioso() {
             if (!userId) return;
-            // 🔥 CORRECCIÓN AQUÍ: Agregamos 'mis_datos' al final también
             const docRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_data', 'mis_datos');
             try {
                 await setDoc(docRef, {
@@ -364,14 +366,18 @@
                     diagnosticosLocales: diagnosticosLocales,
                     ultimaModificacion: new Date().toISOString()
                 });
+                // Al guardar con éxito volvemos a poner la nube en verde
+                actualizarStatusNube('Guardado', 'text-emerald-500');
             } catch (e) {
                 console.error("Fallo guardado:", e);
-                actualizarStatusNube('Fallo al guardar', 'text-red-500', 'fa-cloud-xmark');
+                // Si falla el guardado, nube roja
+                actualizarStatusNube('Fallo Guardado', 'text-red-500');
             }
         }
 
         async function guardarEnLaNube() {
-            actualizarStatusNube('Guardando...', 'text-blue-500', 'fa-spinner fa-spin');
+            // Mientras guarda, ponemos la nube azul (indicando proceso)
+            actualizarStatusNube('Sincronizando...', 'text-blue-500');
             await guardarEnLaNubeSilencioso();
         }
 
