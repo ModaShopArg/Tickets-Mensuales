@@ -276,33 +276,35 @@
         let localActual = 'Concordia';
 
         // 🚨 WATCHDOG: SEGURO ANTI-CONGELAMIENTO PARA C/USERS/...
-        // Si en 4 segundos Firebase no responde por bloqueos del navegador, forzamos la apertura.
         setTimeout(() => {
             if (!datosSincronizados) {
-                console.warn("⚠️ Firebase bloqueado por abrir el archivo localmente (file://). Iniciando en Modo Local.");
+                console.warn("⚠️ Firebase bloqueado. Iniciando en Modo Local.");
                 datosSincronizados = true;
-                actualizarStatusNube('Modo Local (Usa GitHub Pages)', 'text-amber-500', 'fa-hdd');
+                actualizarStatusNube('Modo Local', 'text-amber-500', 'fa-hdd');
                 renderDashboard();
             }
-        }, 4000);
+        }, 5000); // Lo subí a 5 segs para darle más tiempo a GitHub Pages
 
         // Autenticación Segura
         const initAuth = async () => {
+            console.log("1. Intentando iniciar sesión...");
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
+                console.log("2. Inicio de sesión exitoso.");
             } catch (error) {
-                console.error("Error de Autenticación:", error);
-                actualizarStatusNube('Modo Local (Error Auth)', 'text-red-500', 'fa-cloud-xmark');
+                console.error("❌ Error CRÍTICO de Autenticación:", error.code, error.message);
+                actualizarStatusNube('Error Auth', 'text-red-500', 'fa-cloud-xmark');
                 datosSincronizados = true;
                 renderDashboard();
             }
         };
 
         onAuthStateChanged(auth, (user) => {
+            console.log("3. Estado de autenticación cambió. Usuario:", user ? user.uid : "Ninguno");
             if (user) {
                 userId = user.uid;
                 iniciarEscuchaNube();
@@ -321,10 +323,12 @@
         }
 
         function iniciarEscuchaNube() {
+            console.log("4. Iniciando conexión a la base de datos Firestore...");
             try {
                 const docRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_data');
                 
                 onSnapshot(docRef, (documento) => {
+                    console.log("5. Lectura de base de datos exitosa.");
                     datosSincronizados = true;
                     if (documento.exists()) {
                         const datosNube = documento.data();
@@ -337,12 +341,13 @@
                     document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual];
                     renderDashboard();
                 }, (error) => {
-                    console.error("Error leyendo nube: ", error);
-                    actualizarStatusNube('Offline (Error DB)', 'text-amber-500', 'fa-cloud-exclamation');
+                    console.error("❌ Error CRÍTICO leyendo nube:", error.code, error.message);
+                    actualizarStatusNube('Error DB', 'text-amber-500', 'fa-cloud-exclamation');
                     datosSincronizados = true;
                     renderDashboard();
                 });
             } catch (err) {
+                console.error("❌ Error al intentar conectar a Firestore:", err);
                 datosSincronizados = true;
                 renderDashboard();
             }
