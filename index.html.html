@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Integral - Local Concordia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card-hover { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="text-slate-800 p-4 md:p-8">
+
+    <div id="dashboard-content" class="max-w-7xl mx-auto space-y-8 bg-[#f8fafc] pb-4">
+        
+        <!-- Header -->
+        <header class="bg-white rounded-2xl shadow-sm p-6 md:p-8 flex items-center justify-between border-l-8 border-blue-600">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight flex flex-wrap items-center gap-2">
+                    Tablero de Control: 
+                    <select id="selectorLocal" onchange="cambiarLocal(this.value)" class="bg-transparent border-b-4 border-blue-600 text-blue-600 cursor-pointer focus:outline-none hover:text-blue-800 transition-colors pb-1">
+                        <option value="Concordia">Local Concordia</option>
+                        <option value="Chajarí">Local Chajarí</option>
+                        <option value="Tendens">Local Tendens</option>
+                    </select>
+                </h1>
+                <p class="text-slate-500 mt-2 text-lg"><i class="far fa-calendar-alt mr-2"></i> Período Analizado: <span id="periodo-text">Conectando a la nube...</span></p>
+            </div>
+            <div class="flex items-center gap-4">
+                <!-- Indicador de Nube -->
+                <div id="cloud-status" class="hidden md:flex items-center text-sm font-semibold text-slate-500 bg-slate-100 px-4 py-2 rounded-lg border border-slate-200">
+                    <i class="fas fa-spinner fa-spin text-blue-500 mr-2"></i> Conectando...
+                </div>
+                
+                <button id="btnExport" onclick="exportarPDF()" data-html2canvas-ignore="true" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center border border-slate-700">
+                    <i class="fas fa-file-pdf text-red-500 text-xl mr-3"></i>
+                    Exportar para CEO
+                </button>
+            </div>
+        </header>
+
+        <!-- PANEL DE CARGA DE DATOS (No aparece en el PDF) -->
+        <div data-html2canvas-ignore="true" class="bg-indigo-50 border border-indigo-200 rounded-2xl p-6 shadow-sm">
+            <h2 class="text-xl font-bold text-indigo-900 mb-4 flex items-center">
+                <i class="fas fa-keyboard mr-2"></i> Cargar Nuevos Meses (Uso Interno)
+            </h2>
+            <form id="formCarga" onsubmit="agregarNuevoMes(event)" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                    <div>
+                        <label class="block text-sm font-semibold text-indigo-800 mb-1">Mes</label>
+                        <select id="inputMes" class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="Enero">Enero</option>
+                            <option value="Febrero">Febrero</option>
+                            <option value="Marzo">Marzo</option>
+                            <option value="Abril">Abril</option>
+                            <option value="Mayo">Mayo</option>
+                            <option value="Junio">Junio</option>
+                            <option value="Julio">Julio</option>
+                            <option value="Agosto">Agosto</option>
+                            <option value="Septiembre">Septiembre</option>
+                            <option value="Octubre">Octubre</option>
+                            <option value="Noviembre">Noviembre</option>
+                            <option value="Diciembre">Diciembre</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-indigo-800 mb-1">Venta Total ($)</label>
+                        <input type="text" id="inputVenta" placeholder="Ej: 1.500.000,50" class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-indigo-800 mb-1">Venta Turno Mañana ($)</label>
+                        <input type="text" id="inputVentaManana" placeholder="Ej: 600.000,00" class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="El turno tarde se calculará automáticamente restando esto al Total.">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-indigo-800 mb-1">Total de Tickets</label>
+                        <input type="text" id="inputTickets" placeholder="Ej: 950" class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-indigo-800 mb-1">Tickets Mañana</label>
+                        <input type="text" id="inputTicketsManana" placeholder="Ej: 450" class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="El turno tarde se calculará automáticamente.">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-indigo-800 mb-1">Breve Diagnóstico</label>
+                    <div class="flex flex-col md:flex-row gap-2">
+                        <input type="text" id="inputDiagnostico" placeholder="Ej: Las ventas repuntaron..." class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button type="submit" id="btnAgregar" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors whitespace-nowrap shadow-md">
+                            <i class="fas fa-plus mr-1"></i> Agregar
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <p class="text-xs text-indigo-600 mt-3"><i class="fas fa-info-circle"></i> El Turno Tarde se calcula automáticamente restando la venta y tickets de la mañana a los totales. Al generar el PDF, este recuadro azul no será visible.</p>
+        </div>
+
+        <!-- Global KPIs -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-blue-500 card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-slate-500 font-bold uppercase tracking-wider">Facturación Total</p>
+                        <h2 id="kpi-ventas" class="text-3xl font-black text-slate-800 mt-2">$0</h2>
+                    </div>
+                    <i class="fas fa-dollar-sign text-blue-200 text-3xl"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-emerald-500 card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-slate-500 font-bold uppercase tracking-wider">Tráfico (Tickets)</p>
+                        <h2 id="kpi-tickets" class="text-3xl font-black text-slate-800 mt-2">0</h2>
+                    </div>
+                    <i class="fas fa-users text-emerald-200 text-3xl"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-purple-500 card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-slate-500 font-bold uppercase tracking-wider">Ticket Prom. Global</p>
+                        <h2 id="kpi-ticket-prom" class="text-3xl font-black text-slate-800 mt-2">$0</h2>
+                    </div>
+                    <i class="fas fa-receipt text-purple-200 text-3xl"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-amber-500 card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-slate-500 font-bold uppercase tracking-wider">Venta Diaria Prom.</p>
+                        <h2 id="kpi-diaria" class="text-3xl font-black text-slate-800 mt-2">$0</h2>
+                    </div>
+                    <i class="fas fa-store text-amber-200 text-3xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
+                <h3 class="text-xl font-bold text-slate-800 mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-blue-500"></i>Evolución: Ventas vs Ticket Promedio</h3>
+                <div class="relative h-80 w-full">
+                    <canvas id="mixedChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-bold text-slate-800 mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-blue-500"></i>Distribución de Ingresos</h3>
+                <div class="relative h-80 w-full flex justify-center">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section (Análisis de Turnos) -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
+            <h3 class="text-xl font-bold text-slate-800 mb-6 border-b pb-2 flex items-center">
+                <i class="fas fa-clock mr-2 text-indigo-600"></i> 
+                Rendimiento Operativo: Turno Mañana vs. Turno Tarde
+            </h3>
+            <div class="relative h-80 w-full">
+                <canvas id="turnosChart"></canvas>
+            </div>
+            <p class="text-sm text-slate-500 mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
+        </div>
+
+        <!-- Desglose Mensual Detallado -->
+        <div class="mt-10">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
+                <i class="fas fa-calendar-check mr-3 text-blue-600"></i> Desglose Mensual Detallado
+            </h2>
+            <div id="monthly-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Se inyectan las tarjetas por JS -->
+            </div>
+        </div>
+
+        <!-- Diagnóstico Ejecutivo Global -->
+        <div class="mt-8 bg-slate-900 rounded-2xl shadow-xl p-8 text-white">
+            <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-slate-700 pb-4">
+                <i class="fas fa-comment-dots mr-3 text-indigo-400"></i> Diagnóstico Ejecutivo
+            </h2>
+            <div class="bg-slate-800 rounded-xl border border-slate-700 hover:border-indigo-500 transition-colors">
+                <div id="texto-diagnostico" contenteditable="true" onblur="guardarDiagnostico(this.innerText)" class="text-slate-300 leading-relaxed outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-slate-800 rounded-xl p-6 transition-all min-h-[100px] whitespace-pre-wrap" title="Haz clic para escribir el diagnóstico">
+                    [Sincronizando diagnóstico...]
+                </div>
+            </div>
+        </div>
+
+        <!-- Conclusiones Globales -->
+        <div class="mt-8 bg-slate-900 rounded-2xl shadow-xl p-8 text-white">
+            <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-slate-700 pb-4">
+                <i class="fas fa-chess-knight mr-3 text-amber-400"></i> Foco y Plan de Acción
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-3">
+                        <div class="bg-slate-800 p-2 rounded-lg mr-3"><i class="fas fa-chart-line text-blue-400 text-xl"></i></div>
+                        <h3 class="font-bold text-lg">1. Cuidar el Tráfico</h3>
+                    </div>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Observar de cerca el volumen de tickets. Si la cantidad de ingresos al local baja considerablemente, se requiere activación de marketing inmediato.
+                    </p>
+                </div>
+                <div>
+                    <div class="flex items-center mb-3">
+                        <div class="bg-slate-800 p-2 rounded-lg mr-3"><i class="fas fa-hand-holding-usd text-emerald-400 text-xl"></i></div>
+                        <h3 class="font-bold text-lg">2. Up-Selling Constante</h3>
+                    </div>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        El ticket promedio es la métrica de eficiencia. Capacitar en "venta cruzada" en caja es vital para superar la barrera mínima estable mensual.
+                    </p>
+                </div>
+                <div>
+                    <div class="flex items-center mb-3">
+                        <div class="bg-slate-800 p-2 rounded-lg mr-3"><i class="fas fa-bullseye text-red-400 text-xl"></i></div>
+                        <h3 class="font-bold text-lg">3. Metas del Mes</h3>
+                    </div>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Establecer el "Ticket Objetivo Mensual" para los vendedores por turno y atar un incentivo si logran ese monto promedio.
+                    </p>
+                </div>
+                <div>
+                    <div class="flex items-center mb-3">
+                        <div class="bg-slate-800 p-2 rounded-lg mr-3"><i class="fas fa-users-cog text-amber-400 text-xl"></i></div>
+                        <h3 class="font-bold text-lg">4. Balance de Turnos</h3>
+                    </div>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Utilizar el análisis "Mañana vs Tarde" para redistribuir el staff. Reforzar con vendedores top el turno de mayor volumen y crear "Happy Hours" en el más débil.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT TIPO MÓDULO PARA FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // =========================================================================
+        // 🚀 CONFIGURACIÓN DE FIREBASE
+        // =========================================================================
+        let firebaseConfig;
+        if (typeof __firebase_config !== 'undefined') {
+            firebaseConfig = JSON.parse(__firebase_config);
+        } else {
+            firebaseConfig = {
+              apiKey: "AIzaSyC9c_jiYvp7idazJX3-JxqcBNEj_a7iS9g",
+              authDomain: "sistemas-tickets-b008d.firebaseapp.com",
+              projectId: "sistemas-tickets-b008d",
+              storageBucket: "sistemas-tickets-b008d.firebasestorage.app",
+              messagingSenderId: "903612609715",
+              appId: "1:903612609715:web:b378645748e27b4093acc6"
+            };
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'mi-dashboard-gerencial';
+        
+        let userId = null;
+        let datosSincronizados = false;
+
+        let baseDatosLocales = { 'Concordia': [], 'Chajarí': [], 'Tendens': [] };
+        let diagnosticosLocales = {
+            'Concordia': '[Esperando datos...]',
+            'Chajarí': '[Esperando datos...]',
+            'Tendens': '[Esperando datos...]'
+        };
+        let localActual = 'Concordia';
+
+        // 🚨 WATCHDOG: SEGURO ANTI-CONGELAMIENTO PARA C/USERS/...
+        // Si en 4 segundos Firebase no responde por bloqueos del navegador, forzamos la apertura.
+        setTimeout(() => {
+            if (!datosSincronizados) {
+                console.warn("⚠️ Firebase bloqueado por abrir el archivo localmente (file://). Iniciando en Modo Local.");
+                datosSincronizados = true;
+                actualizarStatusNube('Modo Local (Usa GitHub Pages)', 'text-amber-500', 'fa-hdd');
+                renderDashboard();
+            }
+        }, 4000);
+
+        // Autenticación Segura
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Error de Autenticación:", error);
+                actualizarStatusNube('Modo Local (Error Auth)', 'text-red-500', 'fa-cloud-xmark');
+                datosSincronizados = true;
+                renderDashboard();
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userId = user.uid;
+                iniciarEscuchaNube();
+            } else {
+                userId = null;
+            }
+        });
+
+        initAuth();
+
+        function actualizarStatusNube(texto, colorTexto, icono) {
+            const statusEl = document.getElementById('cloud-status');
+            if (statusEl) {
+                statusEl.innerHTML = `<i class="fas ${icono} ${colorTexto} mr-2"></i> <span class="text-slate-600">${texto}</span>`;
+            }
+        }
+
+        function iniciarEscuchaNube() {
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_data');
+                
+                onSnapshot(docRef, (documento) => {
+                    datosSincronizados = true;
+                    if (documento.exists()) {
+                        const datosNube = documento.data();
+                        baseDatosLocales = datosNube.baseDatosLocales || baseDatosLocales;
+                        diagnosticosLocales = datosNube.diagnosticosLocales || diagnosticosLocales;
+                    } else {
+                        guardarEnLaNubeSilencioso();
+                    }
+                    actualizarStatusNube('Guardado', 'text-emerald-500', 'fa-cloud-check');
+                    document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual];
+                    renderDashboard();
+                }, (error) => {
+                    console.error("Error leyendo nube: ", error);
+                    actualizarStatusNube('Offline (Error DB)', 'text-amber-500', 'fa-cloud-exclamation');
+                    datosSincronizados = true;
+                    renderDashboard();
+                });
+            } catch (err) {
+                datosSincronizados = true;
+                renderDashboard();
+            }
+        }
+
+        async function guardarEnLaNubeSilencioso() {
+            if (!userId) return;
+            const docRef = doc(db, 'artifacts', appId, 'users', userId, 'dashboard_data');
+            try {
+                await setDoc(docRef, {
+                    baseDatosLocales: baseDatosLocales,
+                    diagnosticosLocales: diagnosticosLocales,
+                    ultimaModificacion: new Date().toISOString()
+                });
+            } catch (e) {
+                console.error("Fallo guardado:", e);
+                actualizarStatusNube('Fallo al guardar', 'text-red-500', 'fa-cloud-xmark');
+            }
+        }
+
+        async function guardarEnLaNube() {
+            actualizarStatusNube('Guardando...', 'text-blue-500', 'fa-spinner fa-spin');
+            await guardarEnLaNubeSilencioso();
+        }
+
+        window.cambiarLocal = function(nuevoLocal) {
+            localActual = nuevoLocal;
+            document.title = `Dashboard Integral - Local ${localActual}`;
+            document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual];
+            renderDashboard();
+        };
+
+        window.guardarDiagnostico = function(texto) {
+            diagnosticosLocales[localActual] = texto;
+            guardarEnLaNube();
+        };
+
+        let chartMixto = null;
+        let chartTorta = null;
+        let chartTurnos = null;
+
+        const formatCurrency = (value) => {
+            if(isNaN(value)) return '$0';
+            return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value);
+        };
+        const formatNumber = (value) => isNaN(value) ? '0' : new Intl.NumberFormat('es-AR').format(value);
+        const formatMillones = (value) => isNaN(value) ? '$0M' : '$' + (value / 1000000).toFixed(1) + 'M';
+
+        const colores = {
+            blue: { bg: '#3b82f6', light: 'bg-blue-50', border: 'border-blue-100', leftBorder: 'border-blue-400', textLight: 'text-blue-600', textDark: 'text-slate-800' },
+            emerald: { bg: '#10b981', light: 'bg-emerald-50', border: 'border-emerald-100', leftBorder: 'border-emerald-400', textLight: 'text-emerald-600', textDark: 'text-emerald-900' },
+            amber: { bg: '#f59e0b', light: 'bg-amber-50', border: 'border-amber-100', leftBorder: 'border-amber-400', textLight: 'text-amber-600', textDark: 'text-amber-900' },
+            red: { bg: '#ef4444', light: 'bg-red-50', border: 'border-red-100', leftBorder: 'border-red-400', textLight: 'text-red-600', textDark: 'text-red-900' },
+            purple: { bg: '#8b5cf6', light: 'bg-purple-50', border: 'border-purple-100', leftBorder: 'border-purple-400', textLight: 'text-purple-600', textDark: 'text-purple-900' }
+        };
+
+        const listadoColores = ['purple', 'blue', 'emerald', 'amber', 'red'];
+
+        function parseExcelNumber(str) {
+            if (!str) return 0;
+            let texto = String(str).replace(/[$ a-zA-Z]/g, '');
+            let numeroLimpio = texto.replace(/\./g, '').replace(',', '.');
+            let resultado = parseFloat(numeroLimpio);
+            return isNaN(resultado) ? 0 : resultado;
+        }
+
+        function renderDashboard() {
+            if (!datosSincronizados) return; 
+
+            let datosMensuales = baseDatosLocales[localActual] || [];
+
+            if (datosMensuales.length === 0) {
+                document.getElementById('periodo-text').innerText = 'Esperando datos...';
+                document.getElementById('kpi-ventas').innerText = '$0';
+                document.getElementById('kpi-tickets').innerText = '0';
+                document.getElementById('kpi-ticket-prom').innerText = '$0';
+                document.getElementById('kpi-diaria').innerText = '$0';
+                document.getElementById('monthly-container').innerHTML = '<div class="col-span-1 md:col-span-2 text-center p-8 text-slate-500 bg-white rounded-xl border border-dashed border-slate-300">Aún no hay datos cargados. Utiliza el formulario superior para agregar tu primer mes.</div>';
+                
+                if (chartMixto) chartMixto.destroy();
+                if (chartTorta) chartTorta.destroy();
+                if (chartTurnos) chartTurnos.destroy();
+                return;
+            }
+
+            let totalVentas = 0;
+            let totalTickets = 0;
+            datosMensuales.forEach(d => { totalVentas += d.ventas; totalTickets += d.tickets; });
+            const ticketPromedioGlobal = totalTickets > 0 ? (totalVentas / totalTickets) : 0;
+            const ventaDiariaGlobal = totalVentas / (datosMensuales.length * 30); 
+
+            document.getElementById('periodo-text').innerText = `${datosMensuales[0].mes} - ${datosMensuales[datosMensuales.length-1].mes}`;
+            document.getElementById('kpi-ventas').innerText = formatMillones(totalVentas);
+            document.getElementById('kpi-tickets').innerText = formatNumber(totalTickets);
+            document.getElementById('kpi-ticket-prom').innerText = formatCurrency(ticketPromedioGlobal);
+            document.getElementById('kpi-diaria').innerText = formatCurrency(ventaDiariaGlobal);
+
+            const container = document.getElementById('monthly-container');
+            container.innerHTML = ''; 
+            
+            datosMensuales.forEach(data => {
+                const theme = colores[data.colorTema];
+                container.innerHTML += `
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
+                        <div class="${theme.light} p-4 border-b ${theme.border}">
+                            <h3 class="text-xl font-bold ${theme.textDark}">📊 ${data.mes} 2026</h3>
+                        </div>
+                        <div class="p-6 flex-grow">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div><span class="text-slate-500 text-sm block">Venta Total</span><span class="font-bold text-lg ${theme.textLight}">${formatCurrency(data.ventas)}</span></div>
+                                <div><span class="text-slate-500 text-sm block">Ticket Promedio</span><span class="font-bold text-lg ${theme.textLight}">${formatCurrency(data.ticketPromedio)}</span></div>
+                                <div><span class="text-slate-500 text-sm block">Total Tickets</span><span class="font-bold text-lg">${formatNumber(data.tickets)}</span></div>
+                                <div><span class="text-slate-500 text-sm block">Prom. Tickets/Día</span><span class="font-bold text-lg">${data.ticketsDiarios}</span></div>
+                                <div class="col-span-2 text-xs text-slate-500 border-t pt-2 mt-1">
+                                    <span class="font-semibold text-amber-600">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)} (${data.ticketsManana} tkts) <span class="mx-2">|</span> 
+                                    <span class="font-semibold text-indigo-600">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)} (${data.tickets - data.ticketsManana} tkts)
+                                </div>
+                            </div>
+                            <div class="${theme.light} rounded p-4 border-l-4 ${theme.leftBorder} text-sm text-slate-700">
+                                <strong>Diagnóstico:</strong> ${data.diagnostico}
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            if (chartMixto) chartMixto.destroy();
+            if (chartTorta) chartTorta.destroy();
+            if (chartTurnos) chartTurnos.destroy(); 
+
+            const labels = datosMensuales.map(d => d.mes);
+            const dataVts = datosMensuales.map(d => d.ventas);
+            const dataTkts = datosMensuales.map(d => d.ticketPromedio);
+            const bgs = datosMensuales.map(d => colores[d.colorTema].bg);
+
+            chartMixto = new Chart(document.getElementById('mixedChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Facturación ($)', data: dataVts, backgroundColor: '#3b82f6', borderRadius: 8, yAxisID: 'y' },
+                        { label: 'Ticket Promedio ($)', data: dataTkts, type: 'line', borderColor: '#f59e0b', backgroundColor: '#f59e0b', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { type: 'linear', position: 'left', ticks: { callback: function(val) { return formatMillones(val); } } },
+                        y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return formatCurrency(val); } } }
+                    }
+                }
+            });
+
+            chartTorta = new Chart(document.getElementById('pieChart').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: labels, datasets: [{ data: dataVts, backgroundColor: bgs, borderWidth: 2, hoverOffset: 8 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '65%' }
+            });
+
+            const dataManana = datosMensuales.map(d => d.ventasManana);
+            const dataTarde = datosMensuales.map(d => d.ventas - d.ventasManana);
+
+            chartTurnos = new Chart(document.getElementById('turnosChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Ventas Turno Mañana ($)', data: dataManana, backgroundColor: '#fbbf24', borderRadius: 6 },
+                        { label: 'Ventas Turno Tarde ($)', data: dataTarde, backgroundColor: '#3730a3', borderRadius: 6 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    plugins: { tooltip: { callbacks: { label: function(context) { return (context.dataset.label + ': ' + formatCurrency(context.parsed.y)); } } } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } } }
+                }
+            });
+        }
+
+        function generarDiagnosticoAutomatico() {
+            let datos = baseDatosLocales[localActual] || [];
+            if (datos.length === 0) return;
+
+            let totalVentas = 0; let totalVentasManana = 0; let totalTickets = 0;
+            datos.forEach(d => { totalVentas += d.ventas; totalVentasManana += d.ventasManana; totalTickets += d.tickets; });
+
+            let totalVentasTarde = totalVentas - totalVentasManana;
+            let mejorTurno = totalVentasManana > totalVentasTarde ? "mañana" : "tarde";
+            let porcentajeMejorTurno = totalVentasManana > totalVentasTarde ? (totalVentasManana / totalVentas * 100) : (totalVentasTarde / totalVentas * 100);
+            let ticketPromedio = totalVentas / totalTickets;
+
+            let mesInicial = datos[0].mes;
+            let mesFinal = datos[datos.length - 1].mes;
+            
+            let texto = `Durante el período analizado (${mesInicial} - ${mesFinal}), el Local ${localActual} registró una facturación total acumulada de ${formatCurrency(totalVentas)}. `;
+            texto += `A nivel operativo, el turno de la ${mejorTurno} se posiciona como la principal tracción de ingresos, representando un ${porcentajeMejorTurno.toFixed(1)}% de las ventas totales. `;
+
+            if (datos.length > 1) {
+                let ultimoMes = datos[datos.length - 1];
+                let mesAnterior = datos[datos.length - 2];
+                let crecimiento = ((ultimoMes.ventas - mesAnterior.ventas) / mesAnterior.ventas) * 100;
+                
+                if (crecimiento > 0) { texto += `Respecto a la evolución a corto plazo, el mes de ${ultimoMes.mes} mostró un crecimiento positivo del ${crecimiento.toFixed(1)}% en comparación con ${mesAnterior.mes}. `; } 
+                else if (crecimiento < 0) { texto += `Respecto a la evolución a corto plazo, el mes de ${ultimoMes.mes} experimentó una contracción del ${Math.abs(crecimiento).toFixed(1)}% en comparación con ${mesAnterior.mes}, un indicador que requiere atención. `; } 
+                else { texto += `Respecto a la evolución a corto plazo, el mes de ${ultimoMes.mes} mantuvo los mismos niveles de facturación que ${mesAnterior.mes}. `; }
+            }
+
+            texto += `El ticket promedio global de este período se sitúa en ${formatCurrency(ticketPromedio)}, marcando la métrica base que el equipo de ventas deberá utilizar como objetivo de up-selling para los próximos meses.`;
+
+            document.getElementById('texto-diagnostico').innerText = texto;
+            diagnosticosLocales[localActual] = texto;
+            guardarEnLaNube(); 
+            
+            let cajaDiagnostico = document.getElementById('texto-diagnostico').parentElement;
+            cajaDiagnostico.classList.add('ring-2', 'ring-indigo-500', 'bg-slate-700');
+            setTimeout(() => { cajaDiagnostico.classList.remove('ring-2', 'ring-indigo-500', 'bg-slate-700'); }, 500);
+        }
+
+        window.agregarNuevoMes = function(event) {
+            event.preventDefault();
+            try {
+                let datosMensuales = baseDatosLocales[localActual];
+
+                const mes = document.getElementById('inputMes').value;
+                const valVenta = document.getElementById('inputVenta').value;
+                const valVentaManana = document.getElementById('inputVentaManana').value;
+                const valTickets = document.getElementById('inputTickets').value;
+                const valTicketsManana = document.getElementById('inputTicketsManana').value;
+                const diagnostico = document.getElementById('inputDiagnostico').value;
+
+                if (!valVenta || !valVentaManana || !valTickets || !valTicketsManana || !diagnostico) {
+                    alert("⚠️ ¡Atención! Por favor, completa todos los campos.");
+                    return;
+                }
+
+                const ventas = parseExcelNumber(valVenta);
+                const ventasManana = parseExcelNumber(valVentaManana);
+                const tickets = parseInt(parseExcelNumber(valTickets));
+                const ticketsManana = parseInt(parseExcelNumber(valTicketsManana));
+
+                if (ventas <= 0 || tickets <= 0) { alert("⚠️ La venta y los tickets totales deben ser mayores a cero."); return; }
+                if (ventasManana > ventas) { alert(`⚠️ Error Lógico: Las ventas de la mañana no pueden ser mayores al total.`); return; }
+                if (ticketsManana > tickets) { alert(`⚠️ Error Lógico: Los tickets de la mañana no pueden superar los totales.`); return; }
+
+                const ticketPromedio = tickets > 0 ? (ventas / tickets) : 0;
+                const ticketsDiarios = Math.round(tickets / 30);
+                const colorTema = listadoColores[datosMensuales.length % listadoColores.length];
+
+                const indexExistente = datosMensuales.findIndex(d => d.mes === mes);
+                const nuevoDato = { mes, ventas, ventasManana, tickets, ticketsManana, ticketPromedio, ticketsDiarios, diagnostico, colorTema };
+
+                if (indexExistente >= 0) { datosMensuales[indexExistente] = nuevoDato; } 
+                else { datosMensuales.push(nuevoDato); }
+
+                document.getElementById('inputVenta').value = '';
+                document.getElementById('inputVentaManana').value = '';
+                document.getElementById('inputTickets').value = '';
+                document.getElementById('inputTicketsManana').value = '';
+                document.getElementById('inputDiagnostico').value = '';
+
+                guardarEnLaNube();
+                generarDiagnosticoAutomatico();
+                renderDashboard();
+                
+                const btn = document.getElementById('btnAgregar');
+                if (btn) {
+                    const original = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check"></i> ¡Guardado!';
+                    btn.classList.replace('bg-indigo-600', 'bg-green-600');
+                    setTimeout(() => { btn.innerHTML = original; btn.classList.replace('bg-green-600', 'bg-indigo-600'); }, 2500);
+                }
+            } catch (error) {
+                alert("❌ Ocurrió un error: " + error.message);
+                console.error(error);
+            }
+        };
+
+        window.exportarPDF = function() {
+            let datosMensuales = baseDatosLocales[localActual] || [];
+            if (datosMensuales.length === 0) { alert(`⚠️ Carga al menos un mes en el Local ${localActual}.`); return; }
+
+            const btn = document.getElementById('btnExport');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xl mr-3 text-blue-400"></i> Generando PDF...';
+            const element = document.getElementById('dashboard-content');
+            
+            const labels = datosMensuales.map(d => d.mes);
+            const opt = {
+                margin:       10,
+                filename:     `Reporte_${localActual}_${labels[0]}_a_${labels[labels.length-1]}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => { btn.innerHTML = originalText; });
+        };
+    </script>
+</body>
+</html>
