@@ -446,7 +446,6 @@
         }
 
         function actualizarDropdownMeses(datosLocales) {
-            // ... (el código de esta función queda igual) ...
             const mesesCargados = datosLocales.map(d => d.mes);
             const selectMes = document.getElementById('inputMes');
             const btnAgregar = document.getElementById('btnAgregar');
@@ -517,9 +516,12 @@
             const container = document.getElementById('monthly-container');
             container.innerHTML = ''; 
             
-            datosMensuales.forEach(data => {
-                // 🔥 SOLUCIÓN: Si el color guardado es viejo y ya no existe, usa "magenta" por defecto para que no colapse
-                const theme = colores[data.colorTema] || colores['magenta'];
+            datosMensuales.forEach((data, index) => {
+                // 🔥 SOLUCIÓN DEFINITIVA: Si el color es viejo, le asigna uno único de la nueva paleta basado en su posición
+                if (!colores[data.colorTema]) {
+                    data.colorTema = listadoColores[index % listadoColores.length];
+                }
+                const theme = colores[data.colorTema];
                 
                 container.innerHTML += `
                     <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
@@ -551,10 +553,9 @@
             const labels = datosMensuales.map(d => d.mes);
             const dataVts = datosMensuales.map(d => d.ventas);
             const dataTkts = datosMensuales.map(d => d.ticketPromedio);
-            // 🔥 SOLUCIÓN: Fallback también para los colores del gráfico de torta
-            const bgs = datosMensuales.map(d => (colores[d.colorTema] || colores['magenta']).bg);
+            const bgs = datosMensuales.map(d => colores[d.colorTema].bg); // Toma los colores ya corregidos
 
-            // 🔥 GRÁFICOS CON COLORES CORPORATIVOS 🔥
+            // 🔥 GRÁFICOS CON COLORES CORPORATIVOS DINÁMICOS 🔥
             Chart.defaults.font.family = "'Nunito', sans-serif";
             
             chartMixto = new Chart(document.getElementById('mixedChart').getContext('2d'), {
@@ -562,7 +563,8 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Facturación ($)', data: dataVts, backgroundColor: '#111111', borderRadius: 8, yAxisID: 'y' },
+                        // Usamos 'bgs' para que cada barra del mes coincida con su color en la tarjeta y en la torta
+                        { label: 'Facturación ($)', data: dataVts, backgroundColor: bgs, borderRadius: 8, yAxisID: 'y' },
                         { label: 'Ticket Promedio ($)', data: dataTkts, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' }
                     ]
                 },
