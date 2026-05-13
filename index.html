@@ -53,7 +53,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                     <div>
                         <label class="block text-sm font-semibold text-indigo-800 mb-1">Mes</label>
-                        <select id="inputMes" class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <select id="inputMes" class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
                             <option value="Enero">Enero</option>
                             <option value="Febrero">Febrero</option>
                             <option value="Marzo">Marzo</option>
@@ -89,13 +89,13 @@
                     <label class="block text-sm font-semibold text-indigo-800 mb-1">Breve Diagnóstico</label>
                     <div class="flex flex-col md:flex-row gap-2">
                         <input type="text" id="inputDiagnostico" placeholder="Ej: Las ventas repuntaron..." class="w-full rounded-lg border border-indigo-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button type="submit" id="btnAgregar" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors whitespace-nowrap shadow-md">
+                        <button type="submit" id="btnAgregar" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-all whitespace-nowrap shadow-md">
                             <i class="fas fa-plus mr-1"></i> Agregar
                         </button>
                     </div>
                 </div>
             </form>
-            <p class="text-xs text-indigo-600 mt-3"><i class="fas fa-info-circle"></i> El Turno Tarde se calcula automáticamente restando la venta y tickets de la mañana a los totales. Al generar el PDF, este recuadro azul no será visible.</p>
+            <p class="text-xs text-indigo-600 mt-3"><i class="fas fa-info-circle"></i> Los meses ya registrados se bloquearán para evitar sobreescrituras por error. Al generar el PDF, este recuadro azul no será visible.</p>
         </div>
 
         <!-- Global KPIs -->
@@ -318,7 +318,6 @@
         function actualizarStatusNube(texto, colorTexto) {
             const statusEl = document.getElementById('cloud-status');
             if (statusEl) {
-                // Actualizamos siempre con el icono fa-cloud y el color solicitado
                 statusEl.innerHTML = `<i class="fas fa-cloud ${colorTexto} mr-2"></i> <span class="text-slate-600">${texto}</span>`;
             }
         }
@@ -338,13 +337,11 @@
                     } else {
                         guardarEnLaNubeSilencioso();
                     }
-                    // ✅ Éxito: Nube Verde
                     actualizarStatusNube('Guardado', 'text-emerald-500');
                     document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual];
                     renderDashboard();
                 }, (error) => {
                     console.error("❌ Error CRÍTICO leyendo nube:", error.code, error.message);
-                    // ❌ Error: Nube Roja
                     actualizarStatusNube('Error de Nube', 'text-red-500');
                     datosSincronizados = true;
                     renderDashboard();
@@ -366,17 +363,14 @@
                     diagnosticosLocales: diagnosticosLocales,
                     ultimaModificacion: new Date().toISOString()
                 });
-                // Al guardar con éxito volvemos a poner la nube en verde
                 actualizarStatusNube('Guardado', 'text-emerald-500');
             } catch (e) {
                 console.error("Fallo guardado:", e);
-                // Si falla el guardado, nube roja
                 actualizarStatusNube('Fallo Guardado', 'text-red-500');
             }
         }
 
         async function guardarEnLaNube() {
-            // Mientras guarda, ponemos la nube azul (indicando proceso)
             actualizarStatusNube('Sincronizando...', 'text-blue-500');
             await guardarEnLaNubeSilencioso();
         }
@@ -422,10 +416,54 @@
             return isNaN(resultado) ? 0 : resultado;
         }
 
+        // --- NUEVA FUNCIONALIDAD: Bloqueo de Meses Cargados ---
+        function actualizarDropdownMeses(datosLocales) {
+            const mesesCargados = datosLocales.map(d => d.mes);
+            const selectMes = document.getElementById('inputMes');
+            const btnAgregar = document.getElementById('btnAgregar');
+            let primerMesLibre = null;
+
+            Array.from(selectMes.options).forEach(option => {
+                // Removemos el texto "(Ya cargado)" si estaba para resetear
+                let valorReal = option.value;
+                
+                if (mesesCargados.includes(valorReal)) {
+                    // Si ya está cargado, lo bloqueamos visualmente
+                    option.disabled = true;
+                    option.text = valorReal + ' (Ya cargado)';
+                    option.classList.add('bg-slate-200', 'text-slate-400');
+                } else {
+                    // Si está libre, lo habilitamos
+                    option.disabled = false;
+                    option.text = valorReal;
+                    option.classList.remove('bg-slate-200', 'text-slate-400');
+                    if (!primerMesLibre) primerMesLibre = valorReal;
+                }
+            });
+
+            // Comportamiento del botón y selección automática
+            if (primerMesLibre) {
+                selectMes.value = primerMesLibre; // Auto-posiciona en el próximo mes a cargar
+                btnAgregar.disabled = false;
+                btnAgregar.innerHTML = '<i class="fas fa-plus mr-1"></i> Agregar';
+                btnAgregar.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-500');
+                btnAgregar.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+            } else {
+                selectMes.value = "Enero"; // Solo para que no quede en blanco visualmente
+                btnAgregar.disabled = true; // Bloquea el botón
+                btnAgregar.innerHTML = '<i class="fas fa-lock mr-1"></i> Año Completo';
+                btnAgregar.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                btnAgregar.classList.add('bg-slate-500', 'opacity-50', 'cursor-not-allowed');
+            }
+        }
+
         function renderDashboard() {
             if (!datosSincronizados) return; 
 
             let datosMensuales = baseDatosLocales[localActual] || [];
+
+            // Actualizamos el menú desplegable bloqueando meses ya cargados
+            actualizarDropdownMeses(datosMensuales);
 
             if (datosMensuales.length === 0) {
                 document.getElementById('periodo-text').innerText = 'Esperando datos...';
@@ -604,10 +642,15 @@
                 const colorTema = listadoColores[datosMensuales.length % listadoColores.length];
 
                 const indexExistente = datosMensuales.findIndex(d => d.mes === mes);
-                const nuevoDato = { mes, ventas, ventasManana, tickets, ticketsManana, ticketPromedio, ticketsDiarios, diagnostico, colorTema };
-
-                if (indexExistente >= 0) { datosMensuales[indexExistente] = nuevoDato; } 
-                else { datosMensuales.push(nuevoDato); }
+                
+                // --- SEGURIDAD: Doble check por si alguien fuerza el navegador ---
+                if (indexExistente >= 0) { 
+                    const seguro = confirm(`⚠️ ATENCIÓN: El mes de ${mes} ya tiene datos cargados.\n\n¿Estás absolutamente seguro de que deseas SOBRESCRIBIR la información existente? (Esta acción no se puede deshacer)`);
+                    if(!seguro) return;
+                    datosMensuales[indexExistente] = { mes, ventas, ventasManana, tickets, ticketsManana, ticketPromedio, ticketsDiarios, diagnostico, colorTema };
+                } else { 
+                    datosMensuales.push({ mes, ventas, ventasManana, tickets, ticketsManana, ticketPromedio, ticketsDiarios, diagnostico, colorTema });
+                }
 
                 document.getElementById('inputVenta').value = '';
                 document.getElementById('inputVentaManana').value = '';
