@@ -768,6 +768,13 @@
                 const prev = datosMensuales[i-1].ventas;
                 return prev > 0 ? ((d.ventas - prev) / prev) * 100 : 0;
             });
+            
+            // Calculamos la diferencia en dinero para mostrarla en el gráfico
+            const diffCrecimiento = datosMensuales.map((d, i) => {
+                if (i === 0) return 0;
+                return d.ventas - datosMensuales[i-1].ventas;
+            });
+
             const bgCrecimiento = dataCrecimiento.map(val => val >= 0 ? '#ec008c' : '#333333');
 
             chartCrecimiento = new Chart(document.getElementById('crecimientoChart').getContext('2d'), {
@@ -787,8 +794,14 @@
                         tooltip: { 
                             callbacks: { 
                                 label: function(c) { 
-                                    let val = c.parsed.y;
-                                    return (val >= 0 ? '+' : '') + val.toFixed(1) + '%'; 
+                                    let valPorcentaje = c.parsed.y;
+                                    let idx = c.dataIndex;
+                                    let diffDinero = diffCrecimiento[idx];
+                                    let signo = valPorcentaje >= 0 ? '+' : '';
+                                    return [
+                                        `Variación: ${signo}${valPorcentaje.toFixed(1)}%`,
+                                        `Diferencia: ${signo}${formatCurrency(diffDinero)}`
+                                    ]; 
                                 } 
                             } 
                         } 
