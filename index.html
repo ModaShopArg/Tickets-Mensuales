@@ -8,7 +8,7 @@
     <!-- Favicon de la empresa -->
     <link rel="icon" type="image/png" href="logo.png">
     
-    <!-- Tipografía corporativa (Alternativa web a Gotham Rounded) -->
+    <!-- Tipografía corporativa -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -18,23 +18,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
-    <!-- Configuración de Tailwind con Colores de Moda Shop -->
+    <!-- Configuración de Tailwind -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         brand: {
-                            magenta: '#ec008c', // Process Magenta C
+                            magenta: '#ec008c', 
                             magentaHover: '#c40074',
-                            black: '#111111',   // Process Black
+                            black: '#111111',   
                             darkGray: '#333333',
-                            lightGray: '#999999', // 60% Black approx
+                            lightGray: '#999999', 
                             pinkBg: '#fdf2f8'
                         }
                     },
                     fontFamily: {
-                        sans: ['Nunito', 'sans-serif'], // Aplicación de fuente redondeada
+                        sans: ['Nunito', 'sans-serif'], 
                     }
                 }
             }
@@ -46,11 +46,13 @@
         .card-hover { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease; }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         
-        /* 🔥 NUEVO: Caja blindada. Forzamos que sea un bloque cerrado para que el PDF no lo parta 🔥 */
-        .avoid-break { 
+        /* 🔥 FIX DEFINITIVO PARA PDF 🔥
+           Convierte los bloques en ladrillos sólidos indestructibles para html2pdf */
+        .pdf-seccion { 
             page-break-inside: avoid !important; 
             break-inside: avoid !important; 
-            display: block; 
+            display: inline-block !important; 
+            width: 100%;
         }
     </style>
 </head>
@@ -72,7 +74,6 @@
                 <p class="text-brand-lightGray mt-2 text-lg font-semibold"><i class="far fa-calendar-alt mr-2"></i> Período Analizado: <span id="periodo-text">Conectando...</span></p>
             </div>
             <div class="flex items-center gap-4">
-                <!-- Indicador de Nube -->
                 <div id="cloud-status" class="hidden md:flex items-center text-sm font-bold bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
                     <i class="fas fa-cloud text-gray-400 mr-2"></i> <span class="text-gray-600">Conectando...</span>
                 </div>
@@ -130,7 +131,6 @@
                     </div>
                 </div>
                 
-                <!-- Botón acomodado a la derecha -->
                 <div class="flex justify-end mt-6">
                     <button type="submit" id="btnAgregar" class="bg-brand-magenta hover:bg-brand-magentaHover text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md w-full md:w-auto text-lg flex items-center justify-center">
                         <i class="fas fa-save mr-2"></i> Guardar Mes
@@ -139,8 +139,8 @@
             </form>
         </div>
 
-        <!-- Global KPIs (Envuelto en caja blindada) -->
-        <div class="avoid-break">
+        <!-- Global KPIs (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-seccion">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-magenta card-hover">
                     <div class="flex justify-between items-start">
@@ -181,18 +181,18 @@
             </div>
         </div>
 
-        <!-- Desglose Mensual Detallado (MOVIDO AQUÍ) -->
+        <!-- Desglose Mensual Detallado -->
         <div class="mt-6">
             <h2 class="text-2xl font-bold text-brand-black mb-6 flex items-center">
                 <i class="fas fa-calendar-check mr-3 text-brand-magenta"></i> Desglose Mensual Detallado
             </h2>
             <div id="monthly-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Se inyectan las tarjetas por JS envueltas individualmente -->
+                <!-- Se inyectan las tarjetas por JS -->
             </div>
         </div>
 
-        <!-- Charts Section Originales (Envuelto en caja blindada) -->
-        <div class="avoid-break mt-6">
+        <!-- Charts Section Originales (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-seccion mt-6">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
                     <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
@@ -210,9 +210,9 @@
             </div>
         </div>
 
-        <!-- Rendimiento Operativo (Envuelto en caja blindada) -->
-        <div class="avoid-break">
-            <div class="bg-white rounded-xl shadow-sm p-6 mt-2">
+        <!-- Rendimiento Operativo (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-seccion mt-6">
+            <div class="bg-white rounded-xl shadow-sm p-6">
                 <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
                     <i class="fas fa-clock mr-2 text-brand-black"></i> 
                     Rendimiento Operativo: Turno Mañana vs. Turno Tarde
@@ -224,9 +224,9 @@
             </div>
         </div>
 
-        <!-- Gráficos Solicitados y de Eficiencia (Envueltos en caja blindada conjunta) -->
-        <div class="avoid-break">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-2">
+        <!-- Gráficos Solicitados y de Eficiencia (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-seccion mt-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Gráfico de Tráfico (Clientes) -->
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
@@ -253,9 +253,9 @@
             </div>
         </div>
 
-        <!-- Eficiencia de Ventas (Envuelto en caja blindada) -->
-        <div class="avoid-break">
-            <div class="bg-white rounded-xl shadow-sm p-6 mt-2">
+        <!-- Eficiencia de Ventas (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-seccion mt-6">
+            <div class="bg-white rounded-xl shadow-sm p-6">
                 <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
                     <i class="fas fa-box-open mr-2 text-brand-magenta"></i> 
                     Eficiencia de Venta: Unidades y UPT (Artículos por Ticket)
@@ -267,9 +267,9 @@
             </div>
         </div>
 
-        <!-- Diagnóstico Ejecutivo Global (Envuelto en caja blindada) -->
-        <div class="avoid-break">
-            <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white">
+        <!-- Diagnóstico Ejecutivo Global (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-seccion mt-8">
+            <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white">
                 <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
                     <i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo
                 </h2>
@@ -281,9 +281,9 @@
             </div>
         </div>
 
-        <!-- Conclusiones Globales (Envuelto en caja blindada) -->
-        <div class="avoid-break">
-            <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white">
+        <!-- Conclusiones Globales (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-seccion mt-8">
+            <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white">
                 <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
                     <i class="fas fa-heart mr-3 text-brand-magenta"></i> Foco y Plan de Acción
                 </h2>
@@ -336,9 +336,6 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // =========================================================================
-        // 🚀 CONFIGURACIÓN DE FIREBASE
-        // =========================================================================
         let firebaseConfig;
         if (typeof __firebase_config !== 'undefined') {
             firebaseConfig = JSON.parse(__firebase_config);
@@ -369,7 +366,6 @@
         };
         let localActual = 'Concordia';
 
-        // 🚨 WATCHDOG: SEGURO ANTI-CONGELAMIENTO
         setTimeout(() => {
             if (!datosSincronizados) {
                 console.warn("⚠️ Firebase bloqueado. Iniciando en Modo Local.");
@@ -379,7 +375,6 @@
             }
         }, 5000);
 
-        // Autenticación Segura
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -649,7 +644,7 @@
                 const diagnosticoVisual = generarDiagnosticoMensual(data.ventas, data.ventasManana, data.tickets, unidades);
 
                 container.innerHTML += `
-                    <div class="avoid-break h-full">
+                    <div style="page-break-inside: avoid; break-inside: avoid;">
                         <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
                             <div class="${theme.light} p-4 border-b ${theme.border} flex justify-between items-center">
                                 <h3 class="text-xl font-bold ${theme.textDark}">📊 ${data.mes} 2026</h3>
@@ -968,13 +963,14 @@
             
             const labels = datosMensuales.map(d => d.mes);
             
+            // 🔥 AHORA LE DAMOS LA ORDEN A LA LIBRERÍA DE QUE USE NUESTRA CAJA BLINDADA (.pdf-seccion) 🔥
             const opt = {
                 margin:       10,
                 filename:     `Reporte_${localActual}_${labels[0]}_a_${labels[labels.length-1]}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
                 jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' },
-                pagebreak:    { mode: ['css', 'legacy'], avoid: '.avoid-break' } 
+                pagebreak:    { mode: ['css', 'legacy'], avoid: '.pdf-seccion' } 
             };
 
             html2pdf().set(opt).from(element).save().then(() => { btn.innerHTML = originalText; });
