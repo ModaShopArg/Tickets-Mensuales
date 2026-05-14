@@ -83,7 +83,7 @@
                 <i class="fas fa-keyboard mr-2 text-brand-magenta"></i> Cargar Nuevos Meses (Uso Interno)
             </h2>
             <form id="formCarga" onsubmit="agregarNuevoMes(event)" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Mes</label>
                         <select id="inputMes" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta font-bold text-gray-800">
@@ -117,6 +117,11 @@
                         <label class="block text-sm font-bold text-gray-700 mb-1">Tickets Mañana</label>
                         <input type="text" id="inputTicketsManana" placeholder="Ej: 450" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta" title="El turno tarde se calculará automáticamente.">
                     </div>
+                    <!-- 🔥 NUEVO CAMPO: Unidades Vendidas 🔥 -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Unidades Vendidas</label>
+                        <input type="text" id="inputUnidades" placeholder="Ej: 1450" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta" title="Total de artículos vendidos en el mes.">
+                    </div>
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">Breve Diagnóstico</label>
@@ -128,7 +133,7 @@
                     </div>
                 </div>
             </form>
-            <p class="text-xs text-brand-lightGray font-semibold mt-3"><i class="fas fa-info-circle"></i> Los meses ya registrados se bloquearán para evitar sobreescrituras por error. Al generar el PDF, este recuadro no será visible.</p>
+            <p class="text-xs text-brand-lightGray font-semibold mt-3"><i class="fas fa-info-circle"></i> Los meses ya registrados se bloquearán para evitar sobreescrituras por error. Puedes usar el botón "Editar" en el mes correspondiente si necesitas corregirlo. Al generar el PDF, este recuadro no será visible.</p>
         </div>
 
         <!-- Global KPIs -->
@@ -199,7 +204,7 @@
             <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
         </div>
 
-        <!-- 🔥 NUEVOS GRÁFICOS SOLICITADOS (Sin tocar los anteriores) 🔥 -->
+        <!-- Gráficos Solicitados y de Eficiencia -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <!-- Gráfico de Tráfico (Clientes) -->
             <div class="bg-white rounded-xl shadow-sm p-6">
@@ -226,6 +231,18 @@
             </div>
         </div>
 
+        <!-- 🔥 NUEVO GRÁFICO: Eficiencia de Ventas (Unidades y UPT) 🔥 -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
+            <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
+                <i class="fas fa-box-open mr-2 text-brand-magenta"></i> 
+                Eficiencia de Venta: Unidades y UPT (Artículos por Ticket)
+            </h3>
+            <div class="relative h-80 w-full">
+                <canvas id="unidadesChart"></canvas>
+            </div>
+            <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Mide cuántos artículos compran tus clientes en promedio (UPT). Vital para evaluar el nivel de venta cruzada en el local.</p>
+        </div>
+
         <!-- Desglose Mensual Detallado -->
         <div class="mt-10">
             <h2 class="text-2xl font-bold text-brand-black mb-6 flex items-center">
@@ -236,7 +253,7 @@
             </div>
         </div>
 
-        <!-- Diagnóstico Ejecutivo Global -->
+        <!-- Diagnóstico Ejecutivo Global (Modo Oscuro Corporativo) -->
         <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white">
             <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
                 <i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo
@@ -441,13 +458,12 @@
             guardarEnLaNube();
         };
 
-        // Variables de gráficos originales
         let chartMixto = null;
         let chartTorta = null;
         let chartTurnos = null;
-        // Variables de gráficos nuevos
         let chartTrafico = null;
         let chartCrecimiento = null;
+        let chartUnidades = null; // 🔥 VARIABLE PARA EL NUEVO GRÁFICO 🔥
 
         const formatCurrency = (value) => {
             if(isNaN(value)) return '$0';
@@ -509,6 +525,40 @@
             }
         }
 
+        // 🔥 NUEVA FUNCIÓN: Permite editar un mes ya cargado
+        window.editarMes = function(mes) {
+            let datos = baseDatosLocales[localActual].find(d => d.mes === mes);
+            if (!datos) return;
+
+            // Desbloqueamos la opción en el selector
+            const selectMes = document.getElementById('inputMes');
+            Array.from(selectMes.options).forEach(opt => {
+                if (opt.value === mes) {
+                    opt.disabled = false;
+                    opt.text = mes + ' (Editando)';
+                }
+            });
+            
+            // Llenamos el formulario con los datos viejos
+            selectMes.value = mes;
+            document.getElementById('inputVenta').value = datos.ventas;
+            document.getElementById('inputVentaManana').value = datos.ventasManana;
+            document.getElementById('inputTickets').value = datos.tickets;
+            document.getElementById('inputTicketsManana').value = datos.ticketsManana;
+            document.getElementById('inputUnidades').value = (datos.unidades && datos.unidades > 0) ? datos.unidades : '';
+            document.getElementById('inputDiagnostico').value = datos.diagnostico;
+
+            // Cambiamos la apariencia del botón a "Actualizar"
+            const btnAgregar = document.getElementById('btnAgregar');
+            btnAgregar.disabled = false;
+            btnAgregar.innerHTML = '<i class="fas fa-sync-alt mr-1"></i> Actualizar';
+            btnAgregar.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-500');
+            btnAgregar.classList.add('bg-brand-magenta', 'hover:bg-brand-magentaHover');
+
+            // Hacemos scroll suave hasta el formulario de carga
+            document.getElementById('formCarga').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
         function renderDashboard() {
             if (!datosSincronizados) return; 
 
@@ -529,6 +579,7 @@
                 if (chartTurnos) chartTurnos.destroy();
                 if (chartTrafico) chartTrafico.destroy();
                 if (chartCrecimiento) chartCrecimiento.destroy();
+                if (chartUnidades) chartUnidades.destroy();
                 return;
             }
 
@@ -552,19 +603,30 @@
                     data.colorTema = listadoColores[index % listadoColores.length];
                 }
                 const theme = colores[data.colorTema];
+                // Cálculo de UPT para la tarjeta. Si el dato es viejo y no tiene unidades, mostramos 0 por defecto.
+                const unidades = data.unidades || 0;
+                const upt = data.tickets > 0 ? (unidades / data.tickets).toFixed(2) : '0.00';
                 
+                // 🔥 TARJETA ACTUALIZADA CON BOTÓN DE EDITAR 🔥
                 container.innerHTML += `
                     <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
-                        <div class="${theme.light} p-4 border-b ${theme.border}">
+                        <div class="${theme.light} p-4 border-b ${theme.border} flex justify-between items-center">
                             <h3 class="text-xl font-bold ${theme.textDark}">📊 ${data.mes} 2026</h3>
+                            <button onclick="editarMes('${data.mes}')" data-html2canvas-ignore="true" class="text-sm font-bold text-brand-magenta hover:text-white hover:bg-brand-magenta bg-white px-3 py-1 rounded-lg shadow-sm border border-brand-magenta transition-colors">
+                                <i class="fas fa-edit mr-1"></i> Editar
+                            </button>
                         </div>
                         <div class="p-6 flex-grow">
-                            <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                                 <div><span class="text-gray-500 text-sm block font-bold">Venta Total</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ventas)}</span></div>
-                                <div><span class="text-gray-500 text-sm block font-bold">Ticket Promedio</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ticketPromedio)}</span></div>
+                                <div><span class="text-gray-500 text-sm block font-bold">Ticket Prom.</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ticketPromedio)}</span></div>
                                 <div><span class="text-gray-500 text-sm block font-bold">Total Tickets</span><span class="font-bold text-lg">${formatNumber(data.tickets)}</span></div>
-                                <div><span class="text-gray-500 text-sm block font-bold">Prom. Tickets/Día</span><span class="font-bold text-lg">${data.ticketsDiarios}</span></div>
-                                <div class="col-span-2 text-xs text-gray-500 border-t pt-2 mt-1">
+                                
+                                <div><span class="text-gray-500 text-sm block font-bold">Total Unidades</span><span class="font-bold text-lg">${formatNumber(unidades)}</span></div>
+                                <div><span class="text-gray-500 text-sm block font-bold">UPT (Art/Ticket)</span><span class="font-bold text-lg">${upt}</span></div>
+                                <div><span class="text-gray-500 text-sm block font-bold">Tickets/Día</span><span class="font-bold text-lg">${data.ticketsDiarios}</span></div>
+                                
+                                <div class="col-span-2 md:col-span-3 text-xs text-gray-500 border-t pt-2 mt-1">
                                     <span class="font-bold text-brand-magenta">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)} (${data.ticketsManana} tkts) <span class="mx-2">|</span> 
                                     <span class="font-bold text-brand-black">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)} (${data.tickets - data.ticketsManana} tkts)
                                 </div>
@@ -581,6 +643,7 @@
             if (chartTurnos) chartTurnos.destroy(); 
             if (chartTrafico) chartTrafico.destroy();
             if (chartCrecimiento) chartCrecimiento.destroy();
+            if (chartUnidades) chartUnidades.destroy();
 
             const labels = datosMensuales.map(d => d.mes);
             const dataVts = datosMensuales.map(d => d.ventas);
@@ -633,8 +696,6 @@
                 }
             });
 
-            // 🔥 NUEVOS GRÁFICOS 🔥
-
             // 1. Tráfico (Evolución de Tickets Totales)
             const dataTicketsTotal = datosMensuales.map(d => d.tickets);
             chartTrafico = new Chart(document.getElementById('traficoChart').getContext('2d'), {
@@ -664,11 +725,10 @@
 
             // 2. Crecimiento Mes a Mes (%)
             const dataCrecimiento = datosMensuales.map((d, i) => {
-                if (i === 0) return 0; // El primer mes no tiene con qué compararse
+                if (i === 0) return 0;
                 const prev = datosMensuales[i-1].ventas;
                 return prev > 0 ? ((d.ventas - prev) / prev) * 100 : 0;
             });
-            // Si el % es positivo pinta de Magenta, si es negativo pinta de Gris Oscuro/Negro
             const bgCrecimiento = dataCrecimiento.map(val => val >= 0 ? '#ec008c' : '#333333');
 
             chartCrecimiento = new Chart(document.getElementById('crecimientoChart').getContext('2d'), {
@@ -701,19 +761,47 @@
                     }
                 }
             });
+
+            // 🔥 NUEVO GRÁFICO: UNIDADES Y UPT 🔥
+            const dataUnidades = datosMensuales.map(d => d.unidades || 0);
+            const dataUPT = datosMensuales.map(d => d.tickets > 0 ? ((d.unidades || 0) / d.tickets).toFixed(2) : 0);
+
+            chartUnidades = new Chart(document.getElementById('unidadesChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Unidades Vendidas', data: dataUnidades, backgroundColor: '#333333', borderRadius: 8, yAxisID: 'y' },
+                        { label: 'UPT (Art. por Ticket)', data: dataUPT, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatNumber(val); } } },
+                        y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return val + ' art.'; } } }
+                    }
+                }
+            });
         }
 
         function generarDiagnosticoAutomatico() {
             let datos = baseDatosLocales[localActual] || [];
             if (datos.length === 0) return;
 
-            let totalVentas = 0; let totalVentasManana = 0; let totalTickets = 0;
-            datos.forEach(d => { totalVentas += d.ventas; totalVentasManana += d.ventasManana; totalTickets += d.tickets; });
+            let totalVentas = 0; let totalVentasManana = 0; let totalTickets = 0; let totalUnidades = 0;
+            datos.forEach(d => { 
+                totalVentas += d.ventas; 
+                totalVentasManana += d.ventasManana; 
+                totalTickets += d.tickets; 
+                totalUnidades += (d.unidades || 0); // Suma nueva
+            });
 
             let totalVentasTarde = totalVentas - totalVentasManana;
             let mejorTurno = totalVentasManana > totalVentasTarde ? "mañana" : "tarde";
             let porcentajeMejorTurno = totalVentasManana > totalVentasTarde ? (totalVentasManana / totalVentas * 100) : (totalVentasTarde / totalVentas * 100);
             let ticketPromedio = totalVentas / totalTickets;
+            let uptPromedio = totalTickets > 0 ? (totalUnidades / totalTickets) : 0; // UPT
 
             let mesInicial = datos[0].mes;
             let mesFinal = datos[datos.length - 1].mes;
@@ -731,7 +819,12 @@
                 else { texto += `Respecto a la evolución a corto plazo, el mes de ${ultimoMes.mes} mantuvo los mismos niveles de facturación que ${mesAnterior.mes}. `; }
             }
 
-            texto += `El ticket promedio global de este período se sitúa en ${formatCurrency(ticketPromedio)}, marcando la métrica base que el equipo de ventas deberá utilizar como objetivo de up-selling para los próximos meses.`;
+            texto += `El ticket promedio global de este período se sitúa en ${formatCurrency(ticketPromedio)}.`;
+            
+            // Si el cliente tiene cargado el dato de unidades, el bot lo analiza:
+            if (totalUnidades > 0) {
+                texto += ` El nivel de ventas cruzadas (UPT) promedió ${uptPromedio.toFixed(2)} artículos por cliente.`;
+            }
 
             document.getElementById('texto-diagnostico').innerText = texto;
             diagnosticosLocales[localActual] = texto;
@@ -752,10 +845,11 @@
                 const valVentaManana = document.getElementById('inputVentaManana').value;
                 const valTickets = document.getElementById('inputTickets').value;
                 const valTicketsManana = document.getElementById('inputTicketsManana').value;
+                const valUnidades = document.getElementById('inputUnidades').value; // NUEVO
                 const diagnostico = document.getElementById('inputDiagnostico').value;
 
-                if (!valVenta || !valVentaManana || !valTickets || !valTicketsManana || !diagnostico) {
-                    alert("⚠️ ¡Atención! Por favor, completa todos los campos.");
+                if (!valVenta || !valVentaManana || !valTickets || !valTicketsManana || !valUnidades || !diagnostico) {
+                    alert("⚠️ ¡Atención! Por favor, completa todos los campos (incluyendo unidades vendidas).");
                     return;
                 }
 
@@ -763,10 +857,12 @@
                 const ventasManana = parseExcelNumber(valVentaManana);
                 const tickets = parseInt(parseExcelNumber(valTickets));
                 const ticketsManana = parseInt(parseExcelNumber(valTicketsManana));
+                const unidades = parseInt(parseExcelNumber(valUnidades)); // NUEVO
 
                 if (ventas <= 0 || tickets <= 0) { alert("⚠️ La venta y los tickets totales deben ser mayores a cero."); return; }
                 if (ventasManana > ventas) { alert(`⚠️ Error Lógico: Las ventas de la mañana no pueden ser mayores al total.`); return; }
                 if (ticketsManana > tickets) { alert(`⚠️ Error Lógico: Los tickets de la mañana no pueden superar los totales.`); return; }
+                if (unidades < tickets) { alert(`⚠️ Error Lógico: Las unidades vendidas no pueden ser menores a los tickets (cada persona compra al menos 1 cosa).`); return; }
 
                 const ticketPromedio = tickets > 0 ? (ventas / tickets) : 0;
                 const ticketsDiarios = Math.round(tickets / 30);
@@ -777,15 +873,17 @@
                 if (indexExistente >= 0) { 
                     const seguro = confirm(`⚠️ ATENCIÓN: El mes de ${mes} ya tiene datos cargados.\n\n¿Estás absolutamente seguro de que deseas SOBRESCRIBIR la información existente? (Esta acción no se puede deshacer)`);
                     if(!seguro) return;
-                    datosMensuales[indexExistente] = { mes, ventas, ventasManana, tickets, ticketsManana, ticketPromedio, ticketsDiarios, diagnostico, colorTema };
+                    datosMensuales[indexExistente] = { mes, ventas, ventasManana, tickets, ticketsManana, unidades, ticketPromedio, ticketsDiarios, diagnostico, colorTema };
                 } else { 
-                    datosMensuales.push({ mes, ventas, ventasManana, tickets, ticketsManana, ticketPromedio, ticketsDiarios, diagnostico, colorTema });
+                    datosMensuales.push({ mes, ventas, ventasManana, tickets, ticketsManana, unidades, ticketPromedio, ticketsDiarios, diagnostico, colorTema });
                 }
 
+                // Limpieza del formulario
                 document.getElementById('inputVenta').value = '';
                 document.getElementById('inputVentaManana').value = '';
                 document.getElementById('inputTickets').value = '';
                 document.getElementById('inputTicketsManana').value = '';
+                document.getElementById('inputUnidades').value = ''; // NUEVO
                 document.getElementById('inputDiagnostico').value = '';
 
                 guardarEnLaNube();
