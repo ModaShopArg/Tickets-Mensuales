@@ -45,6 +45,8 @@
         body { background-color: #f8fafc; font-family: 'Nunito', sans-serif; }
         .card-hover { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease; }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        /* 🔥 NUEVO: Clase estricta para evitar cortes en el PDF 🔥 */
+        .avoid-break { page-break-inside: avoid !important; break-inside: avoid !important; }
     </style>
 </head>
 <body class="text-brand-black p-4 md:p-8">
@@ -178,14 +180,14 @@
 
         <!-- Charts Section (Originales) -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2 avoid-break">
                 <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
                 <div class="relative h-80 w-full">
                     <canvas id="mixedChart"></canvas>
                 </div>
             </div>
             
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 avoid-break">
                 <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-brand-magenta"></i>Distribución de Ingresos</h3>
                 <div class="relative h-80 w-full flex justify-center">
                     <canvas id="pieChart"></canvas>
@@ -193,7 +195,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
+        <div class="bg-white rounded-xl shadow-sm p-6 mt-6 avoid-break">
             <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
                 <i class="fas fa-clock mr-2 text-brand-black"></i> 
                 Rendimiento Operativo: Turno Mañana vs. Turno Tarde
@@ -207,7 +209,7 @@
         <!-- Gráficos Solicitados y de Eficiencia -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <!-- Gráfico de Tráfico (Clientes) -->
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 avoid-break">
                 <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
                     <i class="fas fa-users mr-2 text-brand-magenta"></i> 
                     Evolución de Tráfico (Retención)
@@ -219,7 +221,7 @@
             </div>
 
             <!-- Gráfico de Crecimiento Mes a Mes -->
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 avoid-break">
                 <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
                     <i class="fas fa-arrow-trend-up mr-2 text-brand-magenta"></i> 
                     Crecimiento Mes a Mes (%)
@@ -232,7 +234,7 @@
         </div>
 
         <!-- 🔥 NUEVO GRÁFICO: Eficiencia de Ventas (Unidades y UPT) 🔥 -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
+        <div class="bg-white rounded-xl shadow-sm p-6 mt-6 avoid-break">
             <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
                 <i class="fas fa-box-open mr-2 text-brand-magenta"></i> 
                 Eficiencia de Venta: Unidades y UPT (Artículos por Ticket)
@@ -254,7 +256,7 @@
         </div>
 
         <!-- Diagnóstico Ejecutivo Global (Modo Oscuro Corporativo) -->
-        <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white">
+        <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white avoid-break">
             <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
                 <i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo
             </h2>
@@ -266,7 +268,7 @@
         </div>
 
         <!-- Conclusiones Globales -->
-        <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white">
+        <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white avoid-break">
             <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
                 <i class="fas fa-heart mr-3 text-brand-magenta"></i> Foco y Plan de Acción
             </h2>
@@ -633,7 +635,7 @@
                 
                 // 🔥 TARJETA ACTUALIZADA CON BOTÓN DE EDITAR 🔥
                 container.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col avoid-break">
                         <div class="${theme.light} p-4 border-b ${theme.border} flex justify-between items-center">
                             <h3 class="text-xl font-bold ${theme.textDark}">📊 ${data.mes} 2026</h3>
                             <button onclick="editarMes('${data.mes}')" data-html2canvas-ignore="true" class="text-sm font-bold text-brand-magenta hover:text-white hover:bg-brand-magenta bg-white px-3 py-1 rounded-lg shadow-sm border border-brand-magenta transition-colors">
@@ -969,9 +971,10 @@
                 margin:       10,
                 filename:     `Reporte_${localActual}_${labels[0]}_a_${labels[labels.length-1]}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
                 jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' },
-                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                // Confiar 100% en las reglas CSS para los cortes de página
+                pagebreak:    { mode: ['css', 'legacy'] }
             };
 
             html2pdf().set(opt).from(element).save().then(() => { btn.innerHTML = originalText; });
