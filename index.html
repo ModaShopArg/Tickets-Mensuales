@@ -130,9 +130,8 @@
                     </div>
                 </div>
                 
-                <!-- Botón acomodado sin el campo de texto de diagnóstico manual -->
-                <div class="flex flex-col md:flex-row justify-between items-center mt-6">
-                    <p class="text-xs text-brand-lightGray font-semibold mb-4 md:mb-0"><i class="fas fa-robot text-brand-magenta mr-1"></i> El diagnóstico mensual se generará automáticamente según los datos ingresados.</p>
+                <!-- Botón acomodado a la derecha -->
+                <div class="flex justify-end mt-6">
                     <button type="submit" id="btnAgregar" class="bg-brand-magenta hover:bg-brand-magentaHover text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md w-full md:w-auto text-lg flex items-center justify-center">
                         <i class="fas fa-save mr-2"></i> Guardar Mes
                     </button>
@@ -649,8 +648,8 @@
                 const unidades = data.unidades || 0;
                 const upt = data.tickets > 0 ? (unidades / data.tickets).toFixed(2) : '0.00';
                 
-                // Mostrar el diagnóstico auto-generado (o el que ya estuviera guardado de antes)
-                const diagnosticoVisual = data.diagnostico ? data.diagnostico : "Diagnóstico en proceso...";
+                // 🔥 SOLUCIÓN: Calculamos el diagnóstico en tiempo real en lugar de leer el texto viejo de Firebase 🔥
+                const diagnosticoVisual = generarDiagnosticoMensual(data.ventas, data.ventasManana, data.tickets, unidades);
 
                 container.innerHTML += `
                     <div class="avoid-break h-full">
@@ -800,8 +799,13 @@
                         tooltip: { 
                             callbacks: { 
                                 label: function(c) { 
-                                    let valPorcentaje = c.parsed.y;
                                     let idx = c.dataIndex;
+                                    // 🔥 NUEVO: Si es el primer mes, mostramos un mensaje aclaratorio en lugar de 0%
+                                    if (idx === 0) {
+                                        return "Mes Base (Punto de partida sin mes previo)";
+                                    }
+                                    
+                                    let valPorcentaje = c.parsed.y;
                                     let diffDinero = diffCrecimiento[idx];
                                     let signo = valPorcentaje >= 0 ? '+' : '';
                                     return [
