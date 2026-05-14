@@ -482,11 +482,35 @@
 
         const listadoColores = ['magenta', 'black', 'gray', 'pink', 'darkgray'];
 
+        // 🔥 MOTOR MATEMÁTICO BLINDADO 🔥
         function parseExcelNumber(str) {
             if (!str) return 0;
-            let texto = String(str).replace(/[$ a-zA-Z]/g, '');
-            let numeroLimpio = texto.replace(/\./g, '').replace(',', '.');
-            let resultado = parseFloat(numeroLimpio);
+            // Quitamos espacios, símbolos de moneda y letras
+            let texto = String(str).trim().replace(/[$ a-zA-Z\s]/g, '');
+            
+            // Buscamos dónde están el último punto y la última coma
+            let ultimoPunto = texto.lastIndexOf('.');
+            let ultimaComa = texto.lastIndexOf(',');
+            
+            if (ultimoPunto > ultimaComa) {
+                // El punto está al final (Ej: 1,500,000.50 -> Formato Inglés)
+                texto = texto.replace(/,/g, '');
+            } else if (ultimaComa > ultimoPunto) {
+                // La coma está al final (Ej: 1.500.000,50 -> Formato Español)
+                texto = texto.replace(/\./g, '').replace(',', '.');
+            } else if (ultimaComa !== -1) {
+                // Solo hay una coma (Ej: 1500,50)
+                texto = texto.replace(',', '.');
+            } else if (ultimoPunto !== -1) {
+                // Solo hay puntos (Ej: 1.500.000 o 1500.50)
+                let partes = texto.split('.');
+                // Si separa 3 ceros exactos (ej 1.500) o hay varios puntos (1.500.000) es separador de miles
+                if (partes.length > 2 || (partes.length === 2 && partes[1].length === 3)) {
+                    texto = texto.replace(/\./g, '');
+                }
+            }
+            
+            let resultado = parseFloat(texto);
             return isNaN(resultado) ? 0 : resultado;
         }
 
