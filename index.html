@@ -181,8 +181,18 @@
             </div>
         </div>
 
+        <!-- Desglose Mensual Detallado (MOVIDO AQUÍ) -->
+        <div class="mt-6">
+            <h2 class="text-2xl font-bold text-brand-black mb-6 flex items-center">
+                <i class="fas fa-calendar-check mr-3 text-brand-magenta"></i> Desglose Mensual Detallado
+            </h2>
+            <div id="monthly-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Se inyectan las tarjetas por JS envueltas individualmente -->
+            </div>
+        </div>
+
         <!-- Charts Section Originales (Envuelto en caja blindada) -->
-        <div class="avoid-break">
+        <div class="avoid-break mt-6">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
                     <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
@@ -254,16 +264,6 @@
                     <canvas id="unidadesChart"></canvas>
                 </div>
                 <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Mide cuántos artículos compran tus clientes en promedio (UPT). Vital para evaluar el nivel de venta cruzada en el local.</p>
-            </div>
-        </div>
-
-        <!-- Desglose Mensual Detallado -->
-        <div class="mt-10">
-            <h2 class="text-2xl font-bold text-brand-black mb-6 flex items-center">
-                <i class="fas fa-calendar-check mr-3 text-brand-magenta"></i> Desglose Mensual Detallado
-            </h2>
-            <div id="monthly-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Se inyectan las tarjetas por JS envueltas individualmente -->
             </div>
         </div>
 
@@ -522,7 +522,6 @@
             return isNaN(resultado) ? 0 : resultado;
         }
 
-        // 🔥 NUEVA FUNCIÓN: Genera un diagnóstico automático para cada mes cargado
         function generarDiagnosticoMensual(ventas, ventasManana, tickets, unidades) {
             const ventasTarde = ventas - ventasManana;
             const turnoFuerte = ventasTarde > ventasManana ? 'Tarde' : 'Mañana';
@@ -590,7 +589,6 @@
             document.getElementById('inputTickets').value = datos.tickets;
             document.getElementById('inputTicketsManana').value = datos.ticketsManana;
             document.getElementById('inputUnidades').value = (datos.unidades && datos.unidades > 0) ? datos.unidades : '';
-            // Se eliminó el seteo del diagnóstico manual
 
             const btnAgregar = document.getElementById('btnAgregar');
             btnAgregar.disabled = false;
@@ -648,7 +646,6 @@
                 const unidades = data.unidades || 0;
                 const upt = data.tickets > 0 ? (unidades / data.tickets).toFixed(2) : '0.00';
                 
-                // 🔥 SOLUCIÓN: Calculamos el diagnóstico en tiempo real en lugar de leer el texto viejo de Firebase 🔥
                 const diagnosticoVisual = generarDiagnosticoMensual(data.ventas, data.ventasManana, data.tickets, unidades);
 
                 container.innerHTML += `
@@ -800,11 +797,9 @@
                             callbacks: { 
                                 label: function(c) { 
                                     let idx = c.dataIndex;
-                                    // 🔥 NUEVO: Si es el primer mes, mostramos un mensaje aclaratorio en lugar de 0%
                                     if (idx === 0) {
                                         return "Mes Base (Punto de partida sin mes previo)";
                                     }
-                                    
                                     let valPorcentaje = c.parsed.y;
                                     let diffDinero = diffCrecimiento[idx];
                                     let signo = valPorcentaje >= 0 ? '+' : '';
@@ -927,7 +922,6 @@
                 const ticketsDiarios = Math.round(tickets / 30);
                 const colorTema = listadoColores[datosMensuales.length % listadoColores.length];
 
-                // 🔥 GENERACIÓN DEL DIAGNÓSTICO MENSUAL AUTOMÁTICO 🔥
                 const diagnosticoAutomatico = generarDiagnosticoMensual(ventas, ventasManana, tickets, unidades);
 
                 const indexExistente = datosMensuales.findIndex(d => d.mes === mes);
