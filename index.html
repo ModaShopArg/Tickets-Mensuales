@@ -89,8 +89,8 @@
             <h2 class="text-xl font-bold text-brand-black mb-4 flex items-center">
                 <i class="fas fa-keyboard mr-2 text-brand-magenta"></i> Cargar Nuevos Meses (Uso Interno)
             </h2>
-            <form id="formCarga" onsubmit="agregarNuevoMes(event)" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end">
+            <form id="formCarga" onsubmit="agregarNuevoMes(event)">
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end mb-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Mes</label>
                         <select id="inputMes" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta font-bold text-gray-800">
@@ -129,17 +129,15 @@
                         <input type="text" id="inputUnidades" placeholder="Ej: 1450" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta" title="Total de artículos vendidos en el mes.">
                     </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Breve Diagnóstico</label>
-                    <div class="flex flex-col md:flex-row gap-2">
-                        <input type="text" id="inputDiagnostico" placeholder="Ej: Las ventas repuntaron..." class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta">
-                        <button type="submit" id="btnAgregar" class="bg-brand-magenta hover:bg-brand-magentaHover text-white font-bold py-3 px-6 rounded-lg transition-all whitespace-nowrap shadow-md">
-                            <i class="fas fa-plus mr-1"></i> Agregar
-                        </button>
-                    </div>
+                
+                <!-- Botón acomodado sin el campo de texto de diagnóstico manual -->
+                <div class="flex flex-col md:flex-row justify-between items-center mt-6">
+                    <p class="text-xs text-brand-lightGray font-semibold mb-4 md:mb-0"><i class="fas fa-robot text-brand-magenta mr-1"></i> El diagnóstico mensual se generará automáticamente según los datos ingresados.</p>
+                    <button type="submit" id="btnAgregar" class="bg-brand-magenta hover:bg-brand-magentaHover text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md w-full md:w-auto text-lg flex items-center justify-center">
+                        <i class="fas fa-save mr-2"></i> Guardar Mes
+                    </button>
                 </div>
             </form>
-            <p class="text-xs text-brand-lightGray font-semibold mt-3"><i class="fas fa-info-circle"></i> Los meses ya registrados se bloquearán para evitar sobreescrituras por error. Puedes usar el botón "Editar" en el mes correspondiente si necesitas corregirlo. Al generar el PDF, este recuadro no será visible.</p>
         </div>
 
         <!-- Global KPIs (Envuelto en caja blindada) -->
@@ -525,6 +523,21 @@
             return isNaN(resultado) ? 0 : resultado;
         }
 
+        // 🔥 NUEVA FUNCIÓN: Genera un diagnóstico automático para cada mes cargado
+        function generarDiagnosticoMensual(ventas, ventasManana, tickets, unidades) {
+            const ventasTarde = ventas - ventasManana;
+            const turnoFuerte = ventasTarde > ventasManana ? 'Tarde' : 'Mañana';
+            const pctTurno = ((Math.max(ventasTarde, ventasManana) / ventas) * 100).toFixed(1);
+            const upt = tickets > 0 ? (unidades / tickets).toFixed(2) : 0;
+            
+            let analisisUPT = "";
+            if (upt >= 2.0) analisisUPT = "Excelente nivel de venta cruzada.";
+            else if (upt >= 1.5) analisisUPT = "Venta cruzada en parámetros estables.";
+            else analisisUPT = "Foco crítico: Mejorar cantidad de artículos por ticket.";
+
+            return `El turno ${turnoFuerte} lideró la facturación (${pctTurno}% del total). UPT registrado: ${upt} art/cliente. ${analisisUPT}`;
+        }
+
         function actualizarDropdownMeses(datosLocales) {
             const mesesCargados = datosLocales.map(d => d.mes);
             const selectMes = document.getElementById('inputMes');
@@ -548,13 +561,13 @@
             if (primerMesLibre) {
                 selectMes.value = primerMesLibre; 
                 btnAgregar.disabled = false;
-                btnAgregar.innerHTML = '<i class="fas fa-plus mr-1"></i> Agregar';
+                btnAgregar.innerHTML = '<i class="fas fa-save mr-2"></i> Guardar Mes';
                 btnAgregar.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-500');
                 btnAgregar.classList.add('bg-brand-magenta', 'hover:bg-brand-magentaHover');
             } else {
                 selectMes.value = "Enero"; 
                 btnAgregar.disabled = true; 
-                btnAgregar.innerHTML = '<i class="fas fa-lock mr-1"></i> Año Completo';
+                btnAgregar.innerHTML = '<i class="fas fa-lock mr-2"></i> Año Completo';
                 btnAgregar.classList.remove('bg-brand-magenta', 'hover:bg-brand-magentaHover');
                 btnAgregar.classList.add('bg-gray-500', 'opacity-50', 'cursor-not-allowed');
             }
@@ -578,11 +591,11 @@
             document.getElementById('inputTickets').value = datos.tickets;
             document.getElementById('inputTicketsManana').value = datos.ticketsManana;
             document.getElementById('inputUnidades').value = (datos.unidades && datos.unidades > 0) ? datos.unidades : '';
-            document.getElementById('inputDiagnostico').value = datos.diagnostico;
+            // Se eliminó el seteo del diagnóstico manual
 
             const btnAgregar = document.getElementById('btnAgregar');
             btnAgregar.disabled = false;
-            btnAgregar.innerHTML = '<i class="fas fa-sync-alt mr-1"></i> Actualizar';
+            btnAgregar.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Actualizar Mes';
             btnAgregar.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-500');
             btnAgregar.classList.add('bg-brand-magenta', 'hover:bg-brand-magentaHover');
 
@@ -636,7 +649,9 @@
                 const unidades = data.unidades || 0;
                 const upt = data.tickets > 0 ? (unidades / data.tickets).toFixed(2) : '0.00';
                 
-                // 🔥 Cada tarjeta ahora está envuelta en su propio bloque avoid-break 🔥
+                // Mostrar el diagnóstico auto-generado (o el que ya estuviera guardado de antes)
+                const diagnosticoVisual = data.diagnostico ? data.diagnostico : "Diagnóstico en proceso...";
+
                 container.innerHTML += `
                     <div class="avoid-break h-full">
                         <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
@@ -662,7 +677,7 @@
                                     </div>
                                 </div>
                                 <div class="${theme.light} rounded p-4 border-l-4 ${theme.leftBorder} text-sm text-gray-700">
-                                    <strong>Diagnóstico:</strong> ${data.diagnostico}
+                                    <strong>Resumen Automático:</strong> ${diagnosticoVisual}
                                 </div>
                             </div>
                         </div>
@@ -887,10 +902,9 @@
                 const valTickets = document.getElementById('inputTickets').value;
                 const valTicketsManana = document.getElementById('inputTicketsManana').value;
                 const valUnidades = document.getElementById('inputUnidades').value;
-                const diagnostico = document.getElementById('inputDiagnostico').value;
 
-                if (!valVenta || !valVentaManana || !valTickets || !valTicketsManana || !valUnidades || !diagnostico) {
-                    alert("⚠️ ¡Atención! Por favor, completa todos los campos (incluyendo unidades vendidas).");
+                if (!valVenta || !valVentaManana || !valTickets || !valTicketsManana || !valUnidades) {
+                    alert("⚠️ ¡Atención! Por favor, completa todos los campos numéricos.");
                     return;
                 }
 
@@ -909,14 +923,17 @@
                 const ticketsDiarios = Math.round(tickets / 30);
                 const colorTema = listadoColores[datosMensuales.length % listadoColores.length];
 
+                // 🔥 GENERACIÓN DEL DIAGNÓSTICO MENSUAL AUTOMÁTICO 🔥
+                const diagnosticoAutomatico = generarDiagnosticoMensual(ventas, ventasManana, tickets, unidades);
+
                 const indexExistente = datosMensuales.findIndex(d => d.mes === mes);
                 
                 if (indexExistente >= 0) { 
                     const seguro = confirm(`⚠️ ATENCIÓN: El mes de ${mes} ya tiene datos cargados.\n\n¿Estás absolutamente seguro de que deseas SOBRESCRIBIR la información existente? (Esta acción no se puede deshacer)`);
                     if(!seguro) return;
-                    datosMensuales[indexExistente] = { mes, ventas, ventasManana, tickets, ticketsManana, unidades, ticketPromedio, ticketsDiarios, diagnostico, colorTema };
+                    datosMensuales[indexExistente] = { mes, ventas, ventasManana, tickets, ticketsManana, unidades, ticketPromedio, ticketsDiarios, diagnostico: diagnosticoAutomatico, colorTema };
                 } else { 
-                    datosMensuales.push({ mes, ventas, ventasManana, tickets, ticketsManana, unidades, ticketPromedio, ticketsDiarios, diagnostico, colorTema });
+                    datosMensuales.push({ mes, ventas, ventasManana, tickets, ticketsManana, unidades, ticketPromedio, ticketsDiarios, diagnostico: diagnosticoAutomatico, colorTema });
                 }
 
                 document.getElementById('inputVenta').value = '';
@@ -924,7 +941,6 @@
                 document.getElementById('inputTickets').value = '';
                 document.getElementById('inputTicketsManana').value = '';
                 document.getElementById('inputUnidades').value = '';
-                document.getElementById('inputDiagnostico').value = '';
 
                 guardarEnLaNube();
                 generarDiagnosticoAutomatico();
@@ -933,7 +949,7 @@
                 const btn = document.getElementById('btnAgregar');
                 if (btn) {
                     const original = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check"></i> ¡Guardado!';
+                    btn.innerHTML = '<i class="fas fa-check mr-2"></i> ¡Guardado!';
                     btn.classList.replace('bg-brand-magenta', 'bg-green-600');
                     setTimeout(() => { btn.innerHTML = original; btn.classList.replace('bg-green-600', 'bg-brand-magenta'); }, 2500);
                 }
@@ -954,7 +970,6 @@
             
             const labels = datosMensuales.map(d => d.mes);
             
-            // 🔥 AHORA LE DAMOS LA ORDEN A LA LIBRERÍA DE QUE USE NUESTRA CAJA BLINDADA (.avoid-break) 🔥
             const opt = {
                 margin:       10,
                 filename:     `Reporte_${localActual}_${labels[0]}_a_${labels[labels.length-1]}.pdf`,
