@@ -45,8 +45,13 @@
         body { background-color: #f8fafc; font-family: 'Nunito', sans-serif; }
         .card-hover { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease; }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        /* 🔥 NUEVO: Clase estricta para evitar cortes en el PDF 🔥 */
-        .avoid-break { page-break-inside: avoid !important; break-inside: avoid !important; }
+        
+        /* 🔥 NUEVO: Caja blindada. Forzamos que sea un bloque cerrado para que el PDF no lo parta 🔥 */
+        .avoid-break { 
+            page-break-inside: avoid !important; 
+            break-inside: avoid !important; 
+            display: block; 
+        }
     </style>
 </head>
 <body class="text-brand-black p-4 md:p-8">
@@ -119,7 +124,6 @@
                         <label class="block text-sm font-bold text-gray-700 mb-1">Tickets Mañana</label>
                         <input type="text" id="inputTicketsManana" placeholder="Ej: 450" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta" title="El turno tarde se calculará automáticamente.">
                     </div>
-                    <!-- 🔥 NUEVO CAMPO: Unidades Vendidas 🔥 -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Unidades Vendidas</label>
                         <input type="text" id="inputUnidades" placeholder="Ej: 1450" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta" title="Total de artículos vendidos en el mes.">
@@ -138,111 +142,122 @@
             <p class="text-xs text-brand-lightGray font-semibold mt-3"><i class="fas fa-info-circle"></i> Los meses ya registrados se bloquearán para evitar sobreescrituras por error. Puedes usar el botón "Editar" en el mes correspondiente si necesitas corregirlo. Al generar el PDF, este recuadro no será visible.</p>
         </div>
 
-        <!-- Global KPIs -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-magenta card-hover">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Facturación Total</p>
-                        <h2 id="kpi-ventas" class="text-3xl font-black text-brand-black mt-2">$0</h2>
+        <!-- Global KPIs (Envuelto en caja blindada) -->
+        <div class="avoid-break">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-magenta card-hover">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Facturación Total</p>
+                            <h2 id="kpi-ventas" class="text-3xl font-black text-brand-black mt-2">$0</h2>
+                        </div>
+                        <i class="fas fa-dollar-sign text-pink-200 text-3xl"></i>
                     </div>
-                    <i class="fas fa-dollar-sign text-pink-200 text-3xl"></i>
                 </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-black card-hover">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Tráfico (Tickets)</p>
-                        <h2 id="kpi-tickets" class="text-3xl font-black text-brand-black mt-2">0</h2>
+                <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-black card-hover">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Tráfico (Tickets)</p>
+                            <h2 id="kpi-tickets" class="text-3xl font-black text-brand-black mt-2">0</h2>
+                        </div>
+                        <i class="fas fa-users text-gray-200 text-3xl"></i>
                     </div>
-                    <i class="fas fa-users text-gray-200 text-3xl"></i>
                 </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-pink-400 card-hover">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Ticket Prom. Global</p>
-                        <h2 id="kpi-ticket-prom" class="text-3xl font-black text-brand-black mt-2">$0</h2>
+                <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-pink-400 card-hover">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Ticket Prom. Global</p>
+                            <h2 id="kpi-ticket-prom" class="text-3xl font-black text-brand-black mt-2">$0</h2>
+                        </div>
+                        <i class="fas fa-receipt text-pink-100 text-3xl"></i>
                     </div>
-                    <i class="fas fa-receipt text-pink-100 text-3xl"></i>
                 </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-gray-400 card-hover">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Venta Diaria Prom.</p>
-                        <h2 id="kpi-diaria" class="text-3xl font-black text-brand-black mt-2">$0</h2>
+                <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-gray-400 card-hover">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Venta Diaria Prom.</p>
+                            <h2 id="kpi-diaria" class="text-3xl font-black text-brand-black mt-2">$0</h2>
+                        </div>
+                        <i class="fas fa-store text-gray-200 text-3xl"></i>
                     </div>
-                    <i class="fas fa-store text-gray-200 text-3xl"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Charts Section (Originales) -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2 avoid-break">
-                <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
-                <div class="relative h-80 w-full">
-                    <canvas id="mixedChart"></canvas>
+        <!-- Charts Section Originales (Envuelto en caja blindada) -->
+        <div class="avoid-break">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
+                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
+                    <div class="relative h-80 w-full">
+                        <canvas id="mixedChart"></canvas>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="bg-white rounded-xl shadow-sm p-6 avoid-break">
-                <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-brand-magenta"></i>Distribución de Ingresos</h3>
-                <div class="relative h-80 w-full flex justify-center">
-                    <canvas id="pieChart"></canvas>
+                
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-brand-magenta"></i>Distribución de Ingresos</h3>
+                    <div class="relative h-80 w-full flex justify-center">
+                        <canvas id="pieChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6 mt-6 avoid-break">
-            <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                <i class="fas fa-clock mr-2 text-brand-black"></i> 
-                Rendimiento Operativo: Turno Mañana vs. Turno Tarde
-            </h3>
-            <div class="relative h-80 w-full">
-                <canvas id="turnosChart"></canvas>
-            </div>
-            <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
-        </div>
-
-        <!-- Gráficos Solicitados y de Eficiencia -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <!-- Gráfico de Tráfico (Clientes) -->
-            <div class="bg-white rounded-xl shadow-sm p-6 avoid-break">
+        <!-- Rendimiento Operativo (Envuelto en caja blindada) -->
+        <div class="avoid-break">
+            <div class="bg-white rounded-xl shadow-sm p-6 mt-2">
                 <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                    <i class="fas fa-users mr-2 text-brand-magenta"></i> 
-                    Evolución de Tráfico (Retención)
+                    <i class="fas fa-clock mr-2 text-brand-black"></i> 
+                    Rendimiento Operativo: Turno Mañana vs. Turno Tarde
                 </h3>
                 <div class="relative h-80 w-full">
-                    <canvas id="traficoChart"></canvas>
+                    <canvas id="turnosChart"></canvas>
                 </div>
-                <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza si el volumen de clientes reales sube o baja, aislando el efecto inflacionario sobre la facturación.</p>
-            </div>
-
-            <!-- Gráfico de Crecimiento Mes a Mes -->
-            <div class="bg-white rounded-xl shadow-sm p-6 avoid-break">
-                <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                    <i class="fas fa-arrow-trend-up mr-2 text-brand-magenta"></i> 
-                    Crecimiento Mes a Mes (%)
-                </h3>
-                <div class="relative h-80 w-full">
-                    <canvas id="crecimientoChart"></canvas>
-                </div>
-                <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Variación porcentual de facturación respecto al mes inmediatamente anterior.</p>
+                <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
             </div>
         </div>
 
-        <!-- 🔥 NUEVO GRÁFICO: Eficiencia de Ventas (Unidades y UPT) 🔥 -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mt-6 avoid-break">
-            <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                <i class="fas fa-box-open mr-2 text-brand-magenta"></i> 
-                Eficiencia de Venta: Unidades y UPT (Artículos por Ticket)
-            </h3>
-            <div class="relative h-80 w-full">
-                <canvas id="unidadesChart"></canvas>
+        <!-- Gráficos Solicitados y de Eficiencia (Envueltos en caja blindada conjunta) -->
+        <div class="avoid-break">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-2">
+                <!-- Gráfico de Tráfico (Clientes) -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
+                        <i class="fas fa-users mr-2 text-brand-magenta"></i> 
+                        Evolución de Tráfico (Retención)
+                    </h3>
+                    <div class="relative h-80 w-full">
+                        <canvas id="traficoChart"></canvas>
+                    </div>
+                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza si el volumen de clientes reales sube o baja, aislando el efecto inflacionario sobre la facturación.</p>
+                </div>
+
+                <!-- Gráfico de Crecimiento Mes a Mes -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
+                        <i class="fas fa-arrow-trend-up mr-2 text-brand-magenta"></i> 
+                        Crecimiento Mes a Mes (%)
+                    </h3>
+                    <div class="relative h-80 w-full">
+                        <canvas id="crecimientoChart"></canvas>
+                    </div>
+                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Variación porcentual de facturación respecto al mes inmediatamente anterior.</p>
+                </div>
             </div>
-            <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Mide cuántos artículos compran tus clientes en promedio (UPT). Vital para evaluar el nivel de venta cruzada en el local.</p>
+        </div>
+
+        <!-- Eficiencia de Ventas (Envuelto en caja blindada) -->
+        <div class="avoid-break">
+            <div class="bg-white rounded-xl shadow-sm p-6 mt-2">
+                <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
+                    <i class="fas fa-box-open mr-2 text-brand-magenta"></i> 
+                    Eficiencia de Venta: Unidades y UPT (Artículos por Ticket)
+                </h3>
+                <div class="relative h-80 w-full">
+                    <canvas id="unidadesChart"></canvas>
+                </div>
+                <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Mide cuántos artículos compran tus clientes en promedio (UPT). Vital para evaluar el nivel de venta cruzada en el local.</p>
+            </div>
         </div>
 
         <!-- Desglose Mensual Detallado -->
@@ -251,63 +266,67 @@
                 <i class="fas fa-calendar-check mr-3 text-brand-magenta"></i> Desglose Mensual Detallado
             </h2>
             <div id="monthly-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Se inyectan las tarjetas por JS -->
+                <!-- Se inyectan las tarjetas por JS envueltas individualmente -->
             </div>
         </div>
 
-        <!-- Diagnóstico Ejecutivo Global (Modo Oscuro Corporativo) -->
-        <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white avoid-break">
-            <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
-                <i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo
-            </h2>
-            <div class="bg-[#222222] rounded-xl border border-brand-darkGray hover:border-brand-magenta transition-colors">
-                <div id="texto-diagnostico" contenteditable="true" onblur="guardarDiagnostico(this.innerText)" class="text-gray-300 leading-relaxed outline-none focus:ring-2 focus:ring-brand-magenta focus:bg-[#222222] rounded-xl p-6 transition-all min-h-[100px] whitespace-pre-wrap" title="Haz clic para escribir el diagnóstico">
-                    [Sincronizando diagnóstico...]
+        <!-- Diagnóstico Ejecutivo Global (Envuelto en caja blindada) -->
+        <div class="avoid-break">
+            <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white">
+                <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
+                    <i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo
+                </h2>
+                <div class="bg-[#222222] rounded-xl border border-brand-darkGray hover:border-brand-magenta transition-colors">
+                    <div id="texto-diagnostico" contenteditable="true" onblur="guardarDiagnostico(this.innerText)" class="text-gray-300 leading-relaxed outline-none focus:ring-2 focus:ring-brand-magenta focus:bg-[#222222] rounded-xl p-6 transition-all min-h-[100px] whitespace-pre-wrap" title="Haz clic para escribir el diagnóstico">
+                        [Sincronizando diagnóstico...]
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Conclusiones Globales -->
-        <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white avoid-break">
-            <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
-                <i class="fas fa-heart mr-3 text-brand-magenta"></i> Foco y Plan de Acción
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <div>
-                    <div class="flex items-center mb-3">
-                        <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-chart-line text-brand-magenta text-xl"></i></div>
-                        <h3 class="font-bold text-lg">1. Cuidar el Tráfico</h3>
+        <!-- Conclusiones Globales (Envuelto en caja blindada) -->
+        <div class="avoid-break">
+            <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white">
+                <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
+                    <i class="fas fa-heart mr-3 text-brand-magenta"></i> Foco y Plan de Acción
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div>
+                        <div class="flex items-center mb-3">
+                            <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-chart-line text-brand-magenta text-xl"></i></div>
+                            <h3 class="font-bold text-lg">1. Cuidar el Tráfico</h3>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed font-semibold">
+                            Observar de cerca el volumen de tickets. Si la cantidad de ingresos al local baja considerablemente, se requiere activación de marketing inmediato.
+                        </p>
                     </div>
-                    <p class="text-gray-400 text-sm leading-relaxed font-semibold">
-                        Observar de cerca el volumen de tickets. Si la cantidad de ingresos al local baja considerablemente, se requiere activación de marketing inmediato.
-                    </p>
-                </div>
-                <div>
-                    <div class="flex items-center mb-3">
-                        <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-hand-holding-usd text-brand-magenta text-xl"></i></div>
-                        <h3 class="font-bold text-lg">2. Up-Selling Constante</h3>
+                    <div>
+                        <div class="flex items-center mb-3">
+                            <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-hand-holding-usd text-brand-magenta text-xl"></i></div>
+                            <h3 class="font-bold text-lg">2. Up-Selling Constante</h3>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed font-semibold">
+                            El ticket promedio es la métrica de eficiencia. Capacitar en "venta cruzada" en caja es vital para superar la barrera mínima estable mensual.
+                        </p>
                     </div>
-                    <p class="text-gray-400 text-sm leading-relaxed font-semibold">
-                        El ticket promedio es la métrica de eficiencia. Capacitar en "venta cruzada" en caja es vital para superar la barrera mínima estable mensual.
-                    </p>
-                </div>
-                <div>
-                    <div class="flex items-center mb-3">
-                        <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-bullseye text-brand-magenta text-xl"></i></div>
-                        <h3 class="font-bold text-lg">3. Metas del Mes</h3>
+                    <div>
+                        <div class="flex items-center mb-3">
+                            <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-bullseye text-brand-magenta text-xl"></i></div>
+                            <h3 class="font-bold text-lg">3. Metas del Mes</h3>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed font-semibold">
+                            Establecer el "Ticket Objetivo Mensual" para los vendedores por turno y atar un incentivo si logran ese monto promedio.
+                        </p>
                     </div>
-                    <p class="text-gray-400 text-sm leading-relaxed font-semibold">
-                        Establecer el "Ticket Objetivo Mensual" para los vendedores por turno y atar un incentivo si logran ese monto promedio.
-                    </p>
-                </div>
-                <div>
-                    <div class="flex items-center mb-3">
-                        <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-users-cog text-brand-magenta text-xl"></i></div>
-                        <h3 class="font-bold text-lg">4. Balance de Turnos</h3>
+                    <div>
+                        <div class="flex items-center mb-3">
+                            <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-users-cog text-brand-magenta text-xl"></i></div>
+                            <h3 class="font-bold text-lg">4. Balance de Turnos</h3>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed font-semibold">
+                            Utilizar el análisis "Mañana vs Tarde" para redistribuir el staff. Reforzar con vendedores top el turno de mayor volumen.
+                        </p>
                     </div>
-                    <p class="text-gray-400 text-sm leading-relaxed font-semibold">
-                        Utilizar el análisis "Mañana vs Tarde" para redistribuir el staff. Reforzar con vendedores top el turno de mayor volumen.
-                    </p>
                 </div>
             </div>
         </div>
@@ -465,7 +484,7 @@
         let chartTurnos = null;
         let chartTrafico = null;
         let chartCrecimiento = null;
-        let chartUnidades = null; // 🔥 VARIABLE PARA EL NUEVO GRÁFICO 🔥
+        let chartUnidades = null;
 
         const formatCurrency = (value) => {
             if(isNaN(value)) return '$0';
@@ -484,34 +503,24 @@
 
         const listadoColores = ['magenta', 'black', 'gray', 'pink', 'darkgray'];
 
-        // 🔥 MOTOR MATEMÁTICO BLINDADO 🔥
         function parseExcelNumber(str) {
             if (!str) return 0;
-            // Quitamos espacios, símbolos de moneda y letras
             let texto = String(str).trim().replace(/[$ a-zA-Z\s]/g, '');
-            
-            // Buscamos dónde están el último punto y la última coma
             let ultimoPunto = texto.lastIndexOf('.');
             let ultimaComa = texto.lastIndexOf(',');
             
             if (ultimoPunto > ultimaComa) {
-                // El punto está al final (Ej: 1,500,000.50 -> Formato Inglés)
                 texto = texto.replace(/,/g, '');
             } else if (ultimaComa > ultimoPunto) {
-                // La coma está al final (Ej: 1.500.000,50 -> Formato Español)
                 texto = texto.replace(/\./g, '').replace(',', '.');
             } else if (ultimaComa !== -1) {
-                // Solo hay una coma (Ej: 1500,50)
                 texto = texto.replace(',', '.');
             } else if (ultimoPunto !== -1) {
-                // Solo hay puntos (Ej: 1.500.000 o 1500.50)
                 let partes = texto.split('.');
-                // Si separa 3 ceros exactos (ej 1.500) o hay varios puntos (1.500.000) es separador de miles
                 if (partes.length > 2 || (partes.length === 2 && partes[1].length === 3)) {
                     texto = texto.replace(/\./g, '');
                 }
             }
-            
             let resultado = parseFloat(texto);
             return isNaN(resultado) ? 0 : resultado;
         }
@@ -551,12 +560,10 @@
             }
         }
 
-        // 🔥 NUEVA FUNCIÓN: Permite editar un mes ya cargado
         window.editarMes = function(mes) {
             let datos = baseDatosLocales[localActual].find(d => d.mes === mes);
             if (!datos) return;
 
-            // Desbloqueamos la opción en el selector
             const selectMes = document.getElementById('inputMes');
             Array.from(selectMes.options).forEach(opt => {
                 if (opt.value === mes) {
@@ -565,7 +572,6 @@
                 }
             });
             
-            // Llenamos el formulario con los datos viejos
             selectMes.value = mes;
             document.getElementById('inputVenta').value = datos.ventas;
             document.getElementById('inputVentaManana').value = datos.ventasManana;
@@ -574,14 +580,12 @@
             document.getElementById('inputUnidades').value = (datos.unidades && datos.unidades > 0) ? datos.unidades : '';
             document.getElementById('inputDiagnostico').value = datos.diagnostico;
 
-            // Cambiamos la apariencia del botón a "Actualizar"
             const btnAgregar = document.getElementById('btnAgregar');
             btnAgregar.disabled = false;
             btnAgregar.innerHTML = '<i class="fas fa-sync-alt mr-1"></i> Actualizar';
             btnAgregar.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-500');
             btnAgregar.classList.add('bg-brand-magenta', 'hover:bg-brand-magentaHover');
 
-            // Hacemos scroll suave hasta el formulario de carga
             document.getElementById('formCarga').scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
 
@@ -629,36 +633,37 @@
                     data.colorTema = listadoColores[index % listadoColores.length];
                 }
                 const theme = colores[data.colorTema];
-                // Cálculo de UPT para la tarjeta. Si el dato es viejo y no tiene unidades, mostramos 0 por defecto.
                 const unidades = data.unidades || 0;
                 const upt = data.tickets > 0 ? (unidades / data.tickets).toFixed(2) : '0.00';
                 
-                // 🔥 TARJETA ACTUALIZADA CON BOTÓN DE EDITAR 🔥
+                // 🔥 Cada tarjeta ahora está envuelta en su propio bloque avoid-break 🔥
                 container.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col avoid-break">
-                        <div class="${theme.light} p-4 border-b ${theme.border} flex justify-between items-center">
-                            <h3 class="text-xl font-bold ${theme.textDark}">📊 ${data.mes} 2026</h3>
-                            <button onclick="editarMes('${data.mes}')" data-html2canvas-ignore="true" class="text-sm font-bold text-brand-magenta hover:text-white hover:bg-brand-magenta bg-white px-3 py-1 rounded-lg shadow-sm border border-brand-magenta transition-colors">
-                                <i class="fas fa-edit mr-1"></i> Editar
-                            </button>
-                        </div>
-                        <div class="p-6 flex-grow">
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                                <div><span class="text-gray-500 text-sm block font-bold">Venta Total</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ventas)}</span></div>
-                                <div><span class="text-gray-500 text-sm block font-bold">Ticket Prom.</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ticketPromedio)}</span></div>
-                                <div><span class="text-gray-500 text-sm block font-bold">Total Tickets</span><span class="font-bold text-lg">${formatNumber(data.tickets)}</span></div>
-                                
-                                <div><span class="text-gray-500 text-sm block font-bold">Total Unidades</span><span class="font-bold text-lg">${formatNumber(unidades)}</span></div>
-                                <div><span class="text-gray-500 text-sm block font-bold">UPT (Art/Ticket)</span><span class="font-bold text-lg">${upt}</span></div>
-                                <div><span class="text-gray-500 text-sm block font-bold">Tickets/Día</span><span class="font-bold text-lg">${data.ticketsDiarios}</span></div>
-                                
-                                <div class="col-span-2 md:col-span-3 text-xs text-gray-500 border-t pt-2 mt-1">
-                                    <span class="font-bold text-brand-magenta">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)} (${data.ticketsManana} tkts) <span class="mx-2">|</span> 
-                                    <span class="font-bold text-brand-black">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)} (${data.tickets - data.ticketsManana} tkts)
-                                </div>
+                    <div class="avoid-break h-full">
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
+                            <div class="${theme.light} p-4 border-b ${theme.border} flex justify-between items-center">
+                                <h3 class="text-xl font-bold ${theme.textDark}">📊 ${data.mes} 2026</h3>
+                                <button onclick="editarMes('${data.mes}')" data-html2canvas-ignore="true" class="text-sm font-bold text-brand-magenta hover:text-white hover:bg-brand-magenta bg-white px-3 py-1 rounded-lg shadow-sm border border-brand-magenta transition-colors">
+                                    <i class="fas fa-edit mr-1"></i> Editar
+                                </button>
                             </div>
-                            <div class="${theme.light} rounded p-4 border-l-4 ${theme.leftBorder} text-sm text-gray-700">
-                                <strong>Diagnóstico:</strong> ${data.diagnostico}
+                            <div class="p-6 flex-grow">
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                                    <div><span class="text-gray-500 text-sm block font-bold">Venta Total</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ventas)}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold">Ticket Prom.</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ticketPromedio)}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold">Total Tickets</span><span class="font-bold text-lg">${formatNumber(data.tickets)}</span></div>
+                                    
+                                    <div><span class="text-gray-500 text-sm block font-bold">Total Unidades</span><span class="font-bold text-lg">${formatNumber(unidades)}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold">UPT (Art/Ticket)</span><span class="font-bold text-lg">${upt}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold">Tickets/Día</span><span class="font-bold text-lg">${data.ticketsDiarios}</span></div>
+                                    
+                                    <div class="col-span-2 md:col-span-3 text-xs text-gray-500 border-t pt-2 mt-1">
+                                        <span class="font-bold text-brand-magenta">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)} (${data.ticketsManana} tkts) <span class="mx-2">|</span> 
+                                        <span class="font-bold text-brand-black">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)} (${data.tickets - data.ticketsManana} tkts)
+                                    </div>
+                                </div>
+                                <div class="${theme.light} rounded p-4 border-l-4 ${theme.leftBorder} text-sm text-gray-700">
+                                    <strong>Diagnóstico:</strong> ${data.diagnostico}
+                                </div>
                             </div>
                         </div>
                     </div>`;
@@ -675,25 +680,14 @@
             const dataVts = datosMensuales.map(d => d.ventas);
             const dataTkts = datosMensuales.map(d => d.ticketPromedio);
             
-            // 🔥 NUEVO: Paleta Corporativa de Alto Contraste para Gráficos 🔥
             const chartPalette = [
-                '#ec008c', // Magenta Moda Shop
-                '#111111', // Negro
-                '#f472b6', // Rosa Claro
-                '#666666', // Gris Medio
-                '#9d174d', // Magenta Oscuro
-                '#999999', // Gris Claro
-                '#fbcfe8', // Rosa Pastel
-                '#333333', // Gris Oscuro
-                '#db2777', // Fucsia
-                '#d1d5db'  // Gris Plata
+                '#ec008c', '#111111', '#f472b6', '#666666', '#9d174d', 
+                '#999999', '#fbcfe8', '#333333', '#db2777', '#d1d5db'
             ];
-            // Asigna un color distinto de la paleta a cada mes
             const dynamicBgs = labels.map((_, i) => chartPalette[i % chartPalette.length]); 
 
             Chart.defaults.font.family = "'Nunito', sans-serif";
             
-            // Gráficos Originales
             chartMixto = new Chart(document.getElementById('mixedChart').getContext('2d'), {
                 type: 'bar',
                 data: {
@@ -737,7 +731,6 @@
                 }
             });
 
-            // 1. Tráfico (Evolución de Tickets Totales)
             const dataTicketsTotal = datosMensuales.map(d => d.tickets);
             chartTrafico = new Chart(document.getElementById('traficoChart').getContext('2d'), {
                 type: 'line',
@@ -746,8 +739,8 @@
                     datasets: [{
                         label: 'Volumen de Tickets',
                         data: dataTicketsTotal,
-                        borderColor: '#ec008c', // Magenta
-                        backgroundColor: 'rgba(236, 0, 140, 0.1)', // Magenta transparente
+                        borderColor: '#ec008c',
+                        backgroundColor: 'rgba(236, 0, 140, 0.1)',
                         borderWidth: 4,
                         tension: 0.4,
                         fill: true,
@@ -764,19 +757,15 @@
                 }
             });
 
-            // 2. Crecimiento Mes a Mes (%)
             const dataCrecimiento = datosMensuales.map((d, i) => {
                 if (i === 0) return 0;
                 const prev = datosMensuales[i-1].ventas;
                 return prev > 0 ? ((d.ventas - prev) / prev) * 100 : 0;
             });
-            
-            // Calculamos la diferencia en dinero para mostrarla en el gráfico
             const diffCrecimiento = datosMensuales.map((d, i) => {
                 if (i === 0) return 0;
                 return d.ventas - datosMensuales[i-1].ventas;
             });
-
             const bgCrecimiento = dataCrecimiento.map(val => val >= 0 ? '#ec008c' : '#333333');
 
             chartCrecimiento = new Chart(document.getElementById('crecimientoChart').getContext('2d'), {
@@ -816,7 +805,6 @@
                 }
             });
 
-            // 🔥 NUEVO GRÁFICO: UNIDADES Y UPT 🔥
             const dataUnidades = datosMensuales.map(d => d.unidades || 0);
             const dataUPT = datosMensuales.map(d => d.tickets > 0 ? ((d.unidades || 0) / d.tickets).toFixed(2) : 0);
 
@@ -848,14 +836,14 @@
                 totalVentas += d.ventas; 
                 totalVentasManana += d.ventasManana; 
                 totalTickets += d.tickets; 
-                totalUnidades += (d.unidades || 0); // Suma nueva
+                totalUnidades += (d.unidades || 0);
             });
 
             let totalVentasTarde = totalVentas - totalVentasManana;
             let mejorTurno = totalVentasManana > totalVentasTarde ? "mañana" : "tarde";
             let porcentajeMejorTurno = totalVentasManana > totalVentasTarde ? (totalVentasManana / totalVentas * 100) : (totalVentasTarde / totalVentas * 100);
             let ticketPromedio = totalVentas / totalTickets;
-            let uptPromedio = totalTickets > 0 ? (totalUnidades / totalTickets) : 0; // UPT
+            let uptPromedio = totalTickets > 0 ? (totalUnidades / totalTickets) : 0;
 
             let mesInicial = datos[0].mes;
             let mesFinal = datos[datos.length - 1].mes;
@@ -875,7 +863,6 @@
 
             texto += `El ticket promedio global de este período se sitúa en ${formatCurrency(ticketPromedio)}.`;
             
-            // Si el cliente tiene cargado el dato de unidades, el bot lo analiza:
             if (totalUnidades > 0) {
                 texto += ` El nivel de ventas cruzadas (UPT) promedió ${uptPromedio.toFixed(2)} artículos por cliente.`;
             }
@@ -899,7 +886,7 @@
                 const valVentaManana = document.getElementById('inputVentaManana').value;
                 const valTickets = document.getElementById('inputTickets').value;
                 const valTicketsManana = document.getElementById('inputTicketsManana').value;
-                const valUnidades = document.getElementById('inputUnidades').value; // NUEVO
+                const valUnidades = document.getElementById('inputUnidades').value;
                 const diagnostico = document.getElementById('inputDiagnostico').value;
 
                 if (!valVenta || !valVentaManana || !valTickets || !valTicketsManana || !valUnidades || !diagnostico) {
@@ -911,7 +898,7 @@
                 const ventasManana = parseExcelNumber(valVentaManana);
                 const tickets = parseInt(parseExcelNumber(valTickets));
                 const ticketsManana = parseInt(parseExcelNumber(valTicketsManana));
-                const unidades = parseInt(parseExcelNumber(valUnidades)); // NUEVO
+                const unidades = parseInt(parseExcelNumber(valUnidades));
 
                 if (ventas <= 0 || tickets <= 0) { alert("⚠️ La venta y los tickets totales deben ser mayores a cero."); return; }
                 if (ventasManana > ventas) { alert(`⚠️ Error Lógico: Las ventas de la mañana no pueden ser mayores al total.`); return; }
@@ -932,12 +919,11 @@
                     datosMensuales.push({ mes, ventas, ventasManana, tickets, ticketsManana, unidades, ticketPromedio, ticketsDiarios, diagnostico, colorTema });
                 }
 
-                // Limpieza del formulario
                 document.getElementById('inputVenta').value = '';
                 document.getElementById('inputVentaManana').value = '';
                 document.getElementById('inputTickets').value = '';
                 document.getElementById('inputTicketsManana').value = '';
-                document.getElementById('inputUnidades').value = ''; // NUEVO
+                document.getElementById('inputUnidades').value = '';
                 document.getElementById('inputDiagnostico').value = '';
 
                 guardarEnLaNube();
@@ -967,14 +953,15 @@
             const element = document.getElementById('dashboard-content');
             
             const labels = datosMensuales.map(d => d.mes);
+            
+            // 🔥 AHORA LE DAMOS LA ORDEN A LA LIBRERÍA DE QUE USE NUESTRA CAJA BLINDADA (.avoid-break) 🔥
             const opt = {
                 margin:       10,
                 filename:     `Reporte_${localActual}_${labels[0]}_a_${labels[labels.length-1]}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
                 jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' },
-                // Confiar 100% en las reglas CSS para los cortes de página
-                pagebreak:    { mode: ['css', 'legacy'] }
+                pagebreak:    { mode: ['css', 'legacy'], avoid: '.avoid-break' } 
             };
 
             html2pdf().set(opt).from(element).save().then(() => { btn.innerHTML = originalText; });
