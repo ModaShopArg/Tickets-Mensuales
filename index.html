@@ -171,7 +171,7 @@
             </div>
         </div>
 
-        <!-- Charts Section -->
+        <!-- Charts Section (Originales) -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
                 <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
@@ -188,7 +188,6 @@
             </div>
         </div>
 
-        <!-- Chart Section (Análisis de Turnos) -->
         <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
             <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
                 <i class="fas fa-clock mr-2 text-brand-black"></i> 
@@ -198,6 +197,33 @@
                 <canvas id="turnosChart"></canvas>
             </div>
             <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
+        </div>
+
+        <!-- 🔥 NUEVOS GRÁFICOS SOLICITADOS (Sin tocar los anteriores) 🔥 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <!-- Gráfico de Tráfico (Clientes) -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
+                    <i class="fas fa-users mr-2 text-brand-magenta"></i> 
+                    Evolución de Tráfico (Retención)
+                </h3>
+                <div class="relative h-80 w-full">
+                    <canvas id="traficoChart"></canvas>
+                </div>
+                <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza si el volumen de clientes reales sube o baja, aislando el efecto inflacionario sobre la facturación.</p>
+            </div>
+
+            <!-- Gráfico de Crecimiento Mes a Mes -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
+                    <i class="fas fa-arrow-trend-up mr-2 text-brand-magenta"></i> 
+                    Crecimiento Mes a Mes (%)
+                </h3>
+                <div class="relative h-80 w-full">
+                    <canvas id="crecimientoChart"></canvas>
+                </div>
+                <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Variación porcentual de facturación respecto al mes inmediatamente anterior.</p>
+            </div>
         </div>
 
         <!-- Desglose Mensual Detallado -->
@@ -210,7 +236,7 @@
             </div>
         </div>
 
-        <!-- Diagnóstico Ejecutivo Global (Modo Oscuro Corporativo) -->
+        <!-- Diagnóstico Ejecutivo Global -->
         <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white">
             <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
                 <i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo
@@ -222,7 +248,7 @@
             </div>
         </div>
 
-        <!-- Conclusiones Globales (Modo Oscuro Corporativo) -->
+        <!-- Conclusiones Globales -->
         <div class="mt-8 bg-brand-black rounded-2xl shadow-xl p-8 text-white">
             <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
                 <i class="fas fa-heart mr-3 text-brand-magenta"></i> Foco y Plan de Acción
@@ -415,9 +441,13 @@
             guardarEnLaNube();
         };
 
+        // Variables de gráficos originales
         let chartMixto = null;
         let chartTorta = null;
         let chartTurnos = null;
+        // Variables de gráficos nuevos
+        let chartTrafico = null;
+        let chartCrecimiento = null;
 
         const formatCurrency = (value) => {
             if(isNaN(value)) return '$0';
@@ -426,7 +456,6 @@
         const formatNumber = (value) => isNaN(value) ? '0' : new Intl.NumberFormat('es-AR').format(value);
         const formatMillones = (value) => isNaN(value) ? '$0M' : '$' + (value / 1000000).toFixed(1) + 'M';
 
-        // 🔥 PALETA DE COLORES CORPORATIVA PARA LAS TARJETAS DINÁMICAS 🔥
         const colores = {
             magenta: { bg: '#ec008c', light: 'bg-pink-50', border: 'border-pink-100', leftBorder: 'border-brand-magenta', textLight: 'text-brand-magenta', textDark: 'text-brand-black' },
             black: { bg: '#111111', light: 'bg-gray-50', border: 'border-gray-200', leftBorder: 'border-brand-black', textLight: 'text-brand-black', textDark: 'text-brand-black' },
@@ -498,6 +527,8 @@
                 if (chartMixto) chartMixto.destroy();
                 if (chartTorta) chartTorta.destroy();
                 if (chartTurnos) chartTurnos.destroy();
+                if (chartTrafico) chartTrafico.destroy();
+                if (chartCrecimiento) chartCrecimiento.destroy();
                 return;
             }
 
@@ -517,7 +548,6 @@
             container.innerHTML = ''; 
             
             datosMensuales.forEach((data, index) => {
-                // 🔥 SOLUCIÓN DEFINITIVA: Si el color es viejo, le asigna uno único de la nueva paleta basado en su posición
                 if (!colores[data.colorTema]) {
                     data.colorTema = listadoColores[index % listadoColores.length];
                 }
@@ -549,21 +579,22 @@
             if (chartMixto) chartMixto.destroy();
             if (chartTorta) chartTorta.destroy();
             if (chartTurnos) chartTurnos.destroy(); 
+            if (chartTrafico) chartTrafico.destroy();
+            if (chartCrecimiento) chartCrecimiento.destroy();
 
             const labels = datosMensuales.map(d => d.mes);
             const dataVts = datosMensuales.map(d => d.ventas);
             const dataTkts = datosMensuales.map(d => d.ticketPromedio);
-            const bgs = datosMensuales.map(d => colores[d.colorTema].bg); // Toma los colores ya corregidos
+            const bgs = datosMensuales.map(d => colores[d.colorTema].bg); 
 
-            // 🔥 GRÁFICOS CON COLORES CORPORATIVOS DINÁMICOS 🔥
             Chart.defaults.font.family = "'Nunito', sans-serif";
             
+            // Gráficos Originales
             chartMixto = new Chart(document.getElementById('mixedChart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [
-                        // Usamos 'bgs' para que cada barra del mes coincida con su color en la tarjeta y en la torta
                         { label: 'Facturación ($)', data: dataVts, backgroundColor: bgs, borderRadius: 8, yAxisID: 'y' },
                         { label: 'Ticket Promedio ($)', data: dataTkts, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' }
                     ]
@@ -599,6 +630,75 @@
                     responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
                     plugins: { tooltip: { callbacks: { label: function(context) { return (context.dataset.label + ': ' + formatCurrency(context.parsed.y)); } } } },
                     scales: { y: { beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } } }
+                }
+            });
+
+            // 🔥 NUEVOS GRÁFICOS 🔥
+
+            // 1. Tráfico (Evolución de Tickets Totales)
+            const dataTicketsTotal = datosMensuales.map(d => d.tickets);
+            chartTrafico = new Chart(document.getElementById('traficoChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Volumen de Tickets',
+                        data: dataTicketsTotal,
+                        borderColor: '#ec008c', // Magenta
+                        backgroundColor: 'rgba(236, 0, 140, 0.1)', // Magenta transparente
+                        borderWidth: 4,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#ec008c',
+                        pointBorderWidth: 3,
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { tooltip: { callbacks: { label: function(c) { return 'Tickets: ' + formatNumber(c.parsed.y); } } } },
+                    scales: { y: { beginAtZero: false } }
+                }
+            });
+
+            // 2. Crecimiento Mes a Mes (%)
+            const dataCrecimiento = datosMensuales.map((d, i) => {
+                if (i === 0) return 0; // El primer mes no tiene con qué compararse
+                const prev = datosMensuales[i-1].ventas;
+                return prev > 0 ? ((d.ventas - prev) / prev) * 100 : 0;
+            });
+            // Si el % es positivo pinta de Magenta, si es negativo pinta de Gris Oscuro/Negro
+            const bgCrecimiento = dataCrecimiento.map(val => val >= 0 ? '#ec008c' : '#333333');
+
+            chartCrecimiento = new Chart(document.getElementById('crecimientoChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Crecimiento vs Mes Anterior (%)',
+                        data: dataCrecimiento,
+                        backgroundColor: bgCrecimiento,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
+                        tooltip: { 
+                            callbacks: { 
+                                label: function(c) { 
+                                    let val = c.parsed.y;
+                                    return (val >= 0 ? '+' : '') + val.toFixed(1) + '%'; 
+                                } 
+                            } 
+                        } 
+                    },
+                    scales: { 
+                        y: { 
+                            ticks: { callback: function(val) { return val + '%'; } } 
+                        } 
+                    }
                 }
             });
         }
