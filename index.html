@@ -672,7 +672,22 @@
             const labels = datosMensuales.map(d => d.mes);
             const dataVts = datosMensuales.map(d => d.ventas);
             const dataTkts = datosMensuales.map(d => d.ticketPromedio);
-            const bgs = datosMensuales.map(d => colores[d.colorTema].bg); 
+            
+            // 🔥 NUEVO: Paleta Corporativa de Alto Contraste para Gráficos 🔥
+            const chartPalette = [
+                '#ec008c', // Magenta Moda Shop
+                '#111111', // Negro
+                '#f472b6', // Rosa Claro
+                '#666666', // Gris Medio
+                '#9d174d', // Magenta Oscuro
+                '#999999', // Gris Claro
+                '#fbcfe8', // Rosa Pastel
+                '#333333', // Gris Oscuro
+                '#db2777', // Fucsia
+                '#d1d5db'  // Gris Plata
+            ];
+            // Asigna un color distinto de la paleta a cada mes
+            const dynamicBgs = labels.map((_, i) => chartPalette[i % chartPalette.length]); 
 
             Chart.defaults.font.family = "'Nunito', sans-serif";
             
@@ -682,7 +697,7 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Facturación ($)', data: dataVts, backgroundColor: bgs, borderRadius: 8, yAxisID: 'y' },
+                        { label: 'Facturación ($)', data: dataVts, backgroundColor: dynamicBgs, borderRadius: 8, yAxisID: 'y' },
                         { label: 'Ticket Promedio ($)', data: dataTkts, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' }
                     ]
                 },
@@ -697,7 +712,7 @@
 
             chartTorta = new Chart(document.getElementById('pieChart').getContext('2d'), {
                 type: 'doughnut',
-                data: { labels: labels, datasets: [{ data: dataVts, backgroundColor: bgs, borderWidth: 2, hoverOffset: 8 }] },
+                data: { labels: labels, datasets: [{ data: dataVts, backgroundColor: dynamicBgs, borderWidth: 2, hoverOffset: 8 }] },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '65%' }
             });
 
