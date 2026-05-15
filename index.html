@@ -46,14 +46,18 @@
         .card-hover { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease; }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         
-        /* 🔥 FIX DEFINITIVO PARA PDF 🔥
-           Esto crea un bloque sólido que html2pdf no puede cortar bajo ningún concepto */
-        .pdf-seccion { 
+        /* 🔥 FIX NUCLEAR PARA PDF 🔥
+           Obliga al PDF a tratar las filas como Tablas Inquebrantables */
+        .pdf-row { 
             page-break-inside: avoid !important; 
             break-inside: avoid !important; 
-            display: block !important;
-            width: 100%;
-            clear: both;
+            display: table !important;
+            width: 100% !important;
+        }
+        
+        .avoid-break {
+            page-break-inside: avoid !important; 
+            break-inside: avoid !important; 
         }
     </style>
 </head>
@@ -140,8 +144,8 @@
             </form>
         </div>
 
-        <!-- KPIs Globals (MANTENER AISLADO) -->
-        <div class="pdf-seccion">
+        <!-- KPIs Globals (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-row mt-4">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-magenta card-hover">
                     <div class="flex justify-between items-start">
@@ -183,7 +187,7 @@
         </div>
 
         <!-- Desglose Mensual Detallado -->
-        <div class="mt-6">
+        <div class="mt-6 avoid-break">
             <h2 class="text-2xl font-bold text-brand-black mb-6 flex items-center">
                 <i class="fas fa-calendar-check mr-3 text-brand-magenta"></i> Desglose Mensual Detallado
             </h2>
@@ -192,48 +196,48 @@
             </div>
         </div>
 
-        <!-- Gráficos 1 y 2 (MANTENER AISLADO) -->
-        <div class="pdf-seccion mt-6">
+        <!-- Gráficos 1 y 2 (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-row mt-6">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
                     <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
-                    <div class="relative h-80 w-full">
+                    <div class="relative h-80 w-full overflow-hidden">
                         <canvas id="mixedChart"></canvas>
                     </div>
                 </div>
                 
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-brand-magenta"></i>Distribución de Ingresos</h3>
-                    <div class="relative h-80 w-full flex justify-center">
+                    <div class="relative h-80 w-full flex justify-center overflow-hidden">
                         <canvas id="pieChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Rendimiento Operativo (MANTENER AISLADO) -->
-        <div class="pdf-seccion mt-6">
+        <!-- Rendimiento Operativo (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-row mt-6">
             <div class="bg-white rounded-xl shadow-sm p-6">
                 <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
                     <i class="fas fa-clock mr-2 text-brand-black"></i> 
                     Rendimiento Operativo: Turno Mañana vs. Turno Tarde
                 </h3>
-                <div class="relative h-80 w-full">
+                <div class="relative h-80 w-full overflow-hidden">
                     <canvas id="turnosChart"></canvas>
                 </div>
                 <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
             </div>
         </div>
 
-        <!-- Gráficos de Retención y Crecimiento (MANTENER AISLADO) -->
-        <div class="pdf-seccion mt-6">
+        <!-- Gráficos de Retención y Crecimiento (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-row mt-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
                         <i class="fas fa-users mr-2 text-brand-magenta"></i> 
                         Evolución de Tráfico (Retención)
                     </h3>
-                    <div class="relative h-80 w-full">
+                    <div class="relative h-80 w-full overflow-hidden">
                         <canvas id="traficoChart"></canvas>
                     </div>
                     <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza si el volumen de clientes reales sube o baja, aislando el efecto inflacionario sobre la facturación.</p>
@@ -244,7 +248,7 @@
                         <i class="fas fa-arrow-trend-up mr-2 text-brand-magenta"></i> 
                         Crecimiento Mes a Mes (%)
                     </h3>
-                    <div class="relative h-80 w-full">
+                    <div class="relative h-80 w-full overflow-hidden">
                         <canvas id="crecimientoChart"></canvas>
                     </div>
                     <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Variación porcentual de facturación respecto al mes inmediatamente anterior.</p>
@@ -252,23 +256,23 @@
             </div>
         </div>
 
-        <!-- Eficiencia de Ventas (MANTENER AISLADO) -->
-        <div class="pdf-seccion mt-6">
+        <!-- Eficiencia de Ventas (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-row mt-6">
             <div class="bg-white rounded-xl shadow-sm p-6">
                 <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
                     <i class="fas fa-box-open mr-2 text-brand-magenta"></i> 
                     Eficiencia de Venta: Unidades y UPT (Artículos por Ticket)
                 </h3>
-                <div class="relative h-80 w-full">
+                <div class="relative h-80 w-full overflow-hidden">
                     <canvas id="unidadesChart"></canvas>
                 </div>
                 <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Mide cuántos artículos compran tus clientes en promedio (UPT). Vital para evaluar el nivel de venta cruzada en el local.</p>
             </div>
         </div>
 
-        <!-- Diagnóstico Ejecutivo (MANTENER AISLADO) -->
-        <div class="pdf-seccion mt-8">
-            <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white">
+        <!-- Diagnóstico Ejecutivo (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-row mt-8">
+            <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white w-full">
                 <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
                     <i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo
                 </h2>
@@ -280,14 +284,14 @@
             </div>
         </div>
 
-        <!-- Foco y Plan de Acción (MANTENER AISLADO) -->
-        <div class="pdf-seccion mt-8">
-            <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white">
+        <!-- Foco y Plan de Acción (BLOQUE SÓLIDO PDF) -->
+        <div class="pdf-row mt-8">
+            <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white w-full">
                 <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
                     <i class="fas fa-heart mr-3 text-brand-magenta"></i> Foco y Plan de Acción
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div>
+                    <div class="avoid-break">
                         <div class="flex items-center mb-3">
                             <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-chart-line text-brand-magenta text-xl"></i></div>
                             <h3 class="font-bold text-lg">1. Cuidar el Tráfico</h3>
@@ -296,7 +300,7 @@
                             Observar de cerca el volumen de tickets. Si la cantidad de ingresos al local baja considerablemente, se requiere activación de marketing inmediato.
                         </p>
                     </div>
-                    <div>
+                    <div class="avoid-break">
                         <div class="flex items-center mb-3">
                             <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-hand-holding-usd text-brand-magenta text-xl"></i></div>
                             <h3 class="font-bold text-lg">2. Up-Selling Constante</h3>
@@ -305,7 +309,7 @@
                             El ticket promedio es la métrica de eficiencia. Capacitar en "venta cruzada" en caja es vital para superar la barrera mínima estable mensual.
                         </p>
                     </div>
-                    <div>
+                    <div class="avoid-break">
                         <div class="flex items-center mb-3">
                             <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-bullseye text-brand-magenta text-xl"></i></div>
                             <h3 class="font-bold text-lg">3. Metas del Mes</h3>
@@ -314,7 +318,7 @@
                             Establecer el "Ticket Objetivo Mensual" para los vendedores por turno y atar un incentivo si logran ese monto promedio.
                         </p>
                     </div>
-                    <div>
+                    <div class="avoid-break">
                         <div class="flex items-center mb-3">
                             <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-users-cog text-brand-magenta text-xl"></i></div>
                             <h3 class="font-bold text-lg">4. Balance de Turnos</h3>
@@ -643,7 +647,7 @@
                 const diagnosticoVisual = generarDiagnosticoMensual(data.ventas, data.ventasManana, data.tickets, unidades);
 
                 container.innerHTML += `
-                    <div class="pdf-seccion">
+                    <div class="avoid-break h-full">
                         <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
                             <div class="${theme.light} p-4 border-b ${theme.border} flex justify-between items-center">
                                 <h3 class="text-xl font-bold ${theme.textDark}">📊 ${data.mes} 2026</h3>
@@ -963,14 +967,16 @@
             
             const labels = datosMensuales.map(d => d.mes);
             
-            // 🔥 FORZAMOS VISTA DE ESCRITORIO (windowWidth 1200) PARA EVITAR CORTES 🔥
+            // 🔥 OPCIÓN NUCLEAR ACTIVA: 
+            // 1. windowWidth: 1200 previene recalculos de grid
+            // 2. 'avoid-all' obliga a la librería a no cortar NADA que sea display:table
             const opt = {
-                margin:       15,
+                margin:       [15, 10, 15, 10], // top, right, bottom, left
                 filename:     `Reporte_${localActual}_${labels[0]}_a_${labels[labels.length-1]}.pdf`,
                 image:        { type: 'jpeg', quality: 1 },
                 html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0, windowWidth: 1200 },
                 jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' },
-                pagebreak:    { mode: 'css', avoid: '.pdf-seccion' } 
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } 
             };
 
             html2pdf().set(opt).from(element).save().then(() => { btn.innerHTML = originalText; });
