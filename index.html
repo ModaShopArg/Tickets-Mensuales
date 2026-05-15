@@ -46,11 +46,13 @@
         .card-hover { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease; }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         
-        /* 🔥 ORDEN ESTRICTA DE CORTE DE PÁGINA 🔥 */
-        .salto-pagina { 
-            page-break-before: always !important; 
-            break-before: page !important; 
-            padding-top: 20px; /* Un poco de aire al inicio de la nueva página */
+        /* 🔥 CLASE QUE OBLIGA EL SALTO DE PÁGINA EN EL PDF 🔥 */
+        .html2pdf__page-break {
+            height: 0;
+            page-break-before: always !important;
+            margin: 0;
+            padding: 0;
+            border: none;
         }
     </style>
 </head>
@@ -58,7 +60,7 @@
 
     <div id="dashboard-content" class="max-w-7xl mx-auto space-y-8 bg-[#f8fafc] pb-4">
         
-        <!-- Cabecera -->
+        <!-- Cabecera (NO ENTRARÁ EN EL PDF) -->
         <header class="bg-white rounded-2xl shadow-sm p-6 md:p-8 flex items-center justify-between border-l-8 border-brand-magenta">
             <div>
                 <h1 class="text-3xl md:text-4xl font-extrabold text-brand-black tracking-tight flex flex-wrap items-center gap-2">
@@ -76,15 +78,15 @@
                     <i class="fas fa-cloud text-gray-400 mr-2"></i> <span class="text-gray-600">Conectando...</span>
                 </div>
                 
-                <button id="btnExport" onclick="exportarPDF()" data-html2canvas-ignore="true" class="bg-brand-black hover:bg-brand-darkGray text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center border border-gray-800">
+                <button id="btnExport" onclick="exportarPDF()" class="bg-brand-black hover:bg-brand-darkGray text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center border border-gray-800">
                     <i class="fas fa-file-pdf text-brand-magenta text-xl mr-3"></i>
                     Exportar para CEO
                 </button>
             </div>
         </header>
 
-        <!-- PANEL DE CARGA DE DATOS (Oculto en el PDF) -->
-        <div data-html2canvas-ignore="true" class="bg-brand-pinkBg border border-pink-200 rounded-2xl p-6 shadow-sm">
+        <!-- PANEL DE CARGA DE DATOS (NO ENTRARÁ EN EL PDF) -->
+        <div class="bg-brand-pinkBg border border-pink-200 rounded-2xl p-6 shadow-sm">
             <h2 class="text-xl font-bold text-brand-black mb-4 flex items-center">
                 <i class="fas fa-keyboard mr-2 text-brand-magenta"></i> Cargar Nuevos Meses (Uso Interno)
             </h2>
@@ -137,192 +139,206 @@
             </form>
         </div>
 
-        <!-- ======================= PÁGINA 1: KPIs y Tarjetas ======================= -->
-        
-        <!-- Global KPIs -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-magenta card-hover">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Facturación Total</p>
-                        <h2 id="kpi-ventas" class="text-3xl font-black text-brand-black mt-2">$0</h2>
-                    </div>
-                    <i class="fas fa-dollar-sign text-pink-200 text-3xl"></i>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-black card-hover">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Tráfico (Tickets)</p>
-                        <h2 id="kpi-tickets" class="text-3xl font-black text-brand-black mt-2">0</h2>
-                    </div>
-                    <i class="fas fa-users text-gray-200 text-3xl"></i>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-pink-400 card-hover">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Ticket Prom. Global</p>
-                        <h2 id="kpi-ticket-prom" class="text-3xl font-black text-brand-black mt-2">$0</h2>
-                    </div>
-                    <i class="fas fa-receipt text-pink-100 text-3xl"></i>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-gray-400 card-hover">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Venta Diaria Prom.</p>
-                        <h2 id="kpi-diaria" class="text-3xl font-black text-brand-black mt-2">$0</h2>
-                    </div>
-                    <i class="fas fa-store text-gray-200 text-3xl"></i>
-                </div>
-            </div>
-        </div>
 
-        <!-- Desglose Mensual Detallado -->
-        <div class="mt-6">
-            <h2 class="text-2xl font-bold text-brand-black mb-6 flex items-center">
-                <i class="fas fa-calendar-check mr-3 text-brand-magenta"></i> Desglose Mensual Detallado
-            </h2>
-            <div id="monthly-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Se inyectan las tarjetas por JS -->
-            </div>
-        </div>
+        <!-- 🔥🔥🔥 ZONA DE EXPORTACIÓN PDF (SÓLO LO QUE ESTÉ AQUÍ DENTRO SALDRÁ EN EL PDF) 🔥🔥🔥 -->
+        <div id="pdf-export-area" class="w-full">
+            
+            <!-- ======================= PÁGINA 1: KPIs y Tarjetas ======================= -->
+            <div id="pagina-1">
+                <!-- Global KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-magenta card-hover">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Facturación Total</p>
+                                <h2 id="kpi-ventas" class="text-3xl font-black text-brand-black mt-2">$0</h2>
+                            </div>
+                            <i class="fas fa-dollar-sign text-pink-200 text-3xl"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-black card-hover">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Tráfico (Tickets)</p>
+                                <h2 id="kpi-tickets" class="text-3xl font-black text-brand-black mt-2">0</h2>
+                            </div>
+                            <i class="fas fa-users text-gray-200 text-3xl"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-pink-400 card-hover">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Ticket Prom. Global</p>
+                                <h2 id="kpi-ticket-prom" class="text-3xl font-black text-brand-black mt-2">$0</h2>
+                            </div>
+                            <i class="fas fa-receipt text-pink-100 text-3xl"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-gray-400 card-hover">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Venta Diaria Prom.</p>
+                                <h2 id="kpi-diaria" class="text-3xl font-black text-brand-black mt-2">$0</h2>
+                            </div>
+                            <i class="fas fa-store text-gray-200 text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- ======================= PÁGINA 2: Gráficos Principales ======================= -->
-        <!-- Muro de corte para el PDF -->
-        <div class="salto-pagina html2pdf__page-break"></div>
-        
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
-                <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
-                <div class="relative h-80 w-full overflow-hidden">
-                    <canvas id="mixedChart"></canvas>
+                <!-- Desglose Mensual Detallado -->
+                <div class="mt-6">
+                    <h2 class="text-2xl font-bold text-brand-black mb-6 flex items-center">
+                        <i class="fas fa-calendar-check mr-3 text-brand-magenta"></i> Desglose Mensual Detallado
+                    </h2>
+                    <div id="monthly-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Se inyectan las tarjetas por JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ✂️ MURO DE CORTE PÁGINA 1 a PÁGINA 2 ✂️ -->
+            <div class="html2pdf__page-break"></div>
+
+            <!-- ======================= PÁGINA 2: Gráficos Principales ======================= -->
+            <div id="pagina-2">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
+                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
+                        <div class="relative h-80 w-full overflow-hidden">
+                            <canvas id="mixedChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-brand-magenta"></i>Distribución de Ingresos</h3>
+                        <div class="relative h-80 w-full flex justify-center overflow-hidden">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rendimiento Operativo -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
+                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
+                        <i class="fas fa-clock mr-2 text-brand-black"></i> 
+                        Rendimiento Operativo: Turno Mañana vs. Turno Tarde
+                    </h3>
+                    <div class="relative h-80 w-full overflow-hidden">
+                        <canvas id="turnosChart"></canvas>
+                    </div>
+                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
+                </div>
+            </div>
+
+            <!-- ✂️ MURO DE CORTE PÁGINA 2 a PÁGINA 3 ✂️ -->
+            <div class="html2pdf__page-break"></div>
+
+            <!-- ======================= PÁGINA 3: Gráficos de Eficiencia ======================= -->
+            <div id="pagina-3">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Gráfico de Tráfico (Clientes) -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
+                            <i class="fas fa-users mr-2 text-brand-magenta"></i> 
+                            Evolución de Tráfico (Retención)
+                        </h3>
+                        <div class="relative h-80 w-full overflow-hidden">
+                            <canvas id="traficoChart"></canvas>
+                        </div>
+                        <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza si el volumen de clientes reales sube o baja, aislando el efecto inflacionario sobre la facturación.</p>
+                    </div>
+
+                    <!-- Gráfico de Crecimiento Mes a Mes -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
+                            <i class="fas fa-arrow-trend-up mr-2 text-brand-magenta"></i> 
+                            Crecimiento Mes a Mes (%)
+                        </h3>
+                        <div class="relative h-80 w-full overflow-hidden">
+                            <canvas id="crecimientoChart"></canvas>
+                        </div>
+                        <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Variación porcentual de facturación respecto al mes inmediatamente anterior.</p>
+                    </div>
+                </div>
+
+                <!-- Eficiencia de Ventas -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
+                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
+                        <i class="fas fa-box-open mr-2 text-brand-magenta"></i> 
+                        Eficiencia de Venta: Unidades y UPT (Artículos por Ticket)
+                    </h3>
+                    <div class="relative h-80 w-full overflow-hidden">
+                        <canvas id="unidadesChart"></canvas>
+                    </div>
+                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Mide cuántos artículos compran tus clientes en promedio (UPT). Vital para evaluar el nivel de venta cruzada en el local.</p>
+                </div>
+            </div>
+
+            <!-- ✂️ MURO DE CORTE PÁGINA 3 a PÁGINA 4 ✂️ -->
+            <div class="html2pdf__page-break"></div>
+
+            <!-- ======================= PÁGINA 4: Diagnóstico y Conclusiones ======================= -->
+            <div id="pagina-4">
+                <!-- Diagnóstico Ejecutivo -->
+                <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
+                        <i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo
+                    </h2>
+                    <div class="bg-[#222222] rounded-xl border border-brand-darkGray hover:border-brand-magenta transition-colors">
+                        <div id="texto-diagnostico" contenteditable="true" onblur="guardarDiagnostico(this.innerText)" class="text-gray-300 leading-relaxed outline-none focus:ring-2 focus:ring-brand-magenta focus:bg-[#222222] rounded-xl p-6 transition-all min-h-[100px] whitespace-pre-wrap" title="Haz clic para escribir el diagnóstico">
+                            [Sincronizando diagnóstico...]
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Foco y Plan de Acción -->
+                <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white mt-8">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
+                        <i class="fas fa-heart mr-3 text-brand-magenta"></i> Foco y Plan de Acción
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div>
+                            <div class="flex items-center mb-3">
+                                <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-chart-line text-brand-magenta text-xl"></i></div>
+                                <h3 class="font-bold text-lg">1. Cuidar el Tráfico</h3>
+                            </div>
+                            <p class="text-gray-400 text-sm leading-relaxed font-semibold">
+                                Observar de cerca el volumen de tickets. Si la cantidad de ingresos al local baja considerablemente, se requiere activación de marketing inmediato.
+                            </p>
+                        </div>
+                        <div>
+                            <div class="flex items-center mb-3">
+                                <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-hand-holding-usd text-brand-magenta text-xl"></i></div>
+                                <h3 class="font-bold text-lg">2. Up-Selling Constante</h3>
+                            </div>
+                            <p class="text-gray-400 text-sm leading-relaxed font-semibold">
+                                El ticket promedio es la métrica de eficiencia. Capacitar en "venta cruzada" en caja es vital para superar la barrera mínima estable mensual.
+                            </p>
+                        </div>
+                        <div>
+                            <div class="flex items-center mb-3">
+                                <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-bullseye text-brand-magenta text-xl"></i></div>
+                                <h3 class="font-bold text-lg">3. Metas del Mes</h3>
+                            </div>
+                            <p class="text-gray-400 text-sm leading-relaxed font-semibold">
+                                Establecer el "Ticket Objetivo Mensual" para los vendedores por turno y atar un incentivo si logran ese monto promedio.
+                            </p>
+                        </div>
+                        <div>
+                            <div class="flex items-center mb-3">
+                                <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-users-cog text-brand-magenta text-xl"></i></div>
+                                <h3 class="font-bold text-lg">4. Balance de Turnos</h3>
+                            </div>
+                            <p class="text-gray-400 text-sm leading-relaxed font-semibold">
+                                Utilizar el análisis "Mañana vs Tarde" para redistribuir el staff. Reforzar con vendedores top el turno de mayor volumen.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-brand-magenta"></i>Distribución de Ingresos</h3>
-                <div class="relative h-80 w-full flex justify-center overflow-hidden">
-                    <canvas id="pieChart"></canvas>
-                </div>
-            </div>
         </div>
-
-        <!-- Rendimiento Operativo -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
-            <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                <i class="fas fa-clock mr-2 text-brand-black"></i> 
-                Rendimiento Operativo: Turno Mañana vs. Turno Tarde
-            </h3>
-            <div class="relative h-80 w-full overflow-hidden">
-                <canvas id="turnosChart"></canvas>
-            </div>
-            <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
-        </div>
-
-        <!-- ======================= PÁGINA 3: Gráficos de Eficiencia ======================= -->
-        <!-- Muro de corte para el PDF -->
-        <div class="salto-pagina html2pdf__page-break"></div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Gráfico de Tráfico (Clientes) -->
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                    <i class="fas fa-users mr-2 text-brand-magenta"></i> 
-                    Evolución de Tráfico (Retención)
-                </h3>
-                <div class="relative h-80 w-full overflow-hidden">
-                    <canvas id="traficoChart"></canvas>
-                </div>
-                <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza si el volumen de clientes reales sube o baja, aislando el efecto inflacionario sobre la facturación.</p>
-            </div>
-
-            <!-- Gráfico de Crecimiento Mes a Mes -->
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                    <i class="fas fa-arrow-trend-up mr-2 text-brand-magenta"></i> 
-                    Crecimiento Mes a Mes (%)
-                </h3>
-                <div class="relative h-80 w-full overflow-hidden">
-                    <canvas id="crecimientoChart"></canvas>
-                </div>
-                <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Variación porcentual de facturación respecto al mes inmediatamente anterior.</p>
-            </div>
-        </div>
-
-        <!-- Eficiencia de Ventas -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
-            <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                <i class="fas fa-box-open mr-2 text-brand-magenta"></i> 
-                Eficiencia de Venta: Unidades y UPT (Artículos por Ticket)
-            </h3>
-            <div class="relative h-80 w-full overflow-hidden">
-                <canvas id="unidadesChart"></canvas>
-            </div>
-            <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Mide cuántos artículos compran tus clientes en promedio (UPT). Vital para evaluar el nivel de venta cruzada en el local.</p>
-        </div>
-
-        <!-- ======================= PÁGINA 4: Diagnóstico y Conclusiones ======================= -->
-        <!-- Muro de corte para el PDF -->
-        <div class="salto-pagina html2pdf__page-break"></div>
-
-        <!-- Diagnóstico Ejecutivo -->
-        <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white">
-            <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
-                <i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo
-            </h2>
-            <div class="bg-[#222222] rounded-xl border border-brand-darkGray hover:border-brand-magenta transition-colors">
-                <div id="texto-diagnostico" contenteditable="true" onblur="guardarDiagnostico(this.innerText)" class="text-gray-300 leading-relaxed outline-none focus:ring-2 focus:ring-brand-magenta focus:bg-[#222222] rounded-xl p-6 transition-all min-h-[100px] whitespace-pre-wrap" title="Haz clic para escribir el diagnóstico">
-                    [Sincronizando diagnóstico...]
-                </div>
-            </div>
-        </div>
-
-        <!-- Foco y Plan de Acción -->
-        <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white mt-8">
-            <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
-                <i class="fas fa-heart mr-3 text-brand-magenta"></i> Foco y Plan de Acción
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <div>
-                    <div class="flex items-center mb-3">
-                        <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-chart-line text-brand-magenta text-xl"></i></div>
-                        <h3 class="font-bold text-lg">1. Cuidar el Tráfico</h3>
-                    </div>
-                    <p class="text-gray-400 text-sm leading-relaxed font-semibold">
-                        Observar de cerca el volumen de tickets. Si la cantidad de ingresos al local baja considerablemente, se requiere activación de marketing inmediato.
-                    </p>
-                </div>
-                <div>
-                    <div class="flex items-center mb-3">
-                        <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-hand-holding-usd text-brand-magenta text-xl"></i></div>
-                        <h3 class="font-bold text-lg">2. Up-Selling Constante</h3>
-                    </div>
-                    <p class="text-gray-400 text-sm leading-relaxed font-semibold">
-                        El ticket promedio es la métrica de eficiencia. Capacitar en "venta cruzada" en caja es vital para superar la barrera mínima estable mensual.
-                    </p>
-                </div>
-                <div>
-                    <div class="flex items-center mb-3">
-                        <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-bullseye text-brand-magenta text-xl"></i></div>
-                        <h3 class="font-bold text-lg">3. Metas del Mes</h3>
-                    </div>
-                    <p class="text-gray-400 text-sm leading-relaxed font-semibold">
-                        Establecer el "Ticket Objetivo Mensual" para los vendedores por turno y atar un incentivo si logran ese monto promedio.
-                    </p>
-                </div>
-                <div>
-                    <div class="flex items-center mb-3">
-                        <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-users-cog text-brand-magenta text-xl"></i></div>
-                        <h3 class="font-bold text-lg">4. Balance de Turnos</h3>
-                    </div>
-                    <p class="text-gray-400 text-sm leading-relaxed font-semibold">
-                        Utilizar el análisis "Mañana vs Tarde" para redistribuir el staff. Reforzar con vendedores top el turno de mayor volumen.
-                    </p>
-                </div>
-            </div>
-        </div>
+        <!-- 🔥🔥🔥 FIN DE LA ZONA DE EXPORTACIÓN PDF 🔥🔥🔥 -->
 
     </div>
 
@@ -956,18 +972,19 @@
             const btn = document.getElementById('btnExport');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xl mr-3 text-brand-magenta"></i> Generando PDF...';
-            const element = document.getElementById('dashboard-content');
+            
+            // 🔥 LEEMOS SÓLO EL CONTENEDOR DE LAS 4 PÁGINAS, IGNORANDO TODO EL RESTO 🔥
+            const element = document.getElementById('pdf-export-area');
             
             const labels = datosMensuales.map(d => d.mes);
             
-            // 🔥 LEEMOS TU CLASE CSS ".salto-pagina" PARA OBLIGAR LOS CORTES 🔥
+            // 🔥 MARGEN UNIFORME PARA CENTRAR PERFECTAMENTE 🔥
             const opt = {
-                margin:       10, 
+                margin:       [10, 10, 10, 10], // Arriba, Derecha, Abajo, Izquierda (Márgenes perfectos)
                 filename:     `Reporte_${localActual}_${labels[0]}_a_${labels[labels.length-1]}.pdf`,
                 image:        { type: 'jpeg', quality: 1 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: 1200 },
-                jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' },
-                pagebreak:    { mode: ['css', 'legacy'] } 
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: 1280 },
+                jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' }
             };
 
             html2pdf().set(opt).from(element).save().then(() => { btn.innerHTML = originalText; });
