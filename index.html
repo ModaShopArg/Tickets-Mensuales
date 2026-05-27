@@ -46,7 +46,7 @@
         .card-hover { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease; }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         
-        /* 🔥 CLASE QUE OBLIGA EL SALTO DE PÁGINA EN EL PDF 🔥 */
+        /* 🔥 CLASE NATIVA PARA OBLIGAR EL SALTO DE PÁGINA EN EL PDF 🔥 */
         .html2pdf__page-break {
             height: 0;
             page-break-before: always !important;
@@ -54,9 +54,17 @@
             padding: 0;
             border: none;
         }
-        @media print {
-            .nueva-pagina { page-break-before: always !important; }
+        
+        /* Estilos para la tabla Excel-like */
+        .tabla-excel th { position: sticky; top: 0; background-color: #fdf2f8; z-index: 10; outline: 1px solid #fbcfe8; }
+        .tabla-excel td { min-width: 100px; }
+        
+        /* Animación para modal */
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
+        .modal-animate { animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 </head>
 <body class="text-brand-black p-4 md:p-8">
@@ -64,7 +72,7 @@
     <div id="dashboard-content" class="max-w-7xl mx-auto space-y-8 bg-[#f8fafc] pb-4">
         
         <!-- Cabecera (NO ENTRARÁ EN EL PDF) -->
-        <header class="bg-white rounded-2xl shadow-sm p-6 md:p-8 flex items-center justify-between border-l-8 border-brand-magenta">
+        <header class="bg-white rounded-2xl shadow-sm p-6 md:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between border-l-8 border-brand-magenta gap-4">
             <div>
                 <h1 class="text-3xl md:text-4xl font-extrabold text-brand-black tracking-tight flex flex-wrap items-center gap-2">
                     Tablero de Control: 
@@ -73,31 +81,50 @@
                         <option value="Chajarí">Local Chajarí</option>
                         <option value="Tendens">Local Tendens</option>
                     </select>
+                    
+                    <!-- 🔥 NUEVO SELECTOR DE AÑO 🔥 -->
+                    <span class="text-gray-400 mx-2">|</span>
+                    <select id="selectorAnio" onchange="cambiarAnio(this.value)" class="bg-transparent border-b-4 border-brand-black text-brand-black cursor-pointer focus:outline-none hover:text-gray-700 transition-colors pb-1">
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026</option>
+                        <option value="2027">2027</option>
+                    </select>
                 </h1>
                 <p class="text-brand-lightGray mt-2 text-lg font-semibold"><i class="far fa-calendar-alt mr-2"></i> Período Analizado: <span id="periodo-text">Conectando...</span></p>
             </div>
-            <div class="flex items-center gap-4">
-                <div id="cloud-status" class="hidden md:flex items-center text-sm font-bold bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <div id="cloud-status" class="hidden md:flex items-center text-sm font-bold bg-white px-4 py-3 rounded-xl border border-gray-200 shadow-sm">
                     <i class="fas fa-cloud text-gray-400 mr-2"></i> <span class="text-gray-600">Conectando...</span>
                 </div>
                 
+                <!-- 🔥 BOTÓN DE SEGURIDAD (LECTURA / ADMIN) 🔥 -->
+                <button id="btnModo" onclick="toggleModo()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 px-6 rounded-xl shadow-sm transition-all flex items-center border border-gray-300">
+                    <i id="icono-modo" class="fas fa-lock mr-2"></i> <span id="texto-modo">Modo Lectura</span>
+                </button>
+
                 <button id="btnExport" onclick="exportarPDF()" class="bg-brand-black hover:bg-brand-darkGray text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center border border-gray-800">
-                    <i class="fas fa-file-pdf text-brand-magenta text-xl mr-3"></i>
-                    Exportar para CEO
+                    <i class="fas fa-file-pdf text-brand-magenta text-xl mr-3"></i> Exportar
                 </button>
             </div>
         </header>
 
-        <!-- PANEL DE CARGA DE DATOS (NO ENTRARÁ EN EL PDF) -->
-        <div class="bg-brand-pinkBg border border-pink-200 rounded-2xl p-6 shadow-sm">
-            <h2 class="text-xl font-bold text-brand-black mb-4 flex items-center">
-                <i class="fas fa-keyboard mr-2 text-brand-magenta"></i> Cargar Nuevos Meses (Uso Interno)
-            </h2>
+        <!-- 🔥 PANEL DE CARGA DE DATOS (OCULTO EN MODO LECTURA) 🔥 -->
+        <div id="panel-admin" class="hidden bg-brand-pinkBg border border-pink-200 rounded-2xl p-6 shadow-sm" data-html2canvas-ignore="true">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                <h2 class="text-xl font-bold text-brand-black flex items-center">
+                    <i class="fas fa-keyboard mr-2 text-brand-magenta"></i> Carga Detallada (Día a Día)
+                </h2>
+                <!-- Botón Empezar desde cero -->
+                <button type="button" onclick="borrarDatosLocal()" class="bg-white text-red-600 hover:bg-red-50 hover:text-red-700 border border-red-200 font-bold py-2 px-4 rounded-lg transition-colors text-sm shadow-sm flex items-center">
+                    <i class="fas fa-trash-alt mr-2"></i> Empezar desde cero
+                </button>
+            </div>
             <form id="formCarga" onsubmit="agregarNuevoMes(event)">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end mb-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Mes</label>
-                        <select id="inputMes" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta font-bold text-gray-800">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Mes a Cargar</label>
+                        <select id="inputMes" onchange="cambiarMesGrilla(this.value)" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta font-bold text-gray-800">
                             <option value="Enero">Enero</option>
                             <option value="Febrero">Febrero</option>
                             <option value="Marzo">Marzo</option>
@@ -113,135 +140,81 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Venta Total ($)</label>
-                        <input type="text" id="inputVenta" placeholder="Ej: 1.500.000,50" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Venta Turno Mañana ($)</label>
-                        <input type="text" id="inputVentaManana" placeholder="Ej: 600.000,00" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta" title="El turno tarde se calculará automáticamente restando esto al Total.">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Total de Tickets</label>
-                        <input type="text" id="inputTickets" placeholder="Ej: 950" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Tickets Mañana</label>
-                        <input type="text" id="inputTicketsManana" placeholder="Ej: 450" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta" title="El turno tarde se calculará automáticamente.">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Unidades Vendidas</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Unidades Totales Vendidas</label>
                         <input type="text" id="inputUnidades" placeholder="Ej: 1450" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta" title="Total de artículos vendidos en el mes.">
+                    </div>
+                    <div class="col-span-1 lg:col-span-2 text-sm text-brand-magenta font-bold bg-white p-3 rounded-lg border border-pink-200 flex items-center shadow-inner">
+                        <i class="fas fa-magic mr-3 text-2xl"></i>
+                        <span>¡El sistema calculará automáticamente la Venta Total, los Tickets y el rendimiento de los Turnos a partir de la tabla inferior!</span>
                     </div>
                 </div>
 
-                <!-- 🔥 SECCIÓN PLEGABLE PARA DETALLE POR HORA 🔥 -->
-                <details class="col-span-1 md:col-span-2 lg:col-span-6 mt-4 border border-pink-300 rounded-xl bg-white overflow-hidden shadow-sm">
-                    <summary class="bg-pink-50 p-3 font-bold text-brand-magenta cursor-pointer hover:bg-pink-100 transition-colors text-sm outline-none">
-                        <i class="fas fa-stopwatch mr-2"></i> Ingresar Detalle por Hora (08:00 a 21:00) - Opcional para Gráfico de Calor
-                    </summary>
-                    <div class="p-4 grid grid-cols-2 md:grid-cols-5 gap-3 bg-gray-50 border-t border-pink-200">
-                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
-                            <span class="font-black text-brand-black block mb-1 text-xs">08:00 hs</span>
-                            <input type="text" id="h_v_8" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                            <input type="text" id="h_t_8" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                        </div>
-                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
-                            <span class="font-black text-brand-black block mb-1 text-xs">09:00 hs</span>
-                            <input type="text" id="h_v_9" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                            <input type="text" id="h_t_9" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                        </div>
-                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
-                            <span class="font-black text-brand-black block mb-1 text-xs">10:00 hs</span>
-                            <input type="text" id="h_v_10" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                            <input type="text" id="h_t_10" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                        </div>
-                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
-                            <span class="font-black text-brand-black block mb-1 text-xs">11:00 hs</span>
-                            <input type="text" id="h_v_11" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                            <input type="text" id="h_t_11" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                        </div>
-                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
-                            <span class="font-black text-brand-black block mb-1 text-xs">12:00 hs</span>
-                            <input type="text" id="h_v_12" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                            <input type="text" id="h_t_12" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                        </div>
-                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
-                            <span class="font-black text-brand-black block mb-1 text-xs">17:00 hs</span>
-                            <input type="text" id="h_v_17" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                            <input type="text" id="h_t_17" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                        </div>
-                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
-                            <span class="font-black text-brand-black block mb-1 text-xs">18:00 hs</span>
-                            <input type="text" id="h_v_18" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                            <input type="text" id="h_t_18" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                        </div>
-                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
-                            <span class="font-black text-brand-black block mb-1 text-xs">19:00 hs</span>
-                            <input type="text" id="h_v_19" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                            <input type="text" id="h_t_19" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                        </div>
-                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
-                            <span class="font-black text-brand-black block mb-1 text-xs">20:00 hs</span>
-                            <input type="text" id="h_v_20" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                            <input type="text" id="h_t_20" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                        </div>
-                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
-                            <span class="font-black text-brand-black block mb-1 text-xs">21:00 hs</span>
-                            <input type="text" id="h_v_21" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                            <input type="text" id="h_t_21" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
-                        </div>
+                <!-- GRILLA DE CARGA DÍA A DÍA -->
+                <div class="mt-6 border border-pink-300 rounded-xl bg-white overflow-hidden shadow-sm">
+                    <div class="bg-pink-50 p-3 font-bold text-brand-magenta border-b border-pink-200 text-sm">
+                        <i class="fas fa-table mr-2"></i> Grilla de Ingreso: Día a Día, Hora a Hora (Se ajusta al mes seleccionado)
                     </div>
-                </details>
+                    <div class="overflow-x-auto max-h-[400px] overflow-y-auto">
+                        <table class="w-full text-xs text-left border-collapse tabla-excel">
+                            <thead>
+                                <tr>
+                                    <th class="p-2 font-black text-center border-r border-pink-200 shadow-sm">Día</th>
+                                    <th class="p-2 font-black text-center border-r border-pink-200 shadow-sm text-amber-600 bg-amber-50">08:00 (Mañana)</th>
+                                    <th class="p-2 font-black text-center border-r border-pink-200 shadow-sm text-amber-600 bg-amber-50">09:00 (Mañana)</th>
+                                    <th class="p-2 font-black text-center border-r border-pink-200 shadow-sm text-amber-600 bg-amber-50">10:00 (Mañana)</th>
+                                    <th class="p-2 font-black text-center border-r border-pink-200 shadow-sm text-amber-600 bg-amber-50">11:00 (Mañana)</th>
+                                    <th class="p-2 font-black text-center border-r border-pink-200 shadow-sm text-amber-600 bg-amber-50">12:00 (Mañana)</th>
+                                    <th class="p-2 font-black text-center border-r border-pink-200 shadow-sm text-indigo-600 bg-indigo-50">17:00 (Tarde)</th>
+                                    <th class="p-2 font-black text-center border-r border-pink-200 shadow-sm text-indigo-600 bg-indigo-50">18:00 (Tarde)</th>
+                                    <th class="p-2 font-black text-center border-r border-pink-200 shadow-sm text-indigo-600 bg-indigo-50">19:00 (Tarde)</th>
+                                    <th class="p-2 font-black text-center border-r border-pink-200 shadow-sm text-indigo-600 bg-indigo-50">20:00 (Tarde)</th>
+                                    <th class="p-2 font-black text-center shadow-sm text-indigo-600 bg-indigo-50">21:00 (Tarde)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-grilla">
+                                <!-- Se inyectan las filas por Javascript según los días del mes -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 
                 <div class="flex justify-end mt-6">
                     <button type="submit" id="btnAgregar" class="bg-brand-magenta hover:bg-brand-magentaHover text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md w-full md:w-auto text-lg flex items-center justify-center">
-                        <i class="fas fa-save mr-2"></i> Guardar Mes
+                        <i class="fas fa-save mr-2"></i> Calcular Totales y Guardar Mes
                     </button>
                 </div>
             </form>
         </div>
 
 
-        <!-- 🔥🔥🔥 ZONA DE EXPORTACIÓN PDF (SÓLO LO QUE ESTÉ AQUÍ DENTRO SALDRÁ EN EL PDF) 🔥🔥🔥 -->
+        <!-- 🔥🔥🔥 ZONA DE EXPORTACIÓN PDF 🔥🔥🔥 -->
         <div id="pdf-export-area" class="w-full bg-[#f8fafc]">
             
-            <!-- ======================= PÁGINA 1: KPIs y Tarjetas ======================= -->
+            <!-- ======================= PÁGINA 1 ======================= -->
             <div id="pagina-1" class="pb-4">
                 <!-- Global KPIs -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                     <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-magenta card-hover">
                         <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Facturación Total</p>
-                                <h2 id="kpi-ventas" class="text-3xl font-black text-brand-black mt-2">$0</h2>
-                            </div>
+                            <div><p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Facturación Total</p><h2 id="kpi-ventas" class="text-3xl font-black text-brand-black mt-2">$0</h2></div>
                             <i class="fas fa-dollar-sign text-pink-200 text-3xl"></i>
                         </div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-black card-hover">
                         <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Tráfico (Tickets)</p>
-                                <h2 id="kpi-tickets" class="text-3xl font-black text-brand-black mt-2">0</h2>
-                            </div>
+                            <div><p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Tráfico (Tickets)</p><h2 id="kpi-tickets" class="text-3xl font-black text-brand-black mt-2">0</h2></div>
                             <i class="fas fa-users text-gray-200 text-3xl"></i>
                         </div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-pink-400 card-hover">
                         <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Ticket Prom. Global</p>
-                                <h2 id="kpi-ticket-prom" class="text-3xl font-black text-brand-black mt-2">$0</h2>
-                            </div>
+                            <div><p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Ticket Prom. Global</p><h2 id="kpi-ticket-prom" class="text-3xl font-black text-brand-black mt-2">$0</h2></div>
                             <i class="fas fa-receipt text-pink-100 text-3xl"></i>
                         </div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-gray-400 card-hover">
                         <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Venta Diaria Prom.</p>
-                                <h2 id="kpi-diaria" class="text-3xl font-black text-brand-black mt-2">$0</h2>
-                            </div>
+                            <div><p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Venta Diaria Prom.</p><h2 id="kpi-diaria" class="text-3xl font-black text-brand-black mt-2">$0</h2></div>
                             <i class="fas fa-store text-gray-200 text-3xl"></i>
                         </div>
                     </div>
@@ -258,157 +231,102 @@
                 </div>
             </div>
 
-            <!-- ✂️ MURO DE CORTE PÁGINA 1 a PÁGINA 2 ✂️ -->
+            <!-- ✂️ MURO DE CORTE -->
             <div class="html2pdf__page-break"></div>
 
-            <!-- ======================= PÁGINA 2: Gráficos Principales ======================= -->
-            <div id="pagina-2" class="nueva-pagina pt-6">
+            <!-- ======================= PÁGINA 2 ======================= -->
+            <div id="pagina-2" class="pt-4">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
                         <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
-                        <div class="relative h-72 w-full overflow-hidden">
-                            <canvas id="mixedChart"></canvas>
-                        </div>
+                        <div class="relative h-72 w-full overflow-hidden"><canvas id="mixedChart"></canvas></div>
                     </div>
-                    
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-brand-magenta"></i>Distribución de Ingresos</h3>
-                        <div class="relative h-72 w-full flex justify-center overflow-hidden">
-                            <canvas id="pieChart"></canvas>
-                        </div>
+                        <div class="relative h-72 w-full flex justify-center overflow-hidden"><canvas id="pieChart"></canvas></div>
                     </div>
                 </div>
-
-                <!-- Rendimiento Operativo -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
-                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                        <i class="fas fa-clock mr-2 text-brand-black"></i> 
-                        Rendimiento Operativo: Turno Mañana vs. Turno Tarde
-                    </h3>
-                    <div class="relative h-72 w-full overflow-hidden">
-                        <canvas id="turnosChart"></canvas>
-                    </div>
+                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center"><i class="fas fa-clock mr-2 text-brand-black"></i> Rendimiento Operativo: Turno Mañana vs. Turno Tarde</h3>
+                    <div class="relative h-72 w-full overflow-hidden"><canvas id="turnosChart"></canvas></div>
                     <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
                 </div>
             </div>
 
-            <!-- ✂️ MURO DE CORTE PÁGINA 2 a PÁGINA 3 ✂️ -->
+            <!-- ✂️ MURO DE CORTE -->
             <div class="html2pdf__page-break"></div>
 
-            <!-- ======================= PÁGINA 3: Gráficos de Eficiencia ======================= -->
-            <div id="pagina-3" class="nueva-pagina pt-6">
+            <!-- ======================= PÁGINA 3 ======================= -->
+            <div id="pagina-3" class="pt-4">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Gráfico de Tráfico (Clientes) -->
                     <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                            <i class="fas fa-users mr-2 text-brand-magenta"></i> 
-                            Evolución de Tráfico (Retención)
-                        </h3>
-                        <div class="relative h-72 w-full overflow-hidden">
-                            <canvas id="traficoChart"></canvas>
-                        </div>
+                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center"><i class="fas fa-users mr-2 text-brand-magenta"></i> Evolución de Tráfico (Retención)</h3>
+                        <div class="relative h-72 w-full overflow-hidden"><canvas id="traficoChart"></canvas></div>
                         <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza si el volumen de clientes reales sube o baja, aislando el efecto inflacionario sobre la facturación.</p>
                     </div>
-
-                    <!-- Gráfico de Crecimiento Mes a Mes -->
                     <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                            <i class="fas fa-arrow-trend-up mr-2 text-brand-magenta"></i> 
-                            Crecimiento Mes a Mes (%)
-                        </h3>
-                        <div class="relative h-72 w-full overflow-hidden">
-                            <canvas id="crecimientoChart"></canvas>
-                        </div>
+                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center"><i class="fas fa-arrow-trend-up mr-2 text-brand-magenta"></i> Crecimiento Mes a Mes (%)</h3>
+                        <div class="relative h-72 w-full overflow-hidden"><canvas id="crecimientoChart"></canvas></div>
                         <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Variación porcentual de facturación respecto al mes inmediatamente anterior.</p>
                     </div>
                 </div>
-
-                <!-- Segunda fila de gráficos en Página 3 -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                    <!-- Eficiencia de Ventas -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                            <i class="fas fa-box-open mr-2 text-brand-magenta"></i> 
-                            Eficiencia de Venta: Unidades y UPT
-                        </h3>
-                        <div class="relative h-72 w-full overflow-hidden">
-                            <canvas id="unidadesChart"></canvas>
-                        </div>
-                        <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Mide cuántos artículos compran tus clientes en promedio (UPT). Vital para evaluar el nivel de venta cruzada en el local.</p>
-                    </div>
-
-                    <!-- 🔥 NUEVO GRÁFICO: Productividad por Hora 🔥 -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                            <i class="fas fa-stopwatch mr-2 text-brand-magenta"></i> 
-                            Productividad por Hora: Ventas y Tickets
-                        </h3>
-                        <div class="relative h-72 w-full overflow-hidden">
-                            <canvas id="horaChart"></canvas>
-                        </div>
-                        <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Evalúa el mapa de calor operativo del local (suma acumulada del periodo seleccionado) para identificar horas pico y muertas.</p>
-                    </div>
+                <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
+                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center"><i class="fas fa-box-open mr-2 text-brand-magenta"></i> Eficiencia de Venta: Unidades y UPT</h3>
+                    <div class="relative h-72 w-full overflow-hidden"><canvas id="unidadesChart"></canvas></div>
+                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Mide cuántos artículos compran tus clientes en promedio (UPT). Vital para evaluar el nivel de venta cruzada en el local.</p>
                 </div>
             </div>
 
-            <!-- ✂️ MURO DE CORTE PÁGINA 3 a PÁGINA 4 ✂️ -->
+            <!-- ✂️ MURO DE CORTE -->
             <div class="html2pdf__page-break"></div>
 
-            <!-- ======================= PÁGINA 4: Diagnóstico y Conclusiones ======================= -->
-            <div id="pagina-4" class="nueva-pagina pt-6">
+            <!-- ======================= PÁGINA 4 (DÍA A DÍA) ======================= -->
+            <div id="pagina-4" class="pt-4">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center"><i class="fas fa-calendar-day mr-2 text-brand-magenta"></i> Evolución Diaria (Día 1 al 31)</h3>
+                    <div class="relative h-72 w-full overflow-hidden"><canvas id="diasChart"></canvas></div>
+                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza la línea de tiempo, identificando picos y valles de venta por cada día calendario del acumulado.</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
+                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center"><i class="fas fa-stopwatch mr-2 text-brand-magenta"></i> Productividad por Hora</h3>
+                    <div class="relative h-72 w-full overflow-hidden"><canvas id="horaChart"></canvas></div>
+                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Evalúa el mapa de calor operativo del local para identificar horas pico y horas valle en el acumulado del periodo.</p>
+                </div>
+            </div>
+
+            <!-- ✂️ MURO DE CORTE -->
+            <div class="html2pdf__page-break"></div>
+
+            <!-- ======================= PÁGINA 5 ======================= -->
+            <div id="pagina-5" class="pt-4">
                 <!-- Diagnóstico Ejecutivo -->
                 <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white">
-                    <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
-                        <i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo
-                    </h2>
+                    <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4"><i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo</h2>
                     <div class="bg-[#222222] rounded-xl border border-brand-darkGray hover:border-brand-magenta transition-colors">
-                        <div id="texto-diagnostico" contenteditable="true" onblur="guardarDiagnostico(this.innerText)" class="text-gray-300 leading-relaxed outline-none focus:ring-2 focus:ring-brand-magenta focus:bg-[#222222] rounded-xl p-6 transition-all min-h-[100px] whitespace-pre-wrap" title="Haz clic para escribir el diagnóstico">
-                            [Sincronizando diagnóstico...]
-                        </div>
+                        <!-- El contenteditable se maneja ahora vía JS según el modo admin -->
+                        <div id="texto-diagnostico" onblur="guardarDiagnostico(this.innerText)" class="text-gray-300 leading-relaxed outline-none rounded-xl p-6 transition-all min-h-[100px] whitespace-pre-wrap" title="El diagnóstico se bloqueará en Modo Lectura">[Sincronizando diagnóstico...]</div>
                     </div>
                 </div>
 
                 <!-- Foco y Plan de Acción -->
                 <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white mt-8">
-                    <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
-                        <i class="fas fa-heart mr-3 text-brand-magenta"></i> Foco y Plan de Acción
-                    </h2>
+                    <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4"><i class="fas fa-heart mr-3 text-brand-magenta"></i> Foco y Plan de Acción</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                         <div>
-                            <div class="flex items-center mb-3">
-                                <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-chart-line text-brand-magenta text-xl"></i></div>
-                                <h3 class="font-bold text-lg">1. Cuidar el Tráfico</h3>
-                            </div>
-                            <p class="text-gray-400 text-sm leading-relaxed font-semibold">
-                                Observar de cerca el volumen de tickets. Si la cantidad de ingresos al local baja considerablemente, se requiere activación de marketing inmediato.
-                            </p>
+                            <div class="flex items-center mb-3"><div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-chart-line text-brand-magenta text-xl"></i></div><h3 class="font-bold text-lg">1. Cuidar el Tráfico</h3></div>
+                            <p class="text-gray-400 text-sm leading-relaxed font-semibold">Observar de cerca el volumen de tickets. Si la cantidad de ingresos al local baja considerablemente, se requiere activación de marketing inmediato.</p>
                         </div>
                         <div>
-                            <div class="flex items-center mb-3">
-                                <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-hand-holding-usd text-brand-magenta text-xl"></i></div>
-                                <h3 class="font-bold text-lg">2. Up-Selling Constante</h3>
-                            </div>
-                            <p class="text-gray-400 text-sm leading-relaxed font-semibold">
-                                El ticket promedio es la métrica de eficiencia. Capacitar en "venta cruzada" en caja es vital para superar la barrera mínima estable mensual.
-                            </p>
+                            <div class="flex items-center mb-3"><div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-hand-holding-usd text-brand-magenta text-xl"></i></div><h3 class="font-bold text-lg">2. Up-Selling Constante</h3></div>
+                            <p class="text-gray-400 text-sm leading-relaxed font-semibold">El ticket promedio es la métrica de eficiencia. Capacitar en "venta cruzada" en caja es vital para superar la barrera mínima estable mensual.</p>
                         </div>
                         <div>
-                            <div class="flex items-center mb-3">
-                                <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-bullseye text-brand-magenta text-xl"></i></div>
-                                <h3 class="font-bold text-lg">3. Metas del Mes</h3>
-                            </div>
-                            <p class="text-gray-400 text-sm leading-relaxed font-semibold">
-                                Establecer el "Ticket Objetivo Mensual" para los vendedores por turno y atar un incentivo si logran ese monto promedio.
-                            </p>
+                            <div class="flex items-center mb-3"><div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-bullseye text-brand-magenta text-xl"></i></div><h3 class="font-bold text-lg">3. Metas del Mes</h3></div>
+                            <p class="text-gray-400 text-sm leading-relaxed font-semibold">Establecer el "Ticket Objetivo Mensual" para los vendedores por turno y atar un incentivo si logran ese monto promedio.</p>
                         </div>
                         <div>
-                            <div class="flex items-center mb-3">
-                                <div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-users-cog text-brand-magenta text-xl"></i></div>
-                                <h3 class="font-bold text-lg">4. Balance de Turnos</h3>
-                            </div>
-                            <p class="text-gray-400 text-sm leading-relaxed font-semibold">
-                                Utilizar el análisis "Mañana vs Tarde" para redistribuir el staff. Reforzar con vendedores top el turno de mayor volumen y considerar Happy Hours en los valles.
-                            </p>
+                            <div class="flex items-center mb-3"><div class="bg-[#222222] p-2 rounded-lg mr-3"><i class="fas fa-users-cog text-brand-magenta text-xl"></i></div><h3 class="font-bold text-lg">4. Balance de Horarios</h3></div>
+                            <p class="text-gray-400 text-sm leading-relaxed font-semibold">Utilizar el análisis "Día a Día" para redistribuir el staff. Reforzar con vendedores top las horas pico y armar promociones en los valles horarios.</p>
                         </div>
                     </div>
                 </div>
@@ -419,12 +337,142 @@
 
     </div>
 
-    <!-- SCRIPT TIPO MÓDULO PARA FIREBASE -->
+    <!-- 🔥 SISTEMA GLOBAL DE VENTANAS MODALES 🔥 -->
+    <div id="custom-modal" data-html2canvas-ignore="true" class="fixed inset-0 bg-brand-black/60 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden modal-animate">
+            <div class="p-6">
+                <div class="flex items-center gap-4 mb-4">
+                    <div id="modal-icon" class="w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0"></div>
+                    <h3 id="modal-title" class="text-xl font-extrabold text-brand-black leading-tight"></h3>
+                </div>
+                <p id="modal-message" class="text-gray-600 mb-6 font-semibold whitespace-pre-line"></p>
+                
+                <!-- Caja de Contraseña Oculta por defecto -->
+                <div id="modal-password-container" class="hidden mb-6">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Contraseña de Autorización</label>
+                    <input type="password" id="modal-password" class="w-full rounded-lg border border-pink-300 p-3 focus:ring-2 focus:ring-brand-magenta outline-none transition-all shadow-inner" placeholder="Ingresa la clave segura...">
+                    <p id="modal-error" class="text-red-500 text-sm mt-2 font-bold hidden"><i class="fas fa-times-circle mr-1"></i> Contraseña incorrecta.</p>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button id="modal-cancel" class="px-5 py-2.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors hidden shadow-sm">Cancelar</button>
+                    <button id="modal-confirm" class="px-5 py-2.5 rounded-xl font-bold text-white transition-colors shadow-md"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT TIPO MÓDULO PARA FIREBASE Y LÓGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // 🔥 CONTRASEÑA GLOBAL DEL TABLERO 🔥
+        const APP_PASSWORD = "admin";
+        
+        // Estado de Seguridad
+        let modoAdmin = false;
+
+        // ================= MOTOR DE MODALES PERSONALIZADOS ================= //
+        function showModal({ type, title, message, iconClass, iconBg, confirmText, confirmClass, onConfirm }) {
+            const modal = document.getElementById('custom-modal');
+            const titleEl = document.getElementById('modal-title');
+            const messageEl = document.getElementById('modal-message');
+            const iconEl = document.getElementById('modal-icon');
+            const passContainer = document.getElementById('modal-password-container');
+            const passInput = document.getElementById('modal-password');
+            const errorEl = document.getElementById('modal-error');
+            const cancelBtn = document.getElementById('modal-cancel');
+            const confirmBtn = document.getElementById('modal-confirm');
+
+            titleEl.innerText = title;
+            messageEl.innerText = message;
+            
+            iconEl.className = `w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0 ${iconBg}`;
+            iconEl.innerHTML = `<i class="fas ${iconClass}"></i>`;
+
+            passInput.value = '';
+            errorEl.classList.add('hidden');
+
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            const newCancelBtn = cancelBtn.cloneNode(true);
+            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+            newConfirmBtn.innerText = confirmText || 'Aceptar';
+            newConfirmBtn.className = `px-5 py-2.5 rounded-xl font-bold text-white transition-colors shadow-md ${confirmClass || 'bg-brand-magenta hover:bg-brand-magentaHover'}`;
+
+            if (type === 'password') {
+                passContainer.classList.remove('hidden');
+                newCancelBtn.classList.remove('hidden');
+                
+                const processPassword = () => {
+                    if (passInput.value === APP_PASSWORD) {
+                        modal.classList.add('hidden');
+                        if (onConfirm) onConfirm();
+                    } else {
+                        errorEl.classList.remove('hidden');
+                        passInput.classList.add('border-red-500', 'ring-1', 'ring-red-500');
+                        setTimeout(() => passInput.classList.remove('border-red-500', 'ring-1', 'ring-red-500'), 1500);
+                    }
+                };
+
+                newConfirmBtn.onclick = processPassword;
+                passInput.onkeydown = (e) => { if (e.key === 'Enter') processPassword(); };
+                newCancelBtn.onclick = () => modal.classList.add('hidden');
+            } else if (type === 'alert') {
+                passContainer.classList.add('hidden');
+                newCancelBtn.classList.add('hidden');
+                
+                newConfirmBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    if (onConfirm) onConfirm();
+                };
+            } else if (type === 'confirm') {
+                passContainer.classList.add('hidden');
+                newCancelBtn.classList.remove('hidden');
+                
+                newConfirmBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    if (onConfirm) onConfirm();
+                };
+                newCancelBtn.onclick = () => modal.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            if (type === 'password') setTimeout(() => passInput.focus(), 100);
+        }
+
+        window.toggleModo = function() {
+            if (!modoAdmin) {
+                showModal({
+                    type: 'password',
+                    title: 'Acceso Restringido',
+                    message: 'Ingresa la contraseña de administrador para habilitar la carga, edición y borrado de datos en el tablero.',
+                    iconClass: 'fa-lock text-brand-magenta',
+                    iconBg: 'bg-pink-100',
+                    confirmText: 'Desbloquear Panel',
+                    onConfirm: () => {
+                        modoAdmin = true;
+                        document.getElementById('btnModo').innerHTML = '<i class="fas fa-unlock-alt mr-2 text-emerald-600"></i> <span class="text-emerald-700">Modo Administrador</span>';
+                        document.getElementById('btnModo').classList.replace('bg-gray-100', 'bg-emerald-50');
+                        document.getElementById('btnModo').classList.replace('border-gray-300', 'border-emerald-200');
+                        document.getElementById('panel-admin').classList.remove('hidden');
+                        renderDashboard(); // Re-renderiza para mostrar botones de editar
+                    }
+                });
+            } else {
+                modoAdmin = false;
+                document.getElementById('btnModo').innerHTML = '<i class="fas fa-lock mr-2 text-gray-600"></i> <span>Modo Lectura</span>';
+                document.getElementById('btnModo').classList.replace('bg-emerald-50', 'bg-gray-100');
+                document.getElementById('btnModo').classList.replace('border-emerald-200', 'border-gray-300');
+                document.getElementById('panel-admin').classList.add('hidden');
+                renderDashboard(); // Re-renderiza para ocultar botones de editar
+            }
+        };
+
+        // ================= CONFIGURACIÓN Y VARIABLES GLOBALES ================= //
         let firebaseConfig;
         if (typeof __firebase_config !== 'undefined') {
             firebaseConfig = JSON.parse(__firebase_config);
@@ -447,14 +495,58 @@
         let userId = null;
         let datosSincronizados = false;
 
-        let baseDatosLocales = { 'Concordia': [], 'Chajarí': [], 'Tendens': [] };
-        let diagnosticosLocales = {
-            'Concordia': '[Esperando datos...]',
-            'Chajarí': '[Esperando datos...]',
-            'Tendens': '[Esperando datos...]'
-        };
+        // Estructura actualizada con Años
+        let baseDatosLocales = { 'Concordia': {}, 'Chajarí': {}, 'Tendens': {} };
+        let diagnosticosLocales = { 'Concordia': {}, 'Chajarí': {}, 'Tendens': {} };
+        
         let localActual = 'Concordia';
+        let anioActual = '2026';
+        
         const horasDinamicas = [8, 9, 10, 11, 12, 17, 18, 19, 20, 21];
+        
+        // 🔥 INTELIGENCIA CALENDARIO: Días exactos por mes y Bisiestos 🔥
+        const diasPorMes = {
+            'Enero': 31, 'Febrero': 28, 'Marzo': 31, 'Abril': 30,
+            'Mayo': 31, 'Junio': 30, 'Julio': 31, 'Agosto': 31,
+            'Septiembre': 30, 'Octubre': 31, 'Noviembre': 30, 'Diciembre': 31
+        };
+
+        function esBisiesto(year) {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        }
+
+        // 🟢 GENERACIÓN DINÁMICA DE LA GRILLA SEGÚN EL MES Y EL AÑO 🟢
+        window.cambiarMesGrilla = function(mesSeleccionado) {
+            if (!mesSeleccionado) mesSeleccionado = document.getElementById('inputMes').value;
+            
+            let numDias = diasPorMes[mesSeleccionado] || 31;
+            if (mesSeleccionado === 'Febrero' && esBisiesto(parseInt(anioActual))) {
+                numDias = 29;
+            }
+            
+            const tbody = document.getElementById('tbody-grilla');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            
+            for(let i=1; i<=numDias; i++) {
+                let tr = document.createElement('tr');
+                tr.className = "border-b border-pink-100 hover:bg-pink-100 transition-colors";
+                let tdDia = `<td class="p-2 font-bold text-center border-r border-pink-200 bg-white sticky left-0 shadow-sm z-10">Día ${i}</td>`;
+                let tdHoras = '';
+                horasDinamicas.forEach(h => {
+                    let colorFondo = h <= 12 ? 'bg-amber-50/50' : 'bg-indigo-50/50';
+                    tdHoras += `
+                    <td class="p-1 border-r border-pink-100 ${colorFondo}">
+                        <input type="text" id="v_${i}_${h}" class="w-full text-[10px] p-1 mb-1 border border-gray-200 rounded text-center focus:ring-1 focus:ring-brand-magenta outline-none" placeholder="$ Venta">
+                        <input type="text" id="t_${i}_${h}" class="w-full text-[10px] p-1 border border-gray-200 rounded text-center focus:ring-1 focus:ring-brand-magenta outline-none" placeholder="Tkts">
+                    </td>`;
+                });
+                tr.innerHTML = tdDia + tdHoras;
+                tbody.appendChild(tr);
+            }
+        };
+
+        window.cambiarMesGrilla(); 
 
         setTimeout(() => {
             if (!datosSincronizados) {
@@ -473,7 +565,7 @@
                     await signInAnonymously(auth);
                 }
             } catch (error) {
-                console.error("❌ Error CRÍTICO de Autenticación:", error.code, error.message);
+                console.error("❌ Error de Autenticación:", error);
                 actualizarStatusNube('Error Conexión', 'text-red-500');
                 datosSincronizados = true;
                 renderDashboard();
@@ -481,21 +573,39 @@
         };
 
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                userId = user.uid;
-                iniciarEscuchaNube();
-            } else {
-                userId = null;
-            }
+            if (user) { userId = user.uid; iniciarEscuchaNube(); } 
+            else { userId = null; }
         });
 
         initAuth();
 
         function actualizarStatusNube(texto, colorTexto) {
             const statusEl = document.getElementById('cloud-status');
-            if (statusEl) {
-                statusEl.innerHTML = `<i class="fas fa-cloud ${colorTexto} mr-2"></i> <span class="text-gray-600">${texto}</span>`;
-            }
+            if (statusEl) { statusEl.innerHTML = `<i class="fas fa-cloud ${colorTexto} mr-2"></i> <span class="text-gray-600">${texto}</span>`; }
+        }
+
+        // 🔥 FUNCIÓN QUE ASEGURA QUE LA ESTRUCTURA NO SE ROMPA AL TRAER DATOS VIEJOS 🔥
+        function estructurarDatosHeredados(datosNube) {
+            let bd = datosNube.baseDatosLocales || { 'Concordia': {}, 'Chajarí': {}, 'Tendens': {} };
+            let diag = datosNube.diagnosticosLocales || { 'Concordia': {}, 'Chajarí': {}, 'Tendens': {} };
+
+            // Si los locales viejos eran simples Arrays, los encapsulamos dentro del año 2026
+            Object.keys(bd).forEach(loc => {
+                if (Array.isArray(bd[loc])) {
+                    let oldData = bd[loc];
+                    bd[loc] = { '2026': oldData };
+                }
+            });
+
+            // Igual con los diagnósticos
+            Object.keys(diag).forEach(loc => {
+                if (typeof diag[loc] === 'string') {
+                    let oldText = diag[loc];
+                    diag[loc] = { '2026': oldText };
+                }
+            });
+
+            return { bd, diag };
         }
 
         function iniciarEscuchaNube() {
@@ -506,22 +616,27 @@
                     datosSincronizados = true;
                     if (documento.exists()) {
                         const datosNube = documento.data();
-                        baseDatosLocales = datosNube.baseDatosLocales || baseDatosLocales;
-                        diagnosticosLocales = datosNube.diagnosticosLocales || diagnosticosLocales;
+                        const { bd, diag } = estructurarDatosHeredados(datosNube);
+                        baseDatosLocales = bd;
+                        diagnosticosLocales = diag;
                     } else {
                         guardarEnLaNubeSilencioso();
                     }
                     actualizarStatusNube('Guardado', 'text-emerald-500');
-                    document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual];
+                    
+                    // Asignar diagnóstico del año actual
+                    if(!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
+                    document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual][anioActual] || '[Esperando datos...]';
+                    
                     renderDashboard();
                 }, (error) => {
-                    console.error("❌ Error CRÍTICO leyendo nube:", error.code, error.message);
+                    console.error("❌ Error leyendo nube:", error);
                     actualizarStatusNube('Error de Nube', 'text-red-500');
                     datosSincronizados = true;
                     renderDashboard();
                 });
             } catch (err) {
-                console.error("❌ Error al intentar conectar a Firestore:", err);
+                console.error("❌ Error Firebase:", err);
                 actualizarStatusNube('Error de Nube', 'text-red-500');
                 datosSincronizados = true;
                 renderDashboard();
@@ -551,14 +666,51 @@
 
         window.cambiarLocal = function(nuevoLocal) {
             localActual = nuevoLocal;
-            document.title = `Tickets PVS - Local ${localActual}`;
-            document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual];
+            document.title = `Tickets PVS - ${localActual} ${anioActual}`;
+            if(!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
+            document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual][anioActual] || '[Esperando datos...]';
+            renderDashboard();
+        };
+
+        window.cambiarAnio = function(nuevoAnio) {
+            anioActual = nuevoAnio;
+            document.title = `Tickets PVS - ${localActual} ${anioActual}`;
+            window.cambiarMesGrilla(); // Resetea la grilla por si hay año bisiesto
+            
+            if(!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
+            document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual][anioActual] || '[Esperando datos...]';
             renderDashboard();
         };
 
         window.guardarDiagnostico = function(texto) {
-            diagnosticosLocales[localActual] = texto;
+            if(!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
+            diagnosticosLocales[localActual][anioActual] = texto;
             guardarEnLaNube();
+        };
+
+        // 🔥 FUNCIÓN PARA EMPEZAR DESDE CERO BLINDADA 🔥
+        window.borrarDatosLocal = function() {
+            showModal({
+                type: 'password',
+                title: 'Eliminación Crítica',
+                message: `Estás a punto de ELIMINAR TODOS los datos del local ${localActual} para el año ${anioActual}.\n\nEsta acción no se puede deshacer.\n\nIngresa tu clave de administrador para confirmar.`,
+                iconClass: 'fa-exclamation-triangle text-red-600',
+                iconBg: 'bg-red-100',
+                confirmText: 'Sí, Eliminar Datos del Año',
+                confirmClass: 'bg-red-600 hover:bg-red-700',
+                onConfirm: () => {
+                    if (!baseDatosLocales[localActual]) baseDatosLocales[localActual] = {};
+                    if (!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
+                    
+                    baseDatosLocales[localActual][anioActual] = [];
+                    diagnosticosLocales[localActual][anioActual] = '[Esperando datos...]';
+                    document.getElementById('inputUnidades').value = '';
+                    
+                    guardarEnLaNube();
+                    renderDashboard();
+                    window.cambiarMesGrilla(); 
+                }
+            });
         };
 
         let chartMixto = null;
@@ -568,6 +720,7 @@
         let chartCrecimiento = null;
         let chartUnidades = null;
         let chartHora = null; 
+        let chartDias = null;
 
         const formatCurrency = (value) => {
             if(isNaN(value)) return '$0';
@@ -591,18 +744,12 @@
             let texto = String(str).trim().replace(/[$ a-zA-Z\s]/g, '');
             let ultimoPunto = texto.lastIndexOf('.');
             let ultimaComa = texto.lastIndexOf(',');
-            
-            if (ultimoPunto > ultimaComa) {
-                texto = texto.replace(/,/g, '');
-            } else if (ultimaComa > ultimoPunto) {
-                texto = texto.replace(/\./g, '').replace(',', '.');
-            } else if (ultimaComa !== -1) {
-                texto = texto.replace(',', '.');
-            } else if (ultimoPunto !== -1) {
+            if (ultimoPunto > ultimaComa) { texto = texto.replace(/,/g, ''); } 
+            else if (ultimaComa > ultimoPunto) { texto = texto.replace(/\./g, '').replace(',', '.'); } 
+            else if (ultimaComa !== -1) { texto = texto.replace(',', '.'); } 
+            else if (ultimoPunto !== -1) {
                 let partes = texto.split('.');
-                if (partes.length > 2 || (partes.length === 2 && partes[1].length === 3)) {
-                    texto = texto.replace(/\./g, '');
-                }
+                if (partes.length > 2 || (partes.length === 2 && partes[1].length === 3)) { texto = texto.replace(/\./g, ''); }
             }
             let resultado = parseFloat(texto);
             return isNaN(resultado) ? 0 : resultado;
@@ -611,19 +758,17 @@
         function generarDiagnosticoMensual(ventas, ventasManana, tickets, unidades) {
             const ventasTarde = ventas - ventasManana;
             const turnoFuerte = ventasTarde > ventasManana ? 'Tarde' : 'Mañana';
-            const pctTurno = ((Math.max(ventasTarde, ventasManana) / ventas) * 100).toFixed(1);
+            const pctTurno = ventas > 0 ? ((Math.max(ventasTarde, ventasManana) / ventas) * 100).toFixed(1) : 0;
             const upt = tickets > 0 ? (unidades / tickets).toFixed(2) : 0;
-            
             let analisisUPT = "";
             if (upt >= 2.0) analisisUPT = "Excelente nivel de venta cruzada.";
             else if (upt >= 1.5) analisisUPT = "Venta cruzada en parámetros estables.";
             else analisisUPT = "Foco crítico: Mejorar cantidad de artículos por ticket.";
-
             return `El turno ${turnoFuerte} lideró la facturación (${pctTurno}% del total). UPT registrado: ${upt} art/cliente. ${analisisUPT}`;
         }
 
-        function actualizarDropdownMeses(datosLocales) {
-            const mesesCargados = datosLocales.map(d => d.mes);
+        function actualizarDropdownMeses(datosMensuales) {
+            const mesesCargados = datosMensuales.map(d => d.mes);
             const selectMes = document.getElementById('inputMes');
             const btnAgregar = document.getElementById('btnAgregar');
             let primerMesLibre = null;
@@ -645,7 +790,7 @@
             if (primerMesLibre) {
                 selectMes.value = primerMesLibre; 
                 btnAgregar.disabled = false;
-                btnAgregar.innerHTML = '<i class="fas fa-save mr-2"></i> Guardar Mes';
+                btnAgregar.innerHTML = '<i class="fas fa-save mr-2"></i> Calcular Totales y Guardar Mes';
                 btnAgregar.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-500');
                 btnAgregar.classList.add('bg-brand-magenta', 'hover:bg-brand-magentaHover');
             } else {
@@ -658,33 +803,43 @@
         }
 
         window.editarMes = function(mes) {
-            let datos = baseDatosLocales[localActual].find(d => d.mes === mes);
+            // Protección de edición desde UI
+            if (!modoAdmin) return;
+
+            let datosLocalesAnio = baseDatosLocales[localActual]?.[anioActual] || [];
+            let datos = datosLocalesAnio.find(d => d.mes === mes);
             if (!datos) return;
 
             const selectMes = document.getElementById('inputMes');
             Array.from(selectMes.options).forEach(opt => {
-                if (opt.value === mes) {
-                    opt.disabled = false;
-                    opt.text = mes + ' (Editando)';
-                }
+                if (opt.value === mes) { opt.disabled = false; opt.text = mes + ' (Editando)'; }
             });
             
             selectMes.value = mes;
-            document.getElementById('inputVenta').value = datos.ventas;
-            document.getElementById('inputVentaManana').value = datos.ventasManana;
-            document.getElementById('inputTickets').value = datos.tickets;
-            document.getElementById('inputTicketsManana').value = datos.ticketsManana;
             document.getElementById('inputUnidades').value = (datos.unidades && datos.unidades > 0) ? datos.unidades : '';
             
-            // Cargar datos por hora si existen
-            horasDinamicas.forEach(h => {
-                document.getElementById(`h_v_${h}`).value = (datos.horasData && datos.horasData[h] && datos.horasData[h].v > 0) ? datos.horasData[h].v : '';
-                document.getElementById(`h_t_${h}`).value = (datos.horasData && datos.horasData[h] && datos.horasData[h].t > 0) ? datos.horasData[h].t : '';
-            });
+            window.cambiarMesGrilla(mes); 
+
+            let numDias = diasPorMes[mes] || 31;
+            if (mes === 'Febrero' && esBisiesto(parseInt(anioActual))) numDias = 29;
+
+            for(let i=1; i<=numDias; i++) {
+                horasDinamicas.forEach(h => {
+                    let vInput = document.getElementById(`v_${i}_${h}`);
+                    let tInput = document.getElementById(`t_${i}_${h}`);
+                    if(vInput) vInput.value = '';
+                    if(tInput) tInput.value = '';
+                    
+                    if (datos.grillaDiaria && datos.grillaDiaria[i] && datos.grillaDiaria[i][h]) {
+                        if(datos.grillaDiaria[i][h].v > 0 && vInput) vInput.value = datos.grillaDiaria[i][h].v;
+                        if(datos.grillaDiaria[i][h].t > 0 && tInput) tInput.value = datos.grillaDiaria[i][h].t;
+                    }
+                });
+            }
 
             const btnAgregar = document.getElementById('btnAgregar');
             btnAgregar.disabled = false;
-            btnAgregar.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Actualizar Mes';
+            btnAgregar.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Calcular y Actualizar Mes';
             btnAgregar.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-500');
             btnAgregar.classList.add('bg-brand-magenta', 'hover:bg-brand-magentaHover');
 
@@ -694,17 +849,31 @@
         function renderDashboard() {
             if (!datosSincronizados) return; 
 
-            let datosMensuales = baseDatosLocales[localActual] || [];
+            // Aplicar seguridad visual al Diagnóstico
+            const diagBox = document.getElementById('texto-diagnostico');
+            diagBox.setAttribute('contenteditable', modoAdmin ? 'true' : 'false');
+            if(modoAdmin) {
+                diagBox.classList.add('hover:ring-2', 'cursor-text');
+                diagBox.title = "Haz clic para editar el diagnóstico.";
+            } else {
+                diagBox.classList.remove('hover:ring-2', 'cursor-text');
+                diagBox.title = "El diagnóstico se bloqueará en Modo Lectura.";
+            }
 
+            // Datos estructurados por Año
+            if (!baseDatosLocales[localActual]) baseDatosLocales[localActual] = {};
+            let datosMensuales = baseDatosLocales[localActual][anioActual] || [];
+            
             actualizarDropdownMeses(datosMensuales);
+            window.cambiarMesGrilla(document.getElementById('inputMes').value);
 
             if (datosMensuales.length === 0) {
-                document.getElementById('periodo-text').innerText = 'Esperando datos...';
+                document.getElementById('periodo-text').innerText = `Año ${anioActual} - Sin datos`;
                 document.getElementById('kpi-ventas').innerText = '$0';
                 document.getElementById('kpi-tickets').innerText = '0';
                 document.getElementById('kpi-ticket-prom').innerText = '$0';
                 document.getElementById('kpi-diaria').innerText = '$0';
-                document.getElementById('monthly-container').innerHTML = '<div class="col-span-1 md:col-span-2 text-center p-8 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300 font-bold">Aún no hay datos cargados. Utiliza el formulario superior para agregar tu primer mes.</div>';
+                document.getElementById('monthly-container').innerHTML = `<div class="col-span-1 md:col-span-2 text-center p-8 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300 font-bold">Aún no hay datos cargados para el ${anioActual}. Utiliza la grilla superior para agregar el primer mes.</div>`;
                 
                 if (chartMixto) chartMixto.destroy();
                 if (chartTorta) chartTorta.destroy();
@@ -713,16 +882,16 @@
                 if (chartCrecimiento) chartCrecimiento.destroy();
                 if (chartUnidades) chartUnidades.destroy();
                 if (chartHora) chartHora.destroy();
+                if (chartDias) chartDias.destroy();
                 return;
             }
 
-            let totalVentas = 0;
-            let totalTickets = 0;
+            let totalVentas = 0; let totalTickets = 0;
             datosMensuales.forEach(d => { totalVentas += d.ventas; totalTickets += d.tickets; });
             const ticketPromedioGlobal = totalTickets > 0 ? (totalVentas / totalTickets) : 0;
             const ventaDiariaGlobal = totalVentas / (datosMensuales.length * 30); 
 
-            document.getElementById('periodo-text').innerText = `${datosMensuales[0].mes} - ${datosMensuales[datosMensuales.length-1].mes}`;
+            document.getElementById('periodo-text').innerText = `${datosMensuales[0].mes} - ${datosMensuales[datosMensuales.length-1].mes} ${anioActual}`;
             document.getElementById('kpi-ventas').innerText = formatMillones(totalVentas);
             document.getElementById('kpi-tickets').innerText = formatNumber(totalTickets);
             document.getElementById('kpi-ticket-prom').innerText = formatCurrency(ticketPromedioGlobal);
@@ -731,64 +900,80 @@
             const container = document.getElementById('monthly-container');
             container.innerHTML = ''; 
             
-            // Inicializamos arrays para sumar la productividad por hora de todo el período
-            let aggrVentasHora = new Array(10).fill(0);
-            let aggrTicketsHora = new Array(10).fill(0);
+            let aggrVentasHora = new Array(10).fill(0); let aggrTicketsHora = new Array(10).fill(0);
+            let aggrVentasDiaDelMes = new Array(31).fill(0); let aggrTicketsDiaDelMes = new Array(31).fill(0);
             
             datosMensuales.forEach((data, index) => {
-                if (!colores[data.colorTema]) {
-                    data.colorTema = listadoColores[index % listadoColores.length];
-                }
+                if (!colores[data.colorTema]) { data.colorTema = listadoColores[index % listadoColores.length]; }
                 const theme = colores[data.colorTema];
                 const unidades = data.unidades || 0;
                 const upt = data.tickets > 0 ? (unidades / data.tickets).toFixed(2) : '0.00';
                 
-                // Extraer el Pico por Hora para la tarjeta de forma segura
                 let horaPicoText = "S/D";
-                let ticketsPicoText = "S/D";
-                if (data.horasData) {
-                    let maxV = -1; let maxH = "";
-                    let maxT = -1; let maxTH = "";
-                    horasDinamicas.forEach((h, i) => {
-                        let v = data.horasData[h]?.v || 0;
-                        let t = data.horasData[h]?.t || 0;
-                        aggrVentasHora[i] += v;
-                        aggrTicketsHora[i] += t;
-                        
-                        if (v > maxV) { maxV = v; maxH = h.toString().padStart(2, '0') + ":00"; }
-                        if (t > maxT) { maxT = t; maxTH = h.toString().padStart(2, '0') + ":00"; }
+                let diaPicoText = "S/D";
+                
+                if (data.grillaDiaria) {
+                    let maxVDia = -1; let maxDia = "";
+                    for(let i=1; i<=31; i++) {
+                        if(data.grillaDiaria[i]) {
+                            let sumaVentaDia = 0;
+                            let sumaTicketsDia = 0;
+                            horasDinamicas.forEach((h, idxHora) => {
+                                let v = data.grillaDiaria[i][h]?.v || 0;
+                                let t = data.grillaDiaria[i][h]?.t || 0;
+                                sumaVentaDia += v;
+                                sumaTicketsDia += t;
+                                
+                                aggrVentasHora[idxHora] += v;
+                                aggrTicketsHora[idxHora] += t;
+                            });
+                            
+                            aggrVentasDiaDelMes[i-1] += sumaVentaDia;
+                            aggrTicketsDiaDelMes[i-1] += sumaTicketsDia;
+
+                            if (sumaVentaDia > maxVDia) { maxVDia = sumaVentaDia; maxDia = `Día ${i}`; }
+                        }
+                    }
+                    if (maxVDia > 0) diaPicoText = `${maxDia} (${formatCurrency(maxVDia)})`;
+
+                    let maxVHora = -1; let maxHora = "";
+                    horasDinamicas.forEach((h) => {
+                        let sumHora = 0;
+                        for(let i=1; i<=31; i++) {
+                            if(data.grillaDiaria[i]) { sumHora += (data.grillaDiaria[i][h]?.v || 0); }
+                        }
+                        if (sumHora > maxVHora) { maxVHora = sumHora; maxHora = h.toString().padStart(2, '0') + ":00"; }
                     });
-                    if (maxV > 0) horaPicoText = `${maxH} (${formatCurrency(maxV)})`;
-                    if (maxT > 0) ticketsPicoText = `${maxTH} (${maxT}t)`;
+                    if (maxVHora > 0) horaPicoText = `${maxHora}`;
                 }
 
                 const diagnosticoVisual = generarDiagnosticoMensual(data.ventas, data.ventasManana, data.tickets, unidades);
+                
+                // El botón de editar solo aparece si es Administrador
+                const editButton = modoAdmin ? 
+                    `<button onclick="editarMes('${data.mes}')" data-html2canvas-ignore="true" class="text-sm font-bold text-brand-magenta hover:text-white hover:bg-brand-magenta bg-white px-3 py-1 rounded-lg shadow-sm border border-brand-magenta transition-colors">
+                        <i class="fas fa-edit mr-1"></i> Editar Día a Día
+                    </button>` : '';
 
                 container.innerHTML += `
                     <div style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 16px;">
                         <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
                             <div class="${theme.light} p-4 border-b ${theme.border} flex justify-between items-center">
-                                <h3 class="text-xl font-bold ${theme.textDark}">📊 ${data.mes} 2026</h3>
-                                <button onclick="editarMes('${data.mes}')" data-html2canvas-ignore="true" class="text-sm font-bold text-brand-magenta hover:text-white hover:bg-brand-magenta bg-white px-3 py-1 rounded-lg shadow-sm border border-brand-magenta transition-colors">
-                                    <i class="fas fa-edit mr-1"></i> Editar
-                                </button>
+                                <h3 class="text-xl font-bold ${theme.textDark}">📊 ${data.mes} ${anioActual}</h3>
+                                ${editButton}
                             </div>
                             <div class="p-6 flex-grow">
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                                     <div><span class="text-gray-500 text-sm block font-bold">Venta Total</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ventas)}</span></div>
                                     <div><span class="text-gray-500 text-sm block font-bold">Ticket Prom.</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ticketPromedio)}</span></div>
                                     <div><span class="text-gray-500 text-sm block font-bold">Total Tickets</span><span class="font-bold text-lg">${formatNumber(data.tickets)}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold">Total Unidades</span><span class="font-bold text-lg">${formatNumber(unidades)}</span></div>
-                                    
                                     <div><span class="text-gray-500 text-sm block font-bold">UPT (Art/Ticket)</span><span class="font-bold text-lg">${upt}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold">Tickets/Día</span><span class="font-bold text-lg">${data.ticketsDiarios}</span></div>
                                     
-                                    <div><span class="text-gray-500 text-sm block font-bold">Pico Venta/Hora</span><span class="font-bold text-base ${theme.textLight}">${horaPicoText}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold">Pico Tkts/Hora</span><span class="font-bold text-base">${ticketsPicoText}</span></div>
-                                    
-                                    <div class="col-span-2 md:col-span-4 text-xs text-gray-500 border-t pt-2 mt-1">
-                                        <span class="font-bold text-brand-magenta">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)} (${data.ticketsManana} tkts) <span class="mx-2">|</span> 
-                                        <span class="font-bold text-brand-black">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)} (${data.tickets - data.ticketsManana} tkts)
+                                    <div><span class="text-gray-500 text-sm block font-bold">Mejor Día</span><span class="font-bold text-base ${theme.textLight}">${diaPicoText}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold">Hora más fuerte</span><span class="font-bold text-base">${horaPicoText}</span></div>
+                                    <div class="col-span-2 text-xs text-gray-500 flex items-center justify-end">
+                                        <span class="font-bold text-brand-magenta">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)} <span class="mx-2">|</span> 
+                                        <span class="font-bold text-brand-black">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)}
                                     </div>
                                 </div>
                                 <div class="${theme.light} rounded p-4 border-l-4 ${theme.leftBorder} text-sm text-gray-700">
@@ -806,208 +991,74 @@
             if (chartCrecimiento) chartCrecimiento.destroy();
             if (chartUnidades) chartUnidades.destroy();
             if (chartHora) chartHora.destroy();
+            if (chartDias) chartDias.destroy();
 
             const labels = datosMensuales.map(d => d.mes);
             const dataVts = datosMensuales.map(d => d.ventas);
             const dataTkts = datosMensuales.map(d => d.ticketPromedio);
-            
-            const chartPalette = [
-                '#ec008c', '#111111', '#f472b6', '#666666', '#9d174d', 
-                '#999999', '#fbcfe8', '#333333', '#db2777', '#d1d5db'
-            ];
-            const dynamicBgs = labels.map((_, i) => chartPalette[i % chartPalette.length]); 
+            const dynamicBgs = labels.map((_, i) => listadoColores[i % listadoColores.length] === 'magenta' ? '#ec008c' : listadoColores[i % listadoColores.length] === 'black' ? '#111111' : listadoColores[i % listadoColores.length] === 'pink' ? '#f472b6' : '#666666'); 
 
             Chart.defaults.font.family = "'Nunito', sans-serif";
-            // 🔥 APAGAR ANIMACIONES PARA EVITAR QUE HTML2CANVAS CORTE LOS GRÁFICOS 🔥
             Chart.defaults.animation = false; 
             
+            // Gráficos PÁGINA 2
             chartMixto = new Chart(document.getElementById('mixedChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'Facturación ($)', data: dataVts, backgroundColor: dynamicBgs, borderRadius: 8, yAxisID: 'y' },
-                        { label: 'Ticket Promedio ($)', data: dataTkts, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    scales: {
-                        y: { type: 'linear', position: 'left', ticks: { callback: function(val) { return formatMillones(val); } } },
-                        y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return formatCurrency(val); } } }
-                    }
-                }
+                type: 'bar', data: { labels: labels, datasets: [ { label: 'Facturación ($)', data: dataVts, backgroundColor: dynamicBgs, borderRadius: 8, yAxisID: 'y' }, { label: 'Ticket Promedio ($)', data: dataTkts, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' } ] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { type: 'linear', position: 'left', ticks: { callback: function(val) { return formatMillones(val); } } }, y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return formatCurrency(val); } } } } }
             });
 
             chartTorta = new Chart(document.getElementById('pieChart').getContext('2d'), {
-                type: 'doughnut',
-                data: { labels: labels, datasets: [{ data: dataVts, backgroundColor: dynamicBgs, borderWidth: 2, hoverOffset: 8 }] },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '65%' }
+                type: 'doughnut', data: { labels: labels, datasets: [{ data: dataVts, backgroundColor: dynamicBgs, borderWidth: 2, hoverOffset: 8 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '65%' }
             });
 
             const dataManana = datosMensuales.map(d => d.ventasManana);
             const dataTarde = datosMensuales.map(d => d.ventas - d.ventasManana);
-
             chartTurnos = new Chart(document.getElementById('turnosChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'Ventas Turno Mañana ($)', data: dataManana, backgroundColor: '#ec008c', borderRadius: 6 },
-                        { label: 'Ventas Turno Tarde ($)', data: dataTarde, backgroundColor: '#111111', borderRadius: 6 }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    plugins: { tooltip: { callbacks: { label: function(context) { return (context.dataset.label + ': ' + formatCurrency(context.parsed.y)); } } } },
-                    scales: { y: { beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } } }
-                }
+                type: 'bar', data: { labels: labels, datasets: [ { label: 'Ventas Turno Mañana ($)', data: dataManana, backgroundColor: '#ec008c', borderRadius: 6 }, { label: 'Ventas Turno Tarde ($)', data: dataTarde, backgroundColor: '#111111', borderRadius: 6 } ] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return (context.dataset.label + ': ' + formatCurrency(context.parsed.y)); } } } }, scales: { y: { beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } } } }
             });
 
-            const dataTicketsTotal = datosMensuales.map(d => d.tickets);
+            // Gráficos PÁGINA 3
             chartTrafico = new Chart(document.getElementById('traficoChart').getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Volumen de Tickets',
-                        data: dataTicketsTotal,
-                        borderColor: '#ec008c',
-                        backgroundColor: 'rgba(236, 0, 140, 0.1)',
-                        borderWidth: 4,
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#ec008c',
-                        pointBorderWidth: 3,
-                        pointRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { tooltip: { callbacks: { label: function(c) { return 'Tickets: ' + formatNumber(c.parsed.y); } } } },
-                    scales: { y: { beginAtZero: false } }
-                }
+                type: 'line', data: { labels: labels, datasets: [{ label: 'Volumen de Tickets', data: datosMensuales.map(d => d.tickets), borderColor: '#ec008c', backgroundColor: 'rgba(236, 0, 140, 0.1)', borderWidth: 4, tension: 0.4, fill: true, pointBackgroundColor: '#fff', pointBorderColor: '#ec008c', pointBorderWidth: 3, pointRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: function(c) { return 'Tickets: ' + formatNumber(c.parsed.y); } } } }, scales: { y: { beginAtZero: false } } }
             });
 
-            const dataCrecimiento = datosMensuales.map((d, i) => {
-                if (i === 0) return 0;
-                const prev = datosMensuales[i-1].ventas;
-                return prev > 0 ? ((d.ventas - prev) / prev) * 100 : 0;
-            });
-            const diffCrecimiento = datosMensuales.map((d, i) => {
-                if (i === 0) return 0;
-                return d.ventas - datosMensuales[i-1].ventas;
-            });
-            const bgCrecimiento = dataCrecimiento.map(val => val >= 0 ? '#ec008c' : '#333333');
-
+            const dataCrecimiento = datosMensuales.map((d, i) => i === 0 ? 0 : ((d.ventas - datosMensuales[i-1].ventas) / datosMensuales[i-1].ventas) * 100);
             chartCrecimiento = new Chart(document.getElementById('crecimientoChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Crecimiento vs Mes Anterior (%)',
-                        data: dataCrecimiento,
-                        backgroundColor: bgCrecimiento,
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        tooltip: { 
-                            callbacks: { 
-                                label: function(c) { 
-                                    let idx = c.dataIndex;
-                                    if (idx === 0) {
-                                        return "Mes Base (Punto de partida sin mes previo)";
-                                    }
-                                    let valPorcentaje = c.parsed.y;
-                                    let diffDinero = diffCrecimiento[idx];
-                                    let signo = valPorcentaje >= 0 ? '+' : '';
-                                    return [
-                                        `Variación: ${signo}${valPorcentaje.toFixed(1)}%`,
-                                        `Diferencia: ${signo}${formatCurrency(diffDinero)}`
-                                    ]; 
-                                } 
-                            } 
-                        } 
-                    },
-                    scales: { 
-                        y: { 
-                            ticks: { callback: function(val) { return val + '%'; } } 
-                        } 
-                    }
-                }
+                type: 'bar', data: { labels: labels, datasets: [{ label: 'Crecimiento vs Mes Anterior (%)', data: dataCrecimiento, backgroundColor: dataCrecimiento.map(val => val >= 0 ? '#ec008c' : '#333333'), borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: function(c) { return c.dataIndex === 0 ? "Mes Base" : `Variación: ${c.parsed.y >= 0 ? '+' : ''}${c.parsed.y.toFixed(1)}%`; } } } }, scales: { y: { ticks: { callback: function(val) { return val + '%'; } } } } }
             });
-
-            const dataUnidades = datosMensuales.map(d => d.unidades || 0);
-            const dataUPT = datosMensuales.map(d => d.tickets > 0 ? ((d.unidades || 0) / d.tickets).toFixed(2) : 0);
 
             chartUnidades = new Chart(document.getElementById('unidadesChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'Unidades Vendidas', data: dataUnidades, backgroundColor: '#333333', borderRadius: 8, yAxisID: 'y' },
-                        { label: 'UPT (Art. por Ticket)', data: dataUPT, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    scales: {
-                        y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatNumber(val); } } },
-                        y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return val + ' art.'; } } }
-                    }
-                }
+                type: 'bar', data: { labels: labels, datasets: [ { label: 'Unidades Vendidas', data: datosMensuales.map(d => d.unidades || 0), backgroundColor: '#333333', borderRadius: 8, yAxisID: 'y' }, { label: 'UPT (Art. por Ticket)', data: datosMensuales.map(d => d.tickets > 0 ? ((d.unidades || 0) / d.tickets).toFixed(2) : 0), type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' } ] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatNumber(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return val + ' art.'; } } } } }
             });
 
-            // 🔥 NUEVO GRÁFICO: Mapa de Calor / Productividad por Hora 🔥
-            const labelsHora = ['08:00', '09:00', '10:00', '11:00', '12:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
+            // Gráficos PÁGINA 4
+            const labelsDiasMes = Array.from({length: 31}, (_, i) => `Día ${i + 1}`);
+            chartDias = new Chart(document.getElementById('diasChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: labelsDiasMes, datasets: [ { label: 'Ventas Acumuladas ($)', data: aggrVentasDiaDelMes, backgroundColor: '#ec008c', borderRadius: 4, yAxisID: 'y' }, { label: 'Tickets Totales', data: aggrTicketsDiaDelMes, type: 'line', borderColor: '#111111', backgroundColor: '#111111', borderWidth: 3, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 2, pointRadius: 4, yAxisID: 'y1' } ] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return context.datasetIndex === 0 ? 'Ventas: ' + formatCurrency(context.parsed.y) : 'Tickets: ' + formatNumber(context.parsed.y); } } } }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } } } }
+            });
 
             chartHora = new Chart(document.getElementById('horaChart').getContext('2d'), {
                 type: 'bar',
-                data: {
-                    labels: labelsHora,
-                    datasets: [
-                        { label: 'Volumen de Ventas Acumulado ($)', data: aggrVentasHora, backgroundColor: '#111111', borderRadius: 8, yAxisID: 'y' },
-                        { label: 'Tickets Acumulados', data: aggrTicketsHora, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    plugins: { 
-                        // 🔥 Detalle extra: Tooltips con formato de Moneda para el nuevo gráfico 🔥
-                        tooltip: { 
-                            callbacks: { 
-                                label: function(context) { 
-                                    if (context.datasetIndex === 0) {
-                                        return 'Ventas Acumuladas: ' + formatCurrency(context.parsed.y);
-                                    } else {
-                                        return 'Tickets Acumulados: ' + formatNumber(context.parsed.y);
-                                    }
-                                } 
-                            } 
-                        } 
-                    },
-                    scales: {
-                        y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } },
-                        y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return val + ' tkts'; } } }
-                    }
-                }
+                data: { labels: labelsHoras, datasets: [ { label: 'Ventas Acumuladas ($)', data: aggrVentasHora, backgroundColor: '#111111', borderRadius: 8, yAxisID: 'y' }, { label: 'Tickets Totales', data: aggrTicketsHora, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' } ] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return context.datasetIndex === 0 ? 'Ventas: ' + formatCurrency(context.parsed.y) : 'Tickets: ' + formatNumber(context.parsed.y); } } } }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } } } }
             });
         }
 
         function generarDiagnosticoAutomatico() {
-            let datos = baseDatosLocales[localActual] || [];
+            let datos = baseDatosLocales[localActual]?.[anioActual] || [];
             if (datos.length === 0) return;
 
             let totalVentas = 0; let totalVentasManana = 0; let totalTickets = 0; let totalUnidades = 0;
+            
             datos.forEach(d => { 
-                totalVentas += d.ventas; 
-                totalVentasManana += d.ventasManana; 
-                totalTickets += d.tickets; 
-                totalUnidades += (d.unidades || 0);
+                totalVentas += d.ventas; totalVentasManana += d.ventasManana; 
+                totalTickets += d.tickets; totalUnidades += (d.unidades || 0);
             });
 
             let totalVentasTarde = totalVentas - totalVentasManana;
@@ -1019,27 +1070,23 @@
             let mesInicial = datos[0].mes;
             let mesFinal = datos[datos.length - 1].mes;
             
-            let texto = `Durante el período analizado (${mesInicial} - ${mesFinal}), el Local ${localActual} registró una facturación total acumulada de ${formatCurrency(totalVentas)}. `;
+            let texto = `Durante el período analizado (${mesInicial} - ${mesFinal} ${anioActual}), el Local ${localActual} registró una facturación total acumulada de ${formatCurrency(totalVentas)}. `;
             texto += `A nivel operativo, el turno de la ${mejorTurno} se posiciona como la principal tracción de ingresos, representando un ${porcentajeMejorTurno.toFixed(1)}% de las ventas totales. `;
 
             if (datos.length > 1) {
                 let ultimoMes = datos[datos.length - 1];
                 let mesAnterior = datos[datos.length - 2];
                 let crecimiento = ((ultimoMes.ventas - mesAnterior.ventas) / mesAnterior.ventas) * 100;
-                
-                if (crecimiento > 0) { texto += `Respecto a la evolución a corto plazo, el mes de ${ultimoMes.mes} mostró un crecimiento positivo del ${crecimiento.toFixed(1)}% en comparación con ${mesAnterior.mes}. `; } 
-                else if (crecimiento < 0) { texto += `Respecto a la evolución a corto plazo, el mes de ${ultimoMes.mes} experimentó una contracción del ${Math.abs(crecimiento).toFixed(1)}% en comparación con ${mesAnterior.mes}, un indicador que requiere atención. `; } 
-                else { texto += `Respecto a la evolución a corto plazo, el mes de ${ultimoMes.mes} mantuvo los mismos niveles de facturación que ${mesAnterior.mes}. `; }
+                if (crecimiento > 0) { texto += `A corto plazo, el mes de ${ultimoMes.mes} mostró un crecimiento del ${crecimiento.toFixed(1)}% en comparación con ${mesAnterior.mes}. `; } 
+                else if (crecimiento < 0) { texto += `A corto plazo, el mes de ${ultimoMes.mes} experimentó una contracción del ${Math.abs(crecimiento).toFixed(1)}% frente a ${mesAnterior.mes}. `; } 
             }
 
             texto += `El ticket promedio global de este período se sitúa en ${formatCurrency(ticketPromedio)}.`;
-            
-            if (totalUnidades > 0) {
-                texto += ` El nivel de ventas cruzadas (UPT) promedió ${uptPromedio.toFixed(2)} artículos por cliente.`;
-            }
+            if (totalUnidades > 0) { texto += ` El nivel de ventas cruzadas (UPT) promedió ${uptPromedio.toFixed(2)} artículos por cliente.`; }
 
+            if (!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
             document.getElementById('texto-diagnostico').innerText = texto;
-            diagnosticosLocales[localActual] = texto;
+            diagnosticosLocales[localActual][anioActual] = texto;
             guardarEnLaNube(); 
             
             let cajaDiagnostico = document.getElementById('texto-diagnostico').parentElement;
@@ -1050,103 +1097,120 @@
         window.agregarNuevoMes = function(event) {
             event.preventDefault();
             try {
-                let datosMensuales = baseDatosLocales[localActual];
-
+                if (!baseDatosLocales[localActual]) baseDatosLocales[localActual] = {};
+                if (!baseDatosLocales[localActual][anioActual]) baseDatosLocales[localActual][anioActual] = [];
+                let datosMensuales = baseDatosLocales[localActual][anioActual];
+                
                 const mes = document.getElementById('inputMes').value;
-                const valVenta = document.getElementById('inputVenta').value;
-                const valVentaManana = document.getElementById('inputVentaManana').value;
-                const valTickets = document.getElementById('inputTickets').value;
-                const valTicketsManana = document.getElementById('inputTicketsManana').value;
-                const valUnidades = document.getElementById('inputUnidades').value;
+                const unidades = parseInt(parseExcelNumber(document.getElementById('inputUnidades').value)) || 0;
 
-                if (!valVenta || !valVentaManana || !valTickets || !valTicketsManana || !valUnidades) {
-                    alert("⚠️ ¡Atención! Por favor, completa los campos principales.");
+                // 🔥 LÓGICA DE VALIDACIÓN 🔥
+                let ventasCalculadas = 0; let ventasMananaCalculadas = 0; let ticketsCalculados = 0; let ticketsMananaCalculados = 0;
+                let grillaDiaria = {}; let hayDatosEnGrilla = false;
+                
+                let numDias = diasPorMes[mes] || 31;
+                if (mes === 'Febrero' && esBisiesto(parseInt(anioActual))) numDias = 29;
+
+                for(let i=1; i<=numDias; i++) {
+                    let datosDia = {}; let diaTieneDatos = false;
+                    horasDinamicas.forEach(h => {
+                        let valV = parseExcelNumber(document.getElementById(`v_${i}_${h}`).value);
+                        let valT = parseInt(parseExcelNumber(document.getElementById(`t_${i}_${h}`).value)) || 0;
+                        if(valV > 0 || valT > 0) {
+                            diaTieneDatos = true; hayDatosEnGrilla = true; datosDia[h] = { v: valV, t: valT };
+                            ventasCalculadas += valV; ticketsCalculados += valT;
+                            if (h <= 12) { ventasMananaCalculadas += valV; ticketsMananaCalculados += valT; }
+                        }
+                    });
+                    if (diaTieneDatos) { grillaDiaria[i] = datosDia; }
+                }
+
+                if (!hayDatosEnGrilla) {
+                    showModal({ type: 'alert', title: 'Campos Vacíos', message: 'Por favor, ingresa al menos un dato de Venta y Ticket en la grilla inferior para que el sistema pueda calcular los totales.', iconClass: 'fa-info-circle text-amber-600', iconBg: 'bg-amber-100' });
                     return;
                 }
-
-                const ventas = parseExcelNumber(valVenta);
-                const ventasManana = parseExcelNumber(valVentaManana);
-                const tickets = parseInt(parseExcelNumber(valTickets));
-                const ticketsManana = parseInt(parseExcelNumber(valTicketsManana));
-                const unidades = parseInt(parseExcelNumber(valUnidades));
-
-                if (ventas <= 0 || tickets <= 0) { alert("⚠️ La venta y tickets deben ser mayores a cero."); return; }
-                if (ventasManana > ventas) { alert(`⚠️ Las ventas de la mañana no pueden ser mayores al total.`); return; }
-                if (ticketsManana > tickets) { alert(`⚠️ Los tickets de la mañana no pueden superar los totales.`); return; }
-
-                // 🔥 Recolectamos la información detallada por hora 🔥
-                let horasData = {};
-                horasDinamicas.forEach(h => {
-                    horasData[h] = {
-                        v: parseExcelNumber(document.getElementById(`h_v_${h}`).value),
-                        t: parseInt(parseExcelNumber(document.getElementById(`h_t_${h}`).value)) || 0
-                    };
-                });
-
-                const ticketPromedio = tickets > 0 ? (ventas / tickets) : 0;
-                const ticketsDiarios = Math.round(tickets / 30);
+                if (ventasCalculadas <= 0 || ticketsCalculados <= 0) { 
+                    showModal({ type: 'alert', title: 'Error Matemático', message: 'El total calculado de la venta y tickets en la grilla no puede ser cero.', iconClass: 'fa-times-circle text-red-600', iconBg: 'bg-red-100' });
+                    return; 
+                }
+                
+                const ticketPromedio = ticketsCalculados > 0 ? (ventasCalculadas / ticketsCalculados) : 0;
+                const ticketsDiarios = Math.round(ticketsCalculados / (numDias || 30));
                 const colorTema = listadoColores[datosMensuales.length % listadoColores.length];
-
-                const diagnosticoAutomatico = generarDiagnosticoMensual(ventas, ventasManana, tickets, unidades);
+                const diagnosticoAutomatico = generarDiagnosticoMensual(ventasCalculadas, ventasMananaCalculadas, ticketsCalculados, unidades);
 
                 const indexExistente = datosMensuales.findIndex(d => d.mes === mes);
-                
-                const mesObjeto = { mes, ventas, ventasManana, tickets, ticketsManana, unidades, horasData, ticketPromedio, ticketsDiarios, diagnostico: diagnosticoAutomatico, colorTema };
+                const mesObjeto = { 
+                    mes, ventas: ventasCalculadas, ventasManana: ventasMananaCalculadas, tickets: ticketsCalculados, 
+                    ticketsManana: ticketsMananaCalculados, unidades, grillaDiaria, ticketPromedio, ticketsDiarios, 
+                    diagnostico: diagnosticoAutomatico, colorTema 
+                };
 
+                const procesoFinalGuardar = (esSobreescritura) => {
+                    if (esSobreescritura) { datosMensuales[indexExistente] = mesObjeto; } 
+                    else { datosMensuales.push(mesObjeto); }
+
+                    document.getElementById('inputUnidades').value = '';
+                    for(let i=1; i<=numDias; i++) {
+                        horasDinamicas.forEach(h => {
+                            let vInput = document.getElementById(`v_${i}_${h}`);
+                            let tInput = document.getElementById(`t_${i}_${h}`);
+                            if(vInput) vInput.value = '';
+                            if(tInput) tInput.value = '';
+                        });
+                    }
+
+                    guardarEnLaNube();
+                    generarDiagnosticoAutomatico();
+                    renderDashboard();
+                    
+                    const btn = document.getElementById('btnAgregar');
+                    if (btn) {
+                        const original = btn.innerHTML; btn.innerHTML = '<i class="fas fa-check mr-2"></i> ¡Guardado y Calculado!';
+                        btn.classList.replace('bg-brand-magenta', 'bg-green-600');
+                        setTimeout(() => { btn.innerHTML = original; btn.classList.replace('bg-green-600', 'bg-brand-magenta'); }, 2500);
+                    }
+                };
+
+                // Seguridad al sobreescribir
                 if (indexExistente >= 0) { 
-                    const seguro = confirm(`⚠️ ATENCIÓN: El mes de ${mes} ya tiene datos cargados.\n\n¿Estás absolutamente seguro de que deseas SOBRESCRIBIR la información existente?`);
-                    if(!seguro) return;
-                    datosMensuales[indexExistente] = mesObjeto;
+                    showModal({
+                        type: 'confirm',
+                        title: 'Sobreescribir Datos',
+                        message: `El mes de ${mes} del ${anioActual} ya tiene datos cargados.\n\n¿Estás seguro de que deseas reemplazar la información existente?`,
+                        iconClass: 'fa-exclamation-triangle text-amber-600',
+                        iconBg: 'bg-amber-100',
+                        confirmText: 'Sí, Sobreescribir',
+                        onConfirm: () => procesoFinalGuardar(true)
+                    });
                 } else { 
-                    datosMensuales.push(mesObjeto);
+                    procesoFinalGuardar(false);
                 }
 
-                // Limpiar campos después de guardar
-                document.getElementById('inputVenta').value = '';
-                document.getElementById('inputVentaManana').value = '';
-                document.getElementById('inputTickets').value = '';
-                document.getElementById('inputTicketsManana').value = '';
-                document.getElementById('inputUnidades').value = '';
-                horasDinamicas.forEach(h => {
-                    document.getElementById(`h_v_${h}`).value = '';
-                    document.getElementById(`h_t_${h}`).value = '';
-                });
-
-                guardarEnLaNube();
-                generarDiagnosticoAutomatico();
-                renderDashboard();
-                
-                const btn = document.getElementById('btnAgregar');
-                if (btn) {
-                    const original = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check mr-2"></i> ¡Guardado!';
-                    btn.classList.replace('bg-brand-magenta', 'bg-green-600');
-                    setTimeout(() => { btn.innerHTML = original; btn.classList.replace('bg-green-600', 'bg-brand-magenta'); }, 2500);
-                }
             } catch (error) {
-                alert("❌ Ocurrió un error: " + error.message);
                 console.error(error);
+                showModal({ type: 'alert', title: 'Error de Sistema', message: "Ocurrió un error: " + error.message, iconClass: 'fa-bug text-red-600', iconBg: 'bg-red-100' });
             }
         };
 
         window.exportarPDF = function() {
-            let datosMensuales = baseDatosLocales[localActual] || [];
-            if (datosMensuales.length === 0) { alert(`⚠️ Carga al menos un mes en el Local ${localActual}.`); return; }
+            let datosLocalesAnio = baseDatosLocales[localActual]?.[anioActual] || [];
+            if (datosLocalesAnio.length === 0) { 
+                showModal({ type: 'alert', title: 'Sin Datos', message: `Debes cargar al menos un mes en el Local ${localActual} (Año ${anioActual}) para poder generar el PDF.`, iconClass: 'fa-file-pdf text-amber-600', iconBg: 'bg-amber-100' });
+                return; 
+            }
 
             const btn = document.getElementById('btnExport');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xl mr-3 text-brand-magenta"></i> Generando PDF...';
             
-            // 🔥 LEEMOS SÓLO EL CONTENEDOR DE LAS 4 PÁGINAS, IGNORANDO TODO EL RESTO 🔥
             const element = document.getElementById('pdf-export-area');
+            const labels = datosLocalesAnio.map(d => d.mes);
             
-            const labels = datosMensuales.map(d => d.mes);
-            
-            // 🔥 FUERZA BRUTA: Le damos a la librería la orden nativa e inquebrantable de romper página
-            // en cada clase .nueva-pagina. Se suma windowWidth ancho para evitar reescalados
+            // 🔥 FUERZA BRUTA: 5 Páginas perfectas garantizadas 🔥
             const opt = {
                 margin:       [10, 10, 10, 10], 
-                filename:     `Reporte_${localActual}_${labels[0]}_a_${labels[labels.length-1]}.pdf`,
+                filename:     `Reporte_${localActual}_${anioActual}_${labels[0]}_a_${labels[labels.length-1]}.pdf`,
                 image:        { type: 'jpeg', quality: 1 },
                 html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: 1366 },
                 jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' },
