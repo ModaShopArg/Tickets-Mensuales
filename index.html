@@ -286,7 +286,7 @@
             <!-- ======================= PÁGINA 4 (DÍA A DÍA) ======================= -->
             <div id="pagina-4" class="pt-4">
                 <div class="bg-white rounded-xl shadow-sm p-6">
-                    <!-- 🔥 NUEVO SELECTOR DE MES PARA EL GRÁFICO DIARIO 🔥 -->
+                    <!-- SELECTOR DE MES PARA EL GRÁFICO DIARIO -->
                     <div class="flex justify-between items-center mb-6 border-b pb-2">
                         <h3 class="text-xl font-bold text-brand-black flex items-center"><i class="fas fa-calendar-day mr-2 text-brand-magenta"></i> Evolución Diaria (Día a Día)</h3>
                         <select id="selectorMesDias" onchange="actualizarGraficoDias(this.value)" class="text-sm font-bold text-brand-magenta bg-transparent border-b-2 border-brand-magenta outline-none cursor-pointer pb-1" title="Seleccionar mes a visualizar">
@@ -297,9 +297,15 @@
                     <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza la línea de tiempo, identificando picos y valles de venta por cada día calendario del mes seleccionado.</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
-                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center"><i class="fas fa-stopwatch mr-2 text-brand-magenta"></i> Productividad por Hora</h3>
+                    <!-- 🔥 NUEVO SELECTOR DE MES PARA EL GRÁFICO POR HORAS 🔥 -->
+                    <div class="flex justify-between items-center mb-6 border-b pb-2">
+                        <h3 class="text-xl font-bold text-brand-black flex items-center"><i class="fas fa-stopwatch mr-2 text-brand-magenta"></i> Productividad por Hora</h3>
+                        <select id="selectorMesHoras" onchange="actualizarGraficoHoras(this.value)" class="text-sm font-bold text-brand-magenta bg-transparent border-b-2 border-brand-magenta outline-none cursor-pointer pb-1" title="Seleccionar mes a visualizar">
+                            <!-- Opciones inyectadas por JS -->
+                        </select>
+                    </div>
                     <div class="relative h-72 w-full overflow-hidden"><canvas id="horaChart"></canvas></div>
-                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Evalúa el mapa de calor operativo del local para identificar horas pico y horas valle en el acumulado del periodo.</p>
+                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Evalúa el mapa de calor operativo del local para identificar horas pico y horas valle en el mes seleccionado.</p>
                 </div>
             </div>
 
@@ -508,6 +514,7 @@
         let anioActual = '2026';
         
         const horasDinamicas = [8, 9, 10, 11, 12, 17, 18, 19, 20, 21];
+        const labelsHoras = ['08:00', '09:00', '10:00', '11:00', '12:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
         
         const diasPorMes = {
             'Enero': 31, 'Febrero': 28, 'Marzo': 31, 'Abril': 30,
@@ -775,7 +782,6 @@
         };
 
         const listadoColores = ['magenta', 'black', 'gray', 'pink', 'darkgray'];
-        const labelsHoras = ['08:00', '09:00', '10:00', '11:00', '12:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
 
         function parseExcelNumber(str) {
             if (!str) return 0;
@@ -889,7 +895,6 @@
             document.getElementById('formCarga').scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
 
-        // 🔥 NUEVA FUNCIÓN PARA ACTUALIZAR SOLO EL GRÁFICO DIARIO 🔥
         window.actualizarGraficoDias = function(mesSeleccionado) {
             let datosLocalesAnio = baseDatosLocales[localActual]?.[anioActual] || [];
             let dataMes = datosLocalesAnio.find(d => d.mes === mesSeleccionado);
@@ -922,6 +927,39 @@
             chartDias = new Chart(document.getElementById('diasChart').getContext('2d'), {
                 type: 'bar',
                 data: { labels: labelsDias, datasets: [ { label: 'Ventas Acumuladas ($)', data: aggrVentasDia, backgroundColor: '#ec008c', borderRadius: 4, yAxisID: 'y' }, { label: 'Tickets Totales', data: aggrTicketsDia, type: 'line', borderColor: '#111111', backgroundColor: '#111111', borderWidth: 3, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 2, pointRadius: 4, yAxisID: 'y1' } ] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return context.datasetIndex === 0 ? 'Ventas: ' + formatCurrency(context.parsed.y) : 'Tickets: ' + formatNumber(context.parsed.y); } } } }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } } } }
+            });
+        };
+
+        // 🔥 NUEVA FUNCIÓN PARA ACTUALIZAR EL GRÁFICO DE HORAS 🔥
+        window.actualizarGraficoHoras = function(mesSeleccionado) {
+            let datosLocalesAnio = baseDatosLocales[localActual]?.[anioActual] || [];
+            let dataMes = datosLocalesAnio.find(d => d.mes === mesSeleccionado);
+            
+            if (!dataMes) return;
+
+            let aggrVentasHora = new Array(10).fill(0);
+            let aggrTicketsHora = new Array(10).fill(0);
+
+            if (dataMes.grillaDiaria) {
+                let numDias = diasPorMes[mesSeleccionado] || 31;
+                if (mesSeleccionado === 'Febrero' && esBisiesto(parseInt(anioActual))) numDias = 29;
+
+                for(let i=1; i<=numDias; i++) {
+                    if(dataMes.grillaDiaria[i]) {
+                        horasDinamicas.forEach((h, idxHora) => {
+                            aggrVentasHora[idxHora] += (dataMes.grillaDiaria[i][h]?.v || 0);
+                            aggrTicketsHora[idxHora] += (dataMes.grillaDiaria[i][h]?.t || 0);
+                        });
+                    }
+                }
+            }
+
+            if (chartHora) chartHora.destroy();
+            
+            chartHora = new Chart(document.getElementById('horaChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: labelsHoras, datasets: [ { label: 'Ventas Acumuladas ($)', data: aggrVentasHora, backgroundColor: '#111111', borderRadius: 8, yAxisID: 'y' }, { label: 'Tickets Totales', data: aggrTicketsHora, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' } ] },
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return context.datasetIndex === 0 ? 'Ventas: ' + formatCurrency(context.parsed.y) : 'Tickets: ' + formatNumber(context.parsed.y); } } } }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } } } }
             });
         };
@@ -959,6 +997,7 @@
                 if (chartHora) chartHora.destroy(); if (chartDias) chartDias.destroy();
                 
                 document.getElementById('selectorMesDias').innerHTML = '';
+                document.getElementById('selectorMesHoras').innerHTML = '';
                 return;
             }
 
@@ -974,7 +1013,6 @@
 
             document.getElementById('periodo-text').innerText = `${datosMensuales[0].mes} - ${datosMensuales[datosMensuales.length-1].mes} ${anioActual}`;
             document.getElementById('kpi-ventas').innerText = formatMillones(totalVentas);
-            // 🔥 Añadimos el sub-índice de tickets por día al KPI global
             document.getElementById('kpi-tickets').innerHTML = `${formatNumber(totalTickets)} <span class="text-base text-gray-500 font-bold ml-1 tracking-normal">(${formatNumber(ticketsDiariosGlobal)}/día)</span>`;
             document.getElementById('kpi-ticket-prom').innerText = formatCurrency(ticketPromedioGlobal);
             document.getElementById('kpi-diaria').innerText = formatCurrency(ventaDiariaGlobal);
@@ -982,15 +1020,12 @@
             const container = document.getElementById('monthly-container');
             container.innerHTML = ''; 
             
-            let aggrVentasHora = new Array(10).fill(0); let aggrTicketsHora = new Array(10).fill(0);
-            
             datosMensuales.forEach((data, index) => {
                 if (!colores[data.colorTema]) { data.colorTema = listadoColores[index % listadoColores.length]; }
                 const theme = colores[data.colorTema];
                 const unidades = data.unidades || 0;
                 const upt = data.tickets > 0 ? (unidades / data.tickets).toFixed(2) : '0.00';
                 
-                // 🔥 Cálculos de promedios diarios para este mes en particular
                 const ventaDiariaMes = data.ventas / (data.diasOperativos || 30);
                 const ticketsDiariosMes = Math.round(data.tickets / (data.diasOperativos || 30));
 
@@ -1004,9 +1039,7 @@
                             let sumaVentaDia = 0;
                             horasDinamicas.forEach((h, idxHora) => {
                                 let v = data.grillaDiaria[i][h]?.v || 0;
-                                let t = data.grillaDiaria[i][h]?.t || 0;
                                 sumaVentaDia += v; 
-                                aggrVentasHora[idxHora] += v; aggrTicketsHora[idxHora] += t;
                             });
                             if (sumaVentaDia > maxVDia) { maxVDia = sumaVentaDia; maxDia = `Día ${i}`; }
                         }
@@ -1031,7 +1064,6 @@
                         <i class="fas fa-edit mr-1"></i> Editar Día a Día
                     </button>` : '';
 
-                // 🔥 Agregamos las métricas diarias a la grilla y acomodamos el pie de tarjeta
                 container.innerHTML += `
                     <div style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 16px;">
                         <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
@@ -1067,7 +1099,7 @@
             if (chartMixto) chartMixto.destroy(); if (chartTorta) chartTorta.destroy();
             if (chartTurnos) chartTurnos.destroy(); if (chartTrafico) chartTrafico.destroy();
             if (chartCrecimiento) chartCrecimiento.destroy(); if (chartUnidades) chartUnidades.destroy();
-            if (chartHora) chartHora.destroy();
+            // No destruimos los de horas y días aquí, lo hacen sus funciones respectivas
 
             const labels = datosMensuales.map(d => d.mes);
             const dataVts = datosMensuales.map(d => d.ventas);
@@ -1111,24 +1143,23 @@
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatNumber(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return val + ' art.'; } } } } }
             });
 
-            // 🔥 RENDERIZADO DEL SELECTOR DE MES PARA EL GRÁFICO DIARIO (PÁGINA 4) 🔥
+            // 🔥 RENDERIZADO DE LOS SELECTORES PARA PÁGINA 4 🔥
             const selectorMesDias = document.getElementById('selectorMesDias');
+            const selectorMesHoras = document.getElementById('selectorMesHoras');
             selectorMesDias.innerHTML = '';
+            selectorMesHoras.innerHTML = '';
             datosMensuales.forEach(d => {
                 selectorMesDias.innerHTML += `<option value="${d.mes}">${d.mes}</option>`;
+                selectorMesHoras.innerHTML += `<option value="${d.mes}">${d.mes}</option>`;
             });
+            
             const ultimoMes = datosMensuales[datosMensuales.length - 1].mes;
             selectorMesDias.value = ultimoMes;
+            selectorMesHoras.value = ultimoMes;
             
-            // Llamamos a la función para dibujar el gráfico del mes por defecto
+            // Llamamos a las funciones para dibujar los gráficos con el mes por defecto
             window.actualizarGraficoDias(ultimoMes);
-
-            // Gráfico PÁGINA 4 (Horas)
-            chartHora = new Chart(document.getElementById('horaChart').getContext('2d'), {
-                type: 'bar',
-                data: { labels: labelsHoras, datasets: [ { label: 'Ventas Acumuladas ($)', data: aggrVentasHora, backgroundColor: '#111111', borderRadius: 8, yAxisID: 'y' }, { label: 'Tickets Totales', data: aggrTicketsHora, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' } ] },
-                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return context.datasetIndex === 0 ? 'Ventas: ' + formatCurrency(context.parsed.y) : 'Tickets: ' + formatNumber(context.parsed.y); } } } }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } } } }
-            });
+            window.actualizarGraficoHoras(ultimoMes);
         }
 
         // 🔥 CEREBRO IA: ANÁLISIS GERENCIAL PROFUNDO 🔥
