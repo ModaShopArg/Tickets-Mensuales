@@ -82,7 +82,7 @@
                         <option value="Tendens">Local Tendens</option>
                     </select>
                     
-                    <!-- 🔥 NUEVO SELECTOR DE AÑO 🔥 -->
+                    <!-- 🔥 SELECTOR DE AÑO LIMPIO 🔥 -->
                     <span class="text-gray-400 mx-2">|</span>
                     <select id="selectorAnio" onchange="cambiarAnio(this.value)" class="bg-transparent border-b-4 border-brand-black text-brand-black cursor-pointer focus:outline-none hover:text-gray-700 transition-colors pb-1">
                         <option value="2025">2025</option>
@@ -94,18 +94,20 @@
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
-                <div id="cloud-status" class="hidden md:flex items-center text-sm font-bold bg-white px-4 py-3 rounded-xl border border-gray-200 shadow-sm">
-                    <i class="fas fa-cloud text-gray-400 mr-2"></i> <span class="text-gray-600">Conectando...</span>
-                </div>
-                
-                <!-- 🔥 BOTÓN DE SEGURIDAD (LECTURA / ADMIN) 🔥 -->
-                <button id="btnModo" onclick="toggleModo()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 px-6 rounded-xl shadow-sm transition-all flex items-center border border-gray-300">
-                    <i id="icono-modo" class="fas fa-lock mr-2"></i> <span id="texto-modo">Modo Lectura</span>
+                <!-- 🔥 BOTÓN DE SEGURIDAD ESTILIZADO 🔥 -->
+                <button id="btnModo" onclick="toggleModo()" class="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg text-sm font-bold shadow-sm transition-all">
+                    <i id="icono-modo" class="fas fa-lock text-gray-500"></i> <span id="texto-modo" class="text-gray-700">Modo Lectura</span>
                 </button>
 
-                <button id="btnExport" onclick="exportarPDF()" class="bg-brand-black hover:bg-brand-darkGray text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center border border-gray-800">
-                    <i class="fas fa-file-pdf text-brand-magenta text-xl mr-3"></i> Exportar
+                <!-- 🔥 BOTÓN EXPORTAR PROPORCIONADO 🔥 -->
+                <button id="btnExport" onclick="exportarPDF()" class="flex items-center gap-2 px-5 py-2.5 bg-brand-black hover:bg-gray-800 border border-brand-black text-white rounded-lg text-sm font-bold shadow-sm transition-all">
+                    <i class="fas fa-file-pdf text-brand-magenta"></i> Exportar
                 </button>
+
+                <!-- 🔥 INDICADOR DE NUBE MINIMALISTA (A LA DERECHA) 🔥 -->
+                <div id="cloud-status" class="flex items-center justify-center w-11 h-11 bg-white border border-gray-200 rounded-full shadow-sm cursor-help transition-colors ml-1" title="Conectando...">
+                    <i class="fas fa-cloud text-gray-400 text-lg"></i>
+                </div>
             </div>
         </header>
 
@@ -455,20 +457,18 @@
                     confirmText: 'Desbloquear Panel',
                     onConfirm: () => {
                         modoAdmin = true;
-                        document.getElementById('btnModo').innerHTML = '<i class="fas fa-unlock-alt mr-2 text-emerald-600"></i> <span class="text-emerald-700">Modo Administrador</span>';
-                        document.getElementById('btnModo').classList.replace('bg-gray-100', 'bg-emerald-50');
-                        document.getElementById('btnModo').classList.replace('border-gray-300', 'border-emerald-200');
+                        document.getElementById('btnModo').innerHTML = '<i class="fas fa-unlock-alt text-emerald-600"></i> <span class="text-emerald-700">Modo Administrador</span>';
+                        document.getElementById('btnModo').className = 'flex items-center gap-2 px-4 py-2.5 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg text-sm font-bold shadow-sm transition-all';
                         document.getElementById('panel-admin').classList.remove('hidden');
-                        renderDashboard(); // Re-renderiza para mostrar botones de editar
+                        renderDashboard(); 
                     }
                 });
             } else {
                 modoAdmin = false;
-                document.getElementById('btnModo').innerHTML = '<i class="fas fa-lock mr-2 text-gray-600"></i> <span>Modo Lectura</span>';
-                document.getElementById('btnModo').classList.replace('bg-emerald-50', 'bg-gray-100');
-                document.getElementById('btnModo').classList.replace('border-emerald-200', 'border-gray-300');
+                document.getElementById('btnModo').innerHTML = '<i id="icono-modo" class="fas fa-lock text-gray-500"></i> <span id="texto-modo" class="text-gray-700">Modo Lectura</span>';
+                document.getElementById('btnModo').className = 'flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg text-sm font-bold shadow-sm transition-all';
                 document.getElementById('panel-admin').classList.add('hidden');
-                renderDashboard(); // Re-renderiza para ocultar botones de editar
+                renderDashboard(); 
             }
         };
 
@@ -495,7 +495,6 @@
         let userId = null;
         let datosSincronizados = false;
 
-        // Estructura actualizada con Años
         let baseDatosLocales = { 'Concordia': {}, 'Chajarí': {}, 'Tendens': {} };
         let diagnosticosLocales = { 'Concordia': {}, 'Chajarí': {}, 'Tendens': {} };
         
@@ -504,7 +503,6 @@
         
         const horasDinamicas = [8, 9, 10, 11, 12, 17, 18, 19, 20, 21];
         
-        // 🔥 INTELIGENCIA CALENDARIO: Días exactos por mes y Bisiestos 🔥
         const diasPorMes = {
             'Enero': 31, 'Febrero': 28, 'Marzo': 31, 'Abril': 30,
             'Mayo': 31, 'Junio': 30, 'Julio': 31, 'Agosto': 31,
@@ -515,7 +513,6 @@
             return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
         }
 
-        // 🟢 GENERACIÓN DINÁMICA DE LA GRILLA SEGÚN EL MES Y EL AÑO 🟢
         window.cambiarMesGrilla = function(mesSeleccionado) {
             if (!mesSeleccionado) mesSeleccionado = document.getElementById('inputMes').value;
             
@@ -579,17 +576,32 @@
 
         initAuth();
 
-        function actualizarStatusNube(texto, colorTexto) {
+        // 🔥 INDICADOR DE NUBE MINIMALISTA 🔥
+        function actualizarStatusNube(texto, colorOriginal) {
             const statusEl = document.getElementById('cloud-status');
-            if (statusEl) { statusEl.innerHTML = `<i class="fas fa-cloud ${colorTexto} mr-2"></i> <span class="text-gray-600">${texto}</span>`; }
+            if (statusEl) { 
+                let colorNube = 'text-emerald-500'; // Por defecto verde (Guardado/OK)
+                let iconNube = 'fa-cloud';
+
+                if (texto.toLowerCase().includes('error') || texto.toLowerCase().includes('fallo') || texto.toLowerCase().includes('offline')) {
+                    colorNube = 'text-red-500';
+                    iconNube = 'fa-cloud-xmark';
+                } else if (texto.toLowerCase().includes('conectando') || texto.toLowerCase().includes('local') || texto.toLowerCase().includes('sincronizando')) {
+                    colorNube = 'text-amber-500';
+                    if (texto.toLowerCase().includes('sincronizando')) {
+                        iconNube = 'fa-cloud-arrow-up fa-fade';
+                    }
+                }
+                
+                statusEl.innerHTML = `<i class="fas ${iconNube} ${colorNube} text-xl"></i>`; 
+                statusEl.title = texto; 
+            }
         }
 
-        // 🔥 FUNCIÓN QUE ASEGURA QUE LA ESTRUCTURA NO SE ROMPA AL TRAER DATOS VIEJOS 🔥
         function estructurarDatosHeredados(datosNube) {
             let bd = datosNube.baseDatosLocales || { 'Concordia': {}, 'Chajarí': {}, 'Tendens': {} };
             let diag = datosNube.diagnosticosLocales || { 'Concordia': {}, 'Chajarí': {}, 'Tendens': {} };
 
-            // Si los locales viejos eran simples Arrays, los encapsulamos dentro del año 2026
             Object.keys(bd).forEach(loc => {
                 if (Array.isArray(bd[loc])) {
                     let oldData = bd[loc];
@@ -597,7 +609,6 @@
                 }
             });
 
-            // Igual con los diagnósticos
             Object.keys(diag).forEach(loc => {
                 if (typeof diag[loc] === 'string') {
                     let oldText = diag[loc];
@@ -622,22 +633,21 @@
                     } else {
                         guardarEnLaNubeSilencioso();
                     }
-                    actualizarStatusNube('Guardado', 'text-emerald-500');
+                    actualizarStatusNube('Sincronizado correctamente', '');
                     
-                    // Asignar diagnóstico del año actual
                     if(!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
                     document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual][anioActual] || '[Esperando datos...]';
                     
                     renderDashboard();
                 }, (error) => {
                     console.error("❌ Error leyendo nube:", error);
-                    actualizarStatusNube('Error de Nube', 'text-red-500');
+                    actualizarStatusNube('Error de conexión (Offline)', '');
                     datosSincronizados = true;
                     renderDashboard();
                 });
             } catch (err) {
                 console.error("❌ Error Firebase:", err);
-                actualizarStatusNube('Error de Nube', 'text-red-500');
+                actualizarStatusNube('Error de Nube', '');
                 datosSincronizados = true;
                 renderDashboard();
             }
@@ -652,15 +662,15 @@
                     diagnosticosLocales: diagnosticosLocales,
                     ultimaModificacion: new Date().toISOString()
                 });
-                actualizarStatusNube('Guardado', 'text-emerald-500');
+                actualizarStatusNube('Sincronizado correctamente', '');
             } catch (e) {
                 console.error("Fallo al guardar:", e);
-                actualizarStatusNube('Fallo Guardado', 'text-red-500');
+                actualizarStatusNube('Error al guardar datos', '');
             }
         }
 
         async function guardarEnLaNube() {
-            actualizarStatusNube('Sincronizando...', 'text-blue-500');
+            actualizarStatusNube('Sincronizando con la nube...', '');
             await guardarEnLaNubeSilencioso();
         }
 
@@ -675,7 +685,7 @@
         window.cambiarAnio = function(nuevoAnio) {
             anioActual = nuevoAnio;
             document.title = `Tickets PVS - ${localActual} ${anioActual}`;
-            window.cambiarMesGrilla(); // Resetea la grilla por si hay año bisiesto
+            window.cambiarMesGrilla(); 
             
             if(!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
             document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual][anioActual] || '[Esperando datos...]';
@@ -688,7 +698,6 @@
             guardarEnLaNube();
         };
 
-        // 🔥 FUNCIÓN PARA EMPEZAR DESDE CERO BLINDADA 🔥
         window.borrarDatosLocal = function() {
             showModal({
                 type: 'password',
@@ -713,14 +722,9 @@
             });
         };
 
-        let chartMixto = null;
-        let chartTorta = null;
-        let chartTurnos = null;
-        let chartTrafico = null;
-        let chartCrecimiento = null;
-        let chartUnidades = null;
-        let chartHora = null; 
-        let chartDias = null;
+        let chartMixto = null; let chartTorta = null; let chartTurnos = null;
+        let chartTrafico = null; let chartCrecimiento = null; let chartUnidades = null;
+        let chartHora = null; let chartDias = null;
 
         const formatCurrency = (value) => {
             if(isNaN(value)) return '$0';
@@ -803,7 +807,6 @@
         }
 
         window.editarMes = function(mes) {
-            // Protección de edición desde UI
             if (!modoAdmin) return;
 
             let datosLocalesAnio = baseDatosLocales[localActual]?.[anioActual] || [];
@@ -849,7 +852,6 @@
         function renderDashboard() {
             if (!datosSincronizados) return; 
 
-            // Aplicar seguridad visual al Diagnóstico
             const diagBox = document.getElementById('texto-diagnostico');
             diagBox.setAttribute('contenteditable', modoAdmin ? 'true' : 'false');
             if(modoAdmin) {
@@ -860,7 +862,6 @@
                 diagBox.title = "El diagnóstico se bloqueará en Modo Lectura.";
             }
 
-            // Datos estructurados por Año
             if (!baseDatosLocales[localActual]) baseDatosLocales[localActual] = {};
             let datosMensuales = baseDatosLocales[localActual][anioActual] || [];
             
@@ -873,16 +874,12 @@
                 document.getElementById('kpi-tickets').innerText = '0';
                 document.getElementById('kpi-ticket-prom').innerText = '$0';
                 document.getElementById('kpi-diaria').innerText = '$0';
-                document.getElementById('monthly-container').innerHTML = `<div class="col-span-1 md:col-span-2 text-center p-8 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300 font-bold">Aún no hay datos cargados para el ${anioActual}. Utiliza la grilla superior para agregar el primer mes.</div>`;
+                document.getElementById('monthly-container').innerHTML = `<div class="col-span-1 md:col-span-2 text-center p-8 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300 font-bold">Aún no hay datos cargados para el ${anioActual}. Utiliza el Modo Administrador para agregar el primer mes.</div>`;
                 
-                if (chartMixto) chartMixto.destroy();
-                if (chartTorta) chartTorta.destroy();
-                if (chartTurnos) chartTurnos.destroy();
-                if (chartTrafico) chartTrafico.destroy();
-                if (chartCrecimiento) chartCrecimiento.destroy();
-                if (chartUnidades) chartUnidades.destroy();
-                if (chartHora) chartHora.destroy();
-                if (chartDias) chartDias.destroy();
+                if (chartMixto) chartMixto.destroy(); if (chartTorta) chartTorta.destroy();
+                if (chartTurnos) chartTurnos.destroy(); if (chartTrafico) chartTrafico.destroy();
+                if (chartCrecimiento) chartCrecimiento.destroy(); if (chartUnidades) chartUnidades.destroy();
+                if (chartHora) chartHora.destroy(); if (chartDias) chartDias.destroy();
                 return;
             }
 
@@ -921,15 +918,10 @@
                             horasDinamicas.forEach((h, idxHora) => {
                                 let v = data.grillaDiaria[i][h]?.v || 0;
                                 let t = data.grillaDiaria[i][h]?.t || 0;
-                                sumaVentaDia += v;
-                                sumaTicketsDia += t;
-                                
-                                aggrVentasHora[idxHora] += v;
-                                aggrTicketsHora[idxHora] += t;
+                                sumaVentaDia += v; sumaTicketsDia += t;
+                                aggrVentasHora[idxHora] += v; aggrTicketsHora[idxHora] += t;
                             });
-                            
-                            aggrVentasDiaDelMes[i-1] += sumaVentaDia;
-                            aggrTicketsDiaDelMes[i-1] += sumaTicketsDia;
+                            aggrVentasDiaDelMes[i-1] += sumaVentaDia; aggrTicketsDiaDelMes[i-1] += sumaTicketsDia;
 
                             if (sumaVentaDia > maxVDia) { maxVDia = sumaVentaDia; maxDia = `Día ${i}`; }
                         }
@@ -949,7 +941,6 @@
 
                 const diagnosticoVisual = generarDiagnosticoMensual(data.ventas, data.ventasManana, data.tickets, unidades);
                 
-                // El botón de editar solo aparece si es Administrador
                 const editButton = modoAdmin ? 
                     `<button onclick="editarMes('${data.mes}')" data-html2canvas-ignore="true" class="text-sm font-bold text-brand-magenta hover:text-white hover:bg-brand-magenta bg-white px-3 py-1 rounded-lg shadow-sm border border-brand-magenta transition-colors">
                         <i class="fas fa-edit mr-1"></i> Editar Día a Día
@@ -984,14 +975,10 @@
                     </div>`;
             });
 
-            if (chartMixto) chartMixto.destroy();
-            if (chartTorta) chartTorta.destroy();
-            if (chartTurnos) chartTurnos.destroy(); 
-            if (chartTrafico) chartTrafico.destroy();
-            if (chartCrecimiento) chartCrecimiento.destroy();
-            if (chartUnidades) chartUnidades.destroy();
-            if (chartHora) chartHora.destroy();
-            if (chartDias) chartDias.destroy();
+            if (chartMixto) chartMixto.destroy(); if (chartTorta) chartTorta.destroy();
+            if (chartTurnos) chartTurnos.destroy(); if (chartTrafico) chartTrafico.destroy();
+            if (chartCrecimiento) chartCrecimiento.destroy(); if (chartUnidades) chartUnidades.destroy();
+            if (chartHora) chartHora.destroy(); if (chartDias) chartDias.destroy();
 
             const labels = datosMensuales.map(d => d.mes);
             const dataVts = datosMensuales.map(d => d.ventas);
@@ -1001,7 +988,6 @@
             Chart.defaults.font.family = "'Nunito', sans-serif";
             Chart.defaults.animation = false; 
             
-            // Gráficos PÁGINA 2
             chartMixto = new Chart(document.getElementById('mixedChart').getContext('2d'), {
                 type: 'bar', data: { labels: labels, datasets: [ { label: 'Facturación ($)', data: dataVts, backgroundColor: dynamicBgs, borderRadius: 8, yAxisID: 'y' }, { label: 'Ticket Promedio ($)', data: dataTkts, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' } ] },
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { type: 'linear', position: 'left', ticks: { callback: function(val) { return formatMillones(val); } } }, y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return formatCurrency(val); } } } } }
@@ -1018,7 +1004,6 @@
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return (context.dataset.label + ': ' + formatCurrency(context.parsed.y)); } } } }, scales: { y: { beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } } } }
             });
 
-            // Gráficos PÁGINA 3
             chartTrafico = new Chart(document.getElementById('traficoChart').getContext('2d'), {
                 type: 'line', data: { labels: labels, datasets: [{ label: 'Volumen de Tickets', data: datosMensuales.map(d => d.tickets), borderColor: '#ec008c', backgroundColor: 'rgba(236, 0, 140, 0.1)', borderWidth: 4, tension: 0.4, fill: true, pointBackgroundColor: '#fff', pointBorderColor: '#ec008c', pointBorderWidth: 3, pointRadius: 6 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: function(c) { return 'Tickets: ' + formatNumber(c.parsed.y); } } } }, scales: { y: { beginAtZero: false } } }
@@ -1035,7 +1020,6 @@
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatNumber(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return val + ' art.'; } } } } }
             });
 
-            // Gráficos PÁGINA 4
             const labelsDiasMes = Array.from({length: 31}, (_, i) => `Día ${i + 1}`);
             chartDias = new Chart(document.getElementById('diasChart').getContext('2d'), {
                 type: 'bar',
@@ -1050,29 +1034,53 @@
             });
         }
 
+        // 🔥 CEREBRO IA: ANÁLISIS GERENCIAL PROFUNDO 🔥
         function generarDiagnosticoAutomatico() {
             let datos = baseDatosLocales[localActual]?.[anioActual] || [];
             if (datos.length === 0) return;
 
             let totalVentas = 0; let totalVentasManana = 0; let totalTickets = 0; let totalUnidades = 0;
             
+            // Vectores para análisis profundo de horas
+            let horasDataAggr = { 8:0, 9:0, 10:0, 11:0, 12:0, 17:0, 18:0, 19:0, 20:0, 21:0 };
+
             datos.forEach(d => { 
                 totalVentas += d.ventas; totalVentasManana += d.ventasManana; 
                 totalTickets += d.tickets; totalUnidades += (d.unidades || 0);
+                
+                if (d.grillaDiaria) {
+                    for(let i=1; i<=31; i++) {
+                        if(d.grillaDiaria[i]) {
+                            horasDinamicas.forEach(h => {
+                                horasDataAggr[h] += (d.grillaDiaria[i][h]?.v || 0);
+                            });
+                        }
+                    }
+                }
             });
 
             let totalVentasTarde = totalVentas - totalVentasManana;
-            let mejorTurno = totalVentasManana > totalVentasTarde ? "mañana" : "tarde";
-            let porcentajeMejorTurno = totalVentasManana > totalVentasTarde ? (totalVentasManana / totalVentas * 100) : (totalVentasTarde / totalVentas * 100);
-            let ticketPromedio = totalVentas / totalTickets;
+            let mejorTurno = totalVentasManana > totalVentasTarde ? "Mañana" : "Tarde";
+            let porcentajeMejorTurno = totalVentas > 0 ? ((Math.max(totalVentasTarde, totalVentasManana) / totalVentas) * 100) : 0;
+            let ticketPromedio = totalTickets > 0 ? (totalVentas / totalTickets) : 0;
             let uptPromedio = totalTickets > 0 ? (totalUnidades / totalTickets) : 0;
+
+            // Extraer Pico y Valle de Horas Histórico
+            let maxHoraV = -1; let picoHora = "S/D";
+            let minHoraV = Infinity; let valleHora = "S/D";
+            horasDinamicas.forEach(h => {
+                let v = horasDataAggr[h];
+                if (v > maxHoraV && v > 0) { maxHoraV = v; picoHora = `${String(h).padStart(2, '0')}:00`; }
+                if (v < minHoraV && v > 0) { minHoraV = v; valleHora = `${String(h).padStart(2, '0')}:00`; }
+            });
+            if (minHoraV === Infinity) { valleHora = picoHora; }
 
             let mesInicial = datos[0].mes;
             let mesFinal = datos[datos.length - 1].mes;
             
+            // 🔥 REDACCIÓN INTELIGENTE 🔥
             let texto = `Durante el período analizado (${mesInicial} - ${mesFinal} ${anioActual}), el Local ${localActual} registró una facturación total acumulada de ${formatCurrency(totalVentas)}. `;
-            texto += `A nivel operativo, el turno de la ${mejorTurno} se posiciona como la principal tracción de ingresos, representando un ${porcentajeMejorTurno.toFixed(1)}% de las ventas totales. `;
-
+            
             if (datos.length > 1) {
                 let ultimoMes = datos[datos.length - 1];
                 let mesAnterior = datos[datos.length - 2];
@@ -1081,8 +1089,13 @@
                 else if (crecimiento < 0) { texto += `A corto plazo, el mes de ${ultimoMes.mes} experimentó una contracción del ${Math.abs(crecimiento).toFixed(1)}% frente a ${mesAnterior.mes}. `; } 
             }
 
-            texto += `El ticket promedio global de este período se sitúa en ${formatCurrency(ticketPromedio)}.`;
-            if (totalUnidades > 0) { texto += ` El nivel de ventas cruzadas (UPT) promedió ${uptPromedio.toFixed(2)} artículos por cliente.`; }
+            texto += `El ticket promedio global se sitúa en ${formatCurrency(ticketPromedio)}.`;
+            if (totalUnidades > 0) { texto += ` El nivel de ventas cruzadas (UPT) promedió ${uptPromedio.toFixed(2)} artículos por cliente.\n\n`; }
+            else { texto += `\n\n`; }
+
+            texto += `📌 ANÁLISIS DE JORNADA Y HORARIOS:\n`;
+            texto += `El turno ${mejorTurno} lidera la tracción de ingresos, representando un ${porcentajeMejorTurno.toFixed(1)}% de las ventas totales. Evaluando el mapa de calor operativo de todo el período, el pico máximo de productividad histórica se produce a las ${picoHora} hs. Esta es la "Zona Caliente" del local, donde se debe garantizar el 100% de cobertura del staff en salón y cajas para maximizar la conversión y evitar pérdidas por demoras.\n\n`;
+            texto += `Por el contrario, la franja de las ${valleHora} hs representa el "Valle Operativo" de menor rendimiento en el local. Se recomienda fuertemente destinar este horario de bajo movimiento para tareas de reposición de stock, mantenimiento, o bien impulsar el tráfico mediante estrategias agresivas de marketing como ofertas relámpago o "Happy Hours".`;
 
             if (!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
             document.getElementById('texto-diagnostico').innerText = texto;
@@ -1104,7 +1117,6 @@
                 const mes = document.getElementById('inputMes').value;
                 const unidades = parseInt(parseExcelNumber(document.getElementById('inputUnidades').value)) || 0;
 
-                // 🔥 LÓGICA DE VALIDACIÓN 🔥
                 let ventasCalculadas = 0; let ventasMananaCalculadas = 0; let ticketsCalculados = 0; let ticketsMananaCalculados = 0;
                 let grillaDiaria = {}; let hayDatosEnGrilla = false;
                 
@@ -1172,7 +1184,6 @@
                     }
                 };
 
-                // Seguridad al sobreescribir
                 if (indexExistente >= 0) { 
                     showModal({
                         type: 'confirm',
@@ -1207,7 +1218,6 @@
             const element = document.getElementById('pdf-export-area');
             const labels = datosLocalesAnio.map(d => d.mes);
             
-            // 🔥 FUERZA BRUTA: 5 Páginas perfectas garantizadas 🔥
             const opt = {
                 margin:       [10, 10, 10, 10], 
                 filename:     `Reporte_${localActual}_${anioActual}_${labels[0]}_a_${labels[labels.length-1]}.pdf`,
