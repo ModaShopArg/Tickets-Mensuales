@@ -958,7 +958,6 @@
                 if (chartCrecimiento) chartCrecimiento.destroy(); if (chartUnidades) chartUnidades.destroy();
                 if (chartHora) chartHora.destroy(); if (chartDias) chartDias.destroy();
                 
-                // Limpiar selector de mes en página 4
                 document.getElementById('selectorMesDias').innerHTML = '';
                 return;
             }
@@ -971,10 +970,12 @@
             });
             const ticketPromedioGlobal = totalTickets > 0 ? (totalVentas / totalTickets) : 0;
             const ventaDiariaGlobal = totalVentas / (totalDiasOperativosGlobal || 1); 
+            const ticketsDiariosGlobal = Math.round(totalTickets / (totalDiasOperativosGlobal || 1));
 
             document.getElementById('periodo-text').innerText = `${datosMensuales[0].mes} - ${datosMensuales[datosMensuales.length-1].mes} ${anioActual}`;
             document.getElementById('kpi-ventas').innerText = formatMillones(totalVentas);
-            document.getElementById('kpi-tickets').innerText = formatNumber(totalTickets);
+            // 🔥 Añadimos el sub-índice de tickets por día al KPI global
+            document.getElementById('kpi-tickets').innerHTML = `${formatNumber(totalTickets)} <span class="text-base text-gray-500 font-bold ml-1 tracking-normal">(${formatNumber(ticketsDiariosGlobal)}/día)</span>`;
             document.getElementById('kpi-ticket-prom').innerText = formatCurrency(ticketPromedioGlobal);
             document.getElementById('kpi-diaria').innerText = formatCurrency(ventaDiariaGlobal);
 
@@ -989,6 +990,10 @@
                 const unidades = data.unidades || 0;
                 const upt = data.tickets > 0 ? (unidades / data.tickets).toFixed(2) : '0.00';
                 
+                // 🔥 Cálculos de promedios diarios para este mes en particular
+                const ventaDiariaMes = data.ventas / (data.diasOperativos || 30);
+                const ticketsDiariosMes = Math.round(data.tickets / (data.diasOperativos || 30));
+
                 let horaPicoText = "S/D";
                 let diaPicoText = "S/D";
                 
@@ -1026,6 +1031,7 @@
                         <i class="fas fa-edit mr-1"></i> Editar Día a Día
                     </button>` : '';
 
+                // 🔥 Agregamos las métricas diarias a la grilla y acomodamos el pie de tarjeta
                 container.innerHTML += `
                     <div style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 16px;">
                         <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
@@ -1042,9 +1048,12 @@
                                     
                                     <div><span class="text-gray-500 text-sm block font-bold">Mejor Día</span><span class="font-bold text-base ${theme.textLight}">${diaPicoText}</span></div>
                                     <div><span class="text-gray-500 text-sm block font-bold">Hora más fuerte</span><span class="font-bold text-base">${horaPicoText}</span></div>
-                                    <div class="col-span-2 text-xs text-gray-500 flex items-center justify-end">
-                                        <span class="font-bold text-brand-magenta">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)} <span class="mx-2">|</span> 
-                                        <span class="font-bold text-brand-black">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)}
+                                    <div><span class="text-gray-500 text-sm block font-bold">Venta Diaria</span><span class="font-bold text-base">${formatCurrency(ventaDiariaMes)}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold">Tickets / Día</span><span class="font-bold text-base">${formatNumber(ticketsDiariosMes)}</span></div>
+                                    
+                                    <div class="col-span-2 md:col-span-4 text-xs text-gray-500 flex items-center justify-between border-t border-gray-100 pt-3 mt-1">
+                                        <div><span class="font-bold text-brand-magenta">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)}</div>
+                                        <div><span class="font-bold text-brand-black">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)}</div>
                                     </div>
                                 </div>
                                 <div class="${theme.light} rounded p-4 border-l-4 ${theme.leftBorder} text-sm text-gray-700">
