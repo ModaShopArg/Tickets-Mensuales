@@ -46,13 +46,9 @@
         .card-hover { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease; }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         
-        /* 🔥 CLASE QUE OBLIGA EL SALTO DE PÁGINA EN EL PDF 🔥 */
-        .html2pdf__page-break {
-            height: 0;
-            page-break-before: always !important;
-            margin: 0;
-            padding: 0;
-            border: none;
+        /* 🔥 ORDEN NATIVA PARA SEPARAR PÁGINAS EN EL PDF 🔥 */
+        @media print {
+            .nueva-pagina { page-break-before: always !important; }
         }
     </style>
 </head>
@@ -141,10 +137,10 @@
 
 
         <!-- 🔥🔥🔥 ZONA DE EXPORTACIÓN PDF (SÓLO LO QUE ESTÉ AQUÍ DENTRO SALDRÁ EN EL PDF) 🔥🔥🔥 -->
-        <div id="pdf-export-area" class="w-full">
+        <div id="pdf-export-area" class="w-full bg-[#f8fafc]">
             
             <!-- ======================= PÁGINA 1: KPIs y Tarjetas ======================= -->
-            <div id="pagina-1">
+            <div id="pagina-1" class="pb-4">
                 <!-- Global KPIs -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                     <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-magenta card-hover">
@@ -196,22 +192,22 @@
                 </div>
             </div>
 
-            <!-- ✂️ MURO DE CORTE PÁGINA 1 a PÁGINA 2 ✂️ -->
-            <div class="html2pdf__page-break"></div>
-
             <!-- ======================= PÁGINA 2: Gráficos Principales ======================= -->
-            <div id="pagina-2">
+            <!-- 🔥 Clase nueva-pagina forza el corte aquí mismo 🔥 -->
+            <div id="pagina-2" class="nueva-pagina pt-6">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
                         <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
-                        <div class="relative h-80 w-full overflow-hidden">
+                        <!-- ALTURA REDUCIDA A h-72 PARA GARANTIZAR QUE QUEPA EN EL PDF -->
+                        <div class="relative h-72 w-full overflow-hidden">
                             <canvas id="mixedChart"></canvas>
                         </div>
                     </div>
                     
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-brand-magenta"></i>Distribución de Ingresos</h3>
-                        <div class="relative h-80 w-full flex justify-center overflow-hidden">
+                        <!-- ALTURA REDUCIDA A h-72 PARA GARANTIZAR QUE QUEPA EN EL PDF -->
+                        <div class="relative h-72 w-full flex justify-center overflow-hidden">
                             <canvas id="pieChart"></canvas>
                         </div>
                     </div>
@@ -223,18 +219,16 @@
                         <i class="fas fa-clock mr-2 text-brand-black"></i> 
                         Rendimiento Operativo: Turno Mañana vs. Turno Tarde
                     </h3>
-                    <div class="relative h-80 w-full overflow-hidden">
+                    <!-- ALTURA REDUCIDA A h-72 PARA GARANTIZAR QUE QUEPA EN EL PDF -->
+                    <div class="relative h-72 w-full overflow-hidden">
                         <canvas id="turnosChart"></canvas>
                     </div>
                     <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
                 </div>
             </div>
 
-            <!-- ✂️ MURO DE CORTE PÁGINA 2 a PÁGINA 3 ✂️ -->
-            <div class="html2pdf__page-break"></div>
-
             <!-- ======================= PÁGINA 3: Gráficos de Eficiencia ======================= -->
-            <div id="pagina-3">
+            <div id="pagina-3" class="nueva-pagina pt-6">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Gráfico de Tráfico (Clientes) -->
                     <div class="bg-white rounded-xl shadow-sm p-6">
@@ -242,7 +236,8 @@
                             <i class="fas fa-users mr-2 text-brand-magenta"></i> 
                             Evolución de Tráfico (Retención)
                         </h3>
-                        <div class="relative h-80 w-full overflow-hidden">
+                        <!-- ALTURA REDUCIDA A h-72 PARA GARANTIZAR QUE QUEPA EN EL PDF -->
+                        <div class="relative h-72 w-full overflow-hidden">
                             <canvas id="traficoChart"></canvas>
                         </div>
                         <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza si el volumen de clientes reales sube o baja, aislando el efecto inflacionario sobre la facturación.</p>
@@ -254,7 +249,8 @@
                             <i class="fas fa-arrow-trend-up mr-2 text-brand-magenta"></i> 
                             Crecimiento Mes a Mes (%)
                         </h3>
-                        <div class="relative h-80 w-full overflow-hidden">
+                        <!-- ALTURA REDUCIDA A h-72 PARA GARANTIZAR QUE QUEPA EN EL PDF -->
+                        <div class="relative h-72 w-full overflow-hidden">
                             <canvas id="crecimientoChart"></canvas>
                         </div>
                         <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Variación porcentual de facturación respecto al mes inmediatamente anterior.</p>
@@ -267,18 +263,16 @@
                         <i class="fas fa-box-open mr-2 text-brand-magenta"></i> 
                         Eficiencia de Venta: Unidades y UPT (Artículos por Ticket)
                     </h3>
-                    <div class="relative h-80 w-full overflow-hidden">
+                    <!-- ALTURA REDUCIDA A h-72 PARA GARANTIZAR QUE QUEPA EN EL PDF -->
+                    <div class="relative h-72 w-full overflow-hidden">
                         <canvas id="unidadesChart"></canvas>
                     </div>
                     <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Mide cuántos artículos compran tus clientes en promedio (UPT). Vital para evaluar el nivel de venta cruzada en el local.</p>
                 </div>
             </div>
 
-            <!-- ✂️ MURO DE CORTE PÁGINA 3 a PÁGINA 4 ✂️ -->
-            <div class="html2pdf__page-break"></div>
-
             <!-- ======================= PÁGINA 4: Diagnóstico y Conclusiones ======================= -->
-            <div id="pagina-4">
+            <div id="pagina-4" class="nueva-pagina pt-6">
                 <!-- Diagnóstico Ejecutivo -->
                 <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white">
                     <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4">
@@ -656,7 +650,7 @@
                 const diagnosticoVisual = generarDiagnosticoMensual(data.ventas, data.ventasManana, data.tickets, unidades);
 
                 container.innerHTML += `
-                    <div>
+                    <div style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 16px;">
                         <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
                             <div class="${theme.light} p-4 border-b ${theme.border} flex justify-between items-center">
                                 <h3 class="text-xl font-bold ${theme.textDark}">📊 ${data.mes} 2026</h3>
@@ -978,13 +972,15 @@
             
             const labels = datosMensuales.map(d => d.mes);
             
-            // 🔥 MARGEN UNIFORME PARA CENTRAR PERFECTAMENTE 🔥
+            // 🔥 FUERZA BRUTA: Le damos a la librería la orden nativa e inquebrantable de romper página
+            // en cada clase .nueva-pagina. Se suma windowWidth ancho para evitar reescalados
             const opt = {
-                margin:       [10, 10, 10, 10], // Arriba, Derecha, Abajo, Izquierda (Márgenes perfectos)
+                margin:       [10, 10, 10, 10], 
                 filename:     `Reporte_${localActual}_${labels[0]}_a_${labels[labels.length-1]}.pdf`,
                 image:        { type: 'jpeg', quality: 1 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: 1280 },
-                jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' }
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: 1366 },
+                jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' },
+                pagebreak:    { mode: ['css', 'legacy'], before: '.nueva-pagina' } 
             };
 
             html2pdf().set(opt).from(element).save().then(() => { btn.innerHTML = originalText; });
