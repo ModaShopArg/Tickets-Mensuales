@@ -46,7 +46,14 @@
         .card-hover { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease; }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         
-        /* 🔥 ORDEN NATIVA PARA SEPARAR PÁGINAS EN EL PDF 🔥 */
+        /* 🔥 CLASE QUE OBLIGA EL SALTO DE PÁGINA EN EL PDF 🔥 */
+        .html2pdf__page-break {
+            height: 0;
+            page-break-before: always !important;
+            margin: 0;
+            padding: 0;
+            border: none;
+        }
         @media print {
             .nueva-pagina { page-break-before: always !important; }
         }
@@ -87,7 +94,7 @@
                 <i class="fas fa-keyboard mr-2 text-brand-magenta"></i> Cargar Nuevos Meses (Uso Interno)
             </h2>
             <form id="formCarga" onsubmit="agregarNuevoMes(event)">
-                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end mb-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Mes</label>
                         <select id="inputMes" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta font-bold text-gray-800">
@@ -126,6 +133,66 @@
                         <input type="text" id="inputUnidades" placeholder="Ej: 1450" class="w-full rounded-lg border border-pink-300 shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-magenta" title="Total de artículos vendidos en el mes.">
                     </div>
                 </div>
+
+                <!-- 🔥 SECCIÓN PLEGABLE PARA DETALLE POR HORA 🔥 -->
+                <details class="col-span-1 md:col-span-2 lg:col-span-6 mt-4 border border-pink-300 rounded-xl bg-white overflow-hidden shadow-sm">
+                    <summary class="bg-pink-50 p-3 font-bold text-brand-magenta cursor-pointer hover:bg-pink-100 transition-colors text-sm outline-none">
+                        <i class="fas fa-stopwatch mr-2"></i> Ingresar Detalle por Hora (08:00 a 21:00) - Opcional para Gráfico
+                    </summary>
+                    <div class="p-4 grid grid-cols-2 md:grid-cols-5 gap-3 bg-gray-50 border-t border-pink-200">
+                        <!-- Generado por HTML -->
+                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
+                            <span class="font-black text-brand-black block mb-1 text-xs">08:00 hs</span>
+                            <input type="text" id="h_v_8" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                            <input type="text" id="h_t_8" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                        </div>
+                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
+                            <span class="font-black text-brand-black block mb-1 text-xs">09:00 hs</span>
+                            <input type="text" id="h_v_9" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                            <input type="text" id="h_t_9" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                        </div>
+                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
+                            <span class="font-black text-brand-black block mb-1 text-xs">10:00 hs</span>
+                            <input type="text" id="h_v_10" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                            <input type="text" id="h_t_10" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                        </div>
+                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
+                            <span class="font-black text-brand-black block mb-1 text-xs">11:00 hs</span>
+                            <input type="text" id="h_v_11" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                            <input type="text" id="h_t_11" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                        </div>
+                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
+                            <span class="font-black text-brand-black block mb-1 text-xs">12:00 hs</span>
+                            <input type="text" id="h_v_12" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                            <input type="text" id="h_t_12" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                        </div>
+                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
+                            <span class="font-black text-brand-black block mb-1 text-xs">17:00 hs</span>
+                            <input type="text" id="h_v_17" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                            <input type="text" id="h_t_17" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                        </div>
+                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
+                            <span class="font-black text-brand-black block mb-1 text-xs">18:00 hs</span>
+                            <input type="text" id="h_v_18" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                            <input type="text" id="h_t_18" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                        </div>
+                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
+                            <span class="font-black text-brand-black block mb-1 text-xs">19:00 hs</span>
+                            <input type="text" id="h_v_19" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                            <input type="text" id="h_t_19" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                        </div>
+                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
+                            <span class="font-black text-brand-black block mb-1 text-xs">20:00 hs</span>
+                            <input type="text" id="h_v_20" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                            <input type="text" id="h_t_20" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                        </div>
+                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
+                            <span class="font-black text-brand-black block mb-1 text-xs">21:00 hs</span>
+                            <input type="text" id="h_v_21" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                            <input type="text" id="h_t_21" placeholder="Tickets" class="w-full text-xs p-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
+                        </div>
+                    </div>
+                </details>
                 
                 <div class="flex justify-end mt-6">
                     <button type="submit" id="btnAgregar" class="bg-brand-magenta hover:bg-brand-magentaHover text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md w-full md:w-auto text-lg flex items-center justify-center">
@@ -192,13 +259,14 @@
                 </div>
             </div>
 
+            <!-- ✂️ MURO DE CORTE PÁGINA 1 a PÁGINA 2 ✂️ -->
+            <div class="html2pdf__page-break"></div>
+
             <!-- ======================= PÁGINA 2: Gráficos Principales ======================= -->
-            <!-- 🔥 Clase nueva-pagina forza el corte aquí mismo 🔥 -->
             <div id="pagina-2" class="nueva-pagina pt-6">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
                         <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
-                        <!-- ALTURA REDUCIDA A h-72 PARA GARANTIZAR QUE QUEPA EN EL PDF -->
                         <div class="relative h-72 w-full overflow-hidden">
                             <canvas id="mixedChart"></canvas>
                         </div>
@@ -206,7 +274,6 @@
                     
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-brand-magenta"></i>Distribución de Ingresos</h3>
-                        <!-- ALTURA REDUCIDA A h-72 PARA GARANTIZAR QUE QUEPA EN EL PDF -->
                         <div class="relative h-72 w-full flex justify-center overflow-hidden">
                             <canvas id="pieChart"></canvas>
                         </div>
@@ -219,13 +286,15 @@
                         <i class="fas fa-clock mr-2 text-brand-black"></i> 
                         Rendimiento Operativo: Turno Mañana vs. Turno Tarde
                     </h3>
-                    <!-- ALTURA REDUCIDA A h-72 PARA GARANTIZAR QUE QUEPA EN EL PDF -->
                     <div class="relative h-72 w-full overflow-hidden">
                         <canvas id="turnosChart"></canvas>
                     </div>
                     <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
                 </div>
             </div>
+
+            <!-- ✂️ MURO DE CORTE PÁGINA 2 a PÁGINA 3 ✂️ -->
+            <div class="html2pdf__page-break"></div>
 
             <!-- ======================= PÁGINA 3: Gráficos de Eficiencia ======================= -->
             <div id="pagina-3" class="nueva-pagina pt-6">
@@ -236,7 +305,6 @@
                             <i class="fas fa-users mr-2 text-brand-magenta"></i> 
                             Evolución de Tráfico (Retención)
                         </h3>
-                        <!-- ALTURA REDUCIDA A h-72 PARA GARANTIZAR QUE QUEPA EN EL PDF -->
                         <div class="relative h-72 w-full overflow-hidden">
                             <canvas id="traficoChart"></canvas>
                         </div>
@@ -249,7 +317,6 @@
                             <i class="fas fa-arrow-trend-up mr-2 text-brand-magenta"></i> 
                             Crecimiento Mes a Mes (%)
                         </h3>
-                        <!-- ALTURA REDUCIDA A h-72 PARA GARANTIZAR QUE QUEPA EN EL PDF -->
                         <div class="relative h-72 w-full overflow-hidden">
                             <canvas id="crecimientoChart"></canvas>
                         </div>
@@ -257,19 +324,36 @@
                     </div>
                 </div>
 
-                <!-- Eficiencia de Ventas -->
-                <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
-                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
-                        <i class="fas fa-box-open mr-2 text-brand-magenta"></i> 
-                        Eficiencia de Venta: Unidades y UPT (Artículos por Ticket)
-                    </h3>
-                    <!-- ALTURA REDUCIDA A h-72 PARA GARANTIZAR QUE QUEPA EN EL PDF -->
-                    <div class="relative h-72 w-full overflow-hidden">
-                        <canvas id="unidadesChart"></canvas>
+                <!-- Segunda fila de gráficos en Página 3 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                    <!-- Eficiencia de Ventas -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
+                            <i class="fas fa-box-open mr-2 text-brand-magenta"></i> 
+                            Eficiencia de Venta: Unidades y UPT
+                        </h3>
+                        <div class="relative h-72 w-full overflow-hidden">
+                            <canvas id="unidadesChart"></canvas>
+                        </div>
+                        <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Mide cuántos artículos compran tus clientes en promedio (UPT). Vital para evaluar el nivel de venta cruzada en el local.</p>
                     </div>
-                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Mide cuántos artículos compran tus clientes en promedio (UPT). Vital para evaluar el nivel de venta cruzada en el local.</p>
+
+                    <!-- 🔥 NUEVO GRÁFICO: Productividad por Hora 🔥 -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center">
+                            <i class="fas fa-stopwatch mr-2 text-brand-magenta"></i> 
+                            Productividad por Hora: Ventas y Tickets
+                        </h3>
+                        <div class="relative h-72 w-full overflow-hidden">
+                            <canvas id="horaChart"></canvas>
+                        </div>
+                        <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Evalúa el mapa de calor operativo del local (suma acumulada del periodo seleccionado) para identificar horas pico y muertas.</p>
+                    </div>
                 </div>
             </div>
+
+            <!-- ✂️ MURO DE CORTE PÁGINA 3 a PÁGINA 4 ✂️ -->
+            <div class="html2pdf__page-break"></div>
 
             <!-- ======================= PÁGINA 4: Diagnóstico y Conclusiones ======================= -->
             <div id="pagina-4" class="nueva-pagina pt-6">
@@ -324,7 +408,7 @@
                                 <h3 class="font-bold text-lg">4. Balance de Turnos</h3>
                             </div>
                             <p class="text-gray-400 text-sm leading-relaxed font-semibold">
-                                Utilizar el análisis "Mañana vs Tarde" para redistribuir el staff. Reforzar con vendedores top el turno de mayor volumen.
+                                Utilizar el análisis "Mañana vs Tarde" para redistribuir el staff. Reforzar con vendedores top el turno de mayor volumen y considerar Happy Hours en los valles.
                             </p>
                         </div>
                     </div>
@@ -371,6 +455,7 @@
             'Tendens': '[Esperando datos...]'
         };
         let localActual = 'Concordia';
+        const horasDinamicas = [8, 9, 10, 11, 12, 17, 18, 19, 20, 21];
 
         setTimeout(() => {
             if (!datosSincronizados) {
@@ -483,6 +568,7 @@
         let chartTrafico = null;
         let chartCrecimiento = null;
         let chartUnidades = null;
+        let chartHora = null; 
 
         const formatCurrency = (value) => {
             if(isNaN(value)) return '$0';
@@ -590,6 +676,12 @@
             document.getElementById('inputTickets').value = datos.tickets;
             document.getElementById('inputTicketsManana').value = datos.ticketsManana;
             document.getElementById('inputUnidades').value = (datos.unidades && datos.unidades > 0) ? datos.unidades : '';
+            
+            // Cargar datos por hora si existen
+            horasDinamicas.forEach(h => {
+                document.getElementById(`h_v_${h}`).value = (datos.horasData && datos.horasData[h] && datos.horasData[h].v > 0) ? datos.horasData[h].v : '';
+                document.getElementById(`h_t_${h}`).value = (datos.horasData && datos.horasData[h] && datos.horasData[h].t > 0) ? datos.horasData[h].t : '';
+            });
 
             const btnAgregar = document.getElementById('btnAgregar');
             btnAgregar.disabled = false;
@@ -621,6 +713,7 @@
                 if (chartTrafico) chartTrafico.destroy();
                 if (chartCrecimiento) chartCrecimiento.destroy();
                 if (chartUnidades) chartUnidades.destroy();
+                if (chartHora) chartHora.destroy();
                 return;
             }
 
@@ -639,6 +732,10 @@
             const container = document.getElementById('monthly-container');
             container.innerHTML = ''; 
             
+            // Inicializamos arrays para sumar la productividad por hora de todo el período
+            let aggrVentasHora = new Array(10).fill(0);
+            let aggrTicketsHora = new Array(10).fill(0);
+            
             datosMensuales.forEach((data, index) => {
                 if (!colores[data.colorTema]) {
                     data.colorTema = listadoColores[index % listadoColores.length];
@@ -647,6 +744,25 @@
                 const unidades = data.unidades || 0;
                 const upt = data.tickets > 0 ? (unidades / data.tickets).toFixed(2) : '0.00';
                 
+                // Extraer el Pico por Hora para la tarjeta
+                let horaPicoText = "S/D";
+                let ticketsPicoText = "S/D";
+                if (data.horasData) {
+                    let maxV = -1; let maxH = "";
+                    let maxT = -1; let maxTH = "";
+                    horasDinamicas.forEach((h, i) => {
+                        let v = data.horasData[h]?.v || 0;
+                        let t = data.horasData[h]?.t || 0;
+                        aggrVentasHora[i] += v;
+                        aggrTicketsHora[i] += t;
+                        
+                        if (v > maxV) { maxV = v; maxH = h.toString().padStart(2, '0') + ":00"; }
+                        if (t > maxT) { maxT = t; maxTH = h.toString().padStart(2, '0') + ":00"; }
+                    });
+                    if (maxV > 0) horaPicoText = `${maxH} (${formatCurrency(maxV)})`;
+                    if (maxT > 0) ticketsPicoText = `${maxTH} (${maxT}t)`;
+                }
+
                 const diagnosticoVisual = generarDiagnosticoMensual(data.ventas, data.ventasManana, data.tickets, unidades);
 
                 container.innerHTML += `
@@ -659,16 +775,20 @@
                                 </button>
                             </div>
                             <div class="p-6 flex-grow">
-                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                                     <div><span class="text-gray-500 text-sm block font-bold">Venta Total</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ventas)}</span></div>
                                     <div><span class="text-gray-500 text-sm block font-bold">Ticket Prom.</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ticketPromedio)}</span></div>
                                     <div><span class="text-gray-500 text-sm block font-bold">Total Tickets</span><span class="font-bold text-lg">${formatNumber(data.tickets)}</span></div>
-                                    
                                     <div><span class="text-gray-500 text-sm block font-bold">Total Unidades</span><span class="font-bold text-lg">${formatNumber(unidades)}</span></div>
+                                    
                                     <div><span class="text-gray-500 text-sm block font-bold">UPT (Art/Ticket)</span><span class="font-bold text-lg">${upt}</span></div>
                                     <div><span class="text-gray-500 text-sm block font-bold">Tickets/Día</span><span class="font-bold text-lg">${data.ticketsDiarios}</span></div>
                                     
-                                    <div class="col-span-2 md:col-span-3 text-xs text-gray-500 border-t pt-2 mt-1">
+                                    <!-- 🔥 NUEVO: Mostramos las HORAS PICOS del Mes 🔥 -->
+                                    <div><span class="text-gray-500 text-sm block font-bold">Pico Venta/Hora</span><span class="font-bold text-base ${theme.textLight}">${horaPicoText}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold">Pico Tkts/Hora</span><span class="font-bold text-base">${ticketsPicoText}</span></div>
+                                    
+                                    <div class="col-span-2 md:col-span-4 text-xs text-gray-500 border-t pt-2 mt-1">
                                         <span class="font-bold text-brand-magenta">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)} (${data.ticketsManana} tkts) <span class="mx-2">|</span> 
                                         <span class="font-bold text-brand-black">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)} (${data.tickets - data.ticketsManana} tkts)
                                     </div>
@@ -687,6 +807,7 @@
             if (chartTrafico) chartTrafico.destroy();
             if (chartCrecimiento) chartCrecimiento.destroy();
             if (chartUnidades) chartUnidades.destroy();
+            if (chartHora) chartHora.destroy();
 
             const labels = datosMensuales.map(d => d.mes);
             const dataVts = datosMensuales.map(d => d.ventas);
@@ -842,6 +963,27 @@
                     }
                 }
             });
+
+            // 🔥 NUEVO GRÁFICO: Mapa de Calor / Productividad por Hora 🔥
+            const labelsHora = ['08:00', '09:00', '10:00', '11:00', '12:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
+
+            chartHora = new Chart(document.getElementById('horaChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labelsHora,
+                    datasets: [
+                        { label: 'Volumen de Ventas Acumulado ($)', data: aggrVentasHora, backgroundColor: '#111111', borderRadius: 8, yAxisID: 'y' },
+                        { label: 'Tickets Acumulados', data: aggrTicketsHora, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } },
+                        y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return val + ' tkts'; } } }
+                    }
+                }
+            });
         }
 
         function generarDiagnosticoAutomatico() {
@@ -906,7 +1048,7 @@
                 const valUnidades = document.getElementById('inputUnidades').value;
 
                 if (!valVenta || !valVentaManana || !valTickets || !valTicketsManana || !valUnidades) {
-                    alert("⚠️ ¡Atención! Por favor, completa todos los campos numéricos.");
+                    alert("⚠️ ¡Atención! Por favor, completa los campos principales.");
                     return;
                 }
 
@@ -920,6 +1062,15 @@
                 if (ventasManana > ventas) { alert(`⚠️ Las ventas de la mañana no pueden ser mayores al total.`); return; }
                 if (ticketsManana > tickets) { alert(`⚠️ Los tickets de la mañana no pueden superar los totales.`); return; }
 
+                // 🔥 Recolectamos la información detallada por hora 🔥
+                let horasData = {};
+                horasDinamicas.forEach(h => {
+                    horasData[h] = {
+                        v: parseExcelNumber(document.getElementById(`h_v_${h}`).value),
+                        t: parseInt(parseExcelNumber(document.getElementById(`h_t_${h}`).value)) || 0
+                    };
+                });
+
                 const ticketPromedio = tickets > 0 ? (ventas / tickets) : 0;
                 const ticketsDiarios = Math.round(tickets / 30);
                 const colorTema = listadoColores[datosMensuales.length % listadoColores.length];
@@ -928,19 +1079,26 @@
 
                 const indexExistente = datosMensuales.findIndex(d => d.mes === mes);
                 
+                const mesObjeto = { mes, ventas, ventasManana, tickets, ticketsManana, unidades, horasData, ticketPromedio, ticketsDiarios, diagnostico: diagnosticoAutomatico, colorTema };
+
                 if (indexExistente >= 0) { 
                     const seguro = confirm(`⚠️ ATENCIÓN: El mes de ${mes} ya tiene datos cargados.\n\n¿Estás absolutamente seguro de que deseas SOBRESCRIBIR la información existente?`);
                     if(!seguro) return;
-                    datosMensuales[indexExistente] = { mes, ventas, ventasManana, tickets, ticketsManana, unidades, ticketPromedio, ticketsDiarios, diagnostico: diagnosticoAutomatico, colorTema };
+                    datosMensuales[indexExistente] = mesObjeto;
                 } else { 
-                    datosMensuales.push({ mes, ventas, ventasManana, tickets, ticketsManana, unidades, ticketPromedio, ticketsDiarios, diagnostico: diagnosticoAutomatico, colorTema });
+                    datosMensuales.push(mesObjeto);
                 }
 
+                // Limpiar campos después de guardar
                 document.getElementById('inputVenta').value = '';
                 document.getElementById('inputVentaManana').value = '';
                 document.getElementById('inputTickets').value = '';
                 document.getElementById('inputTicketsManana').value = '';
                 document.getElementById('inputUnidades').value = '';
+                horasDinamicas.forEach(h => {
+                    document.getElementById(`h_v_${h}`).value = '';
+                    document.getElementById(`h_t_${h}`).value = '';
+                });
 
                 guardarEnLaNube();
                 generarDiagnosticoAutomatico();
