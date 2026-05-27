@@ -286,9 +286,15 @@
             <!-- ======================= PÁGINA 4 (DÍA A DÍA) ======================= -->
             <div id="pagina-4" class="pt-4">
                 <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center"><i class="fas fa-calendar-day mr-2 text-brand-magenta"></i> Evolución Diaria (Día 1 al 31)</h3>
+                    <!-- 🔥 NUEVO SELECTOR DE MES PARA EL GRÁFICO DIARIO 🔥 -->
+                    <div class="flex justify-between items-center mb-6 border-b pb-2">
+                        <h3 class="text-xl font-bold text-brand-black flex items-center"><i class="fas fa-calendar-day mr-2 text-brand-magenta"></i> Evolución Diaria (Día a Día)</h3>
+                        <select id="selectorMesDias" onchange="actualizarGraficoDias(this.value)" class="text-sm font-bold text-brand-magenta bg-transparent border-b-2 border-brand-magenta outline-none cursor-pointer pb-1" title="Seleccionar mes a visualizar">
+                            <!-- Opciones inyectadas por JS -->
+                        </select>
+                    </div>
                     <div class="relative h-72 w-full overflow-hidden"><canvas id="diasChart"></canvas></div>
-                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza la línea de tiempo, identificando picos y valles de venta por cada día calendario del acumulado.</p>
+                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza la línea de tiempo, identificando picos y valles de venta por cada día calendario del mes seleccionado.</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
                     <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center"><i class="fas fa-stopwatch mr-2 text-brand-magenta"></i> Productividad por Hora</h3>
@@ -306,7 +312,6 @@
                 <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white">
                     <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4"><i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo</h2>
                     <div class="bg-[#222222] rounded-xl border border-brand-darkGray hover:border-brand-magenta transition-colors">
-                        <!-- El contenteditable se maneja ahora vía JS según el modo admin -->
                         <div id="texto-diagnostico" onblur="guardarDiagnostico(this.innerText)" class="text-gray-300 leading-relaxed outline-none rounded-xl p-6 transition-all min-h-[100px] whitespace-pre-wrap" title="El diagnóstico se bloqueará en Modo Lectura">[Sincronizando diagnóstico...]</div>
                     </div>
                 </div>
@@ -514,7 +519,6 @@
             return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
         }
 
-        // 🔥 FUNCIÓN PARA CAMBIAR COLOR DE FILA SEGÚN TIPO DE DÍA 🔥
         window.cambiarTipoDia = function(dia, selectElement) {
             const tr = selectElement.closest('tr');
             const tdLabel = document.getElementById(`td_dia_${dia}`);
@@ -549,7 +553,6 @@
                 let tr = document.createElement('tr');
                 tr.className = "border-b border-pink-100 hover:bg-pink-100 transition-colors";
                 
-                // 🔥 NUEVA COLUMNA CON SELECTOR DE TIPO DE DÍA 🔥
                 let tdDia = `
                     <td class="p-2 font-bold text-center border-r border-pink-200 bg-white sticky left-0 shadow-sm z-10 transition-colors" id="td_dia_${i}">
                         <div class="mb-1 text-sm">Día ${i}</div>
@@ -607,11 +610,10 @@
 
         initAuth();
 
-        // 🔥 INDICADOR DE NUBE MINIMALISTA 🔥
         function actualizarStatusNube(texto, colorOriginal) {
             const statusEl = document.getElementById('cloud-status');
             if (statusEl) { 
-                let colorNube = 'text-emerald-500'; // Por defecto verde (Guardado/OK)
+                let colorNube = 'text-emerald-500'; 
                 let iconNube = 'fa-cloud';
 
                 if (texto.toLowerCase().includes('error') || texto.toLowerCase().includes('fallo') || texto.toLowerCase().includes('offline')) {
@@ -859,11 +861,10 @@
             if (mes === 'Febrero' && esBisiesto(parseInt(anioActual))) numDias = 29;
 
             for(let i=1; i<=numDias; i++) {
-                // 🔥 Restaurar tipo de día 🔥
                 let tipoInput = document.getElementById(`tipo_dia_${i}`);
                 if (tipoInput) {
                     tipoInput.value = (datos.tiposDia && datos.tiposDia[i]) ? datos.tiposDia[i] : 'normal';
-                    window.cambiarTipoDia(i, tipoInput); // Trigger visual update
+                    window.cambiarTipoDia(i, tipoInput); 
                 }
 
                 horasDinamicas.forEach(h => {
@@ -886,6 +887,43 @@
             btnAgregar.classList.add('bg-brand-magenta', 'hover:bg-brand-magentaHover');
 
             document.getElementById('formCarga').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        // 🔥 NUEVA FUNCIÓN PARA ACTUALIZAR SOLO EL GRÁFICO DIARIO 🔥
+        window.actualizarGraficoDias = function(mesSeleccionado) {
+            let datosLocalesAnio = baseDatosLocales[localActual]?.[anioActual] || [];
+            let dataMes = datosLocalesAnio.find(d => d.mes === mesSeleccionado);
+            
+            if (!dataMes) return;
+
+            let numDias = diasPorMes[mesSeleccionado] || 31;
+            if (mesSeleccionado === 'Febrero' && esBisiesto(parseInt(anioActual))) numDias = 29;
+
+            let aggrVentasDia = new Array(numDias).fill(0);
+            let aggrTicketsDia = new Array(numDias).fill(0);
+
+            if (dataMes.grillaDiaria) {
+                for(let i=1; i<=numDias; i++) {
+                    if(dataMes.grillaDiaria[i]) {
+                        let sumaV = 0, sumaT = 0;
+                        horasDinamicas.forEach(h => {
+                            sumaV += (dataMes.grillaDiaria[i][h]?.v || 0);
+                            sumaT += (dataMes.grillaDiaria[i][h]?.t || 0);
+                        });
+                        aggrVentasDia[i-1] = sumaV;
+                        aggrTicketsDia[i-1] = sumaT;
+                    }
+                }
+            }
+
+            if (chartDias) chartDias.destroy();
+            
+            const labelsDias = Array.from({length: numDias}, (_, i) => `Día ${i + 1}`);
+            chartDias = new Chart(document.getElementById('diasChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: labelsDias, datasets: [ { label: 'Ventas Acumuladas ($)', data: aggrVentasDia, backgroundColor: '#ec008c', borderRadius: 4, yAxisID: 'y' }, { label: 'Tickets Totales', data: aggrTicketsDia, type: 'line', borderColor: '#111111', backgroundColor: '#111111', borderWidth: 3, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 2, pointRadius: 4, yAxisID: 'y1' } ] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return context.datasetIndex === 0 ? 'Ventas: ' + formatCurrency(context.parsed.y) : 'Tickets: ' + formatNumber(context.parsed.y); } } } }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } } } }
+            });
         };
 
         function renderDashboard() {
@@ -919,6 +957,9 @@
                 if (chartTurnos) chartTurnos.destroy(); if (chartTrafico) chartTrafico.destroy();
                 if (chartCrecimiento) chartCrecimiento.destroy(); if (chartUnidades) chartUnidades.destroy();
                 if (chartHora) chartHora.destroy(); if (chartDias) chartDias.destroy();
+                
+                // Limpiar selector de mes en página 4
+                document.getElementById('selectorMesDias').innerHTML = '';
                 return;
             }
 
@@ -926,7 +967,7 @@
             datosMensuales.forEach(d => { 
                 totalVentas += d.ventas; 
                 totalTickets += d.tickets; 
-                totalDiasOperativosGlobal += (d.diasOperativos || 30); // Fallback por si hay datos viejos
+                totalDiasOperativosGlobal += (d.diasOperativos || 30); 
             });
             const ticketPromedioGlobal = totalTickets > 0 ? (totalVentas / totalTickets) : 0;
             const ventaDiariaGlobal = totalVentas / (totalDiasOperativosGlobal || 1); 
@@ -941,7 +982,6 @@
             container.innerHTML = ''; 
             
             let aggrVentasHora = new Array(10).fill(0); let aggrTicketsHora = new Array(10).fill(0);
-            let aggrVentasDiaDelMes = new Array(31).fill(0); let aggrTicketsDiaDelMes = new Array(31).fill(0);
             
             datosMensuales.forEach((data, index) => {
                 if (!colores[data.colorTema]) { data.colorTema = listadoColores[index % listadoColores.length]; }
@@ -957,15 +997,12 @@
                     for(let i=1; i<=31; i++) {
                         if(data.grillaDiaria[i]) {
                             let sumaVentaDia = 0;
-                            let sumaTicketsDia = 0;
                             horasDinamicas.forEach((h, idxHora) => {
                                 let v = data.grillaDiaria[i][h]?.v || 0;
                                 let t = data.grillaDiaria[i][h]?.t || 0;
-                                sumaVentaDia += v; sumaTicketsDia += t;
+                                sumaVentaDia += v; 
                                 aggrVentasHora[idxHora] += v; aggrTicketsHora[idxHora] += t;
                             });
-                            aggrVentasDiaDelMes[i-1] += sumaVentaDia; aggrTicketsDiaDelMes[i-1] += sumaTicketsDia;
-
                             if (sumaVentaDia > maxVDia) { maxVDia = sumaVentaDia; maxDia = `Día ${i}`; }
                         }
                     }
@@ -1021,7 +1058,7 @@
             if (chartMixto) chartMixto.destroy(); if (chartTorta) chartTorta.destroy();
             if (chartTurnos) chartTurnos.destroy(); if (chartTrafico) chartTrafico.destroy();
             if (chartCrecimiento) chartCrecimiento.destroy(); if (chartUnidades) chartUnidades.destroy();
-            if (chartHora) chartHora.destroy(); if (chartDias) chartDias.destroy();
+            if (chartHora) chartHora.destroy();
 
             const labels = datosMensuales.map(d => d.mes);
             const dataVts = datosMensuales.map(d => d.ventas);
@@ -1065,14 +1102,19 @@
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatNumber(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return val + ' art.'; } } } } }
             });
 
-            // Gráficos PÁGINA 4
-            const labelsDiasMes = Array.from({length: 31}, (_, i) => `Día ${i + 1}`);
-            chartDias = new Chart(document.getElementById('diasChart').getContext('2d'), {
-                type: 'bar',
-                data: { labels: labelsDiasMes, datasets: [ { label: 'Ventas Acumuladas ($)', data: aggrVentasDiaDelMes, backgroundColor: '#ec008c', borderRadius: 4, yAxisID: 'y' }, { label: 'Tickets Totales', data: aggrTicketsDiaDelMes, type: 'line', borderColor: '#111111', backgroundColor: '#111111', borderWidth: 3, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 2, pointRadius: 4, yAxisID: 'y1' } ] },
-                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return context.datasetIndex === 0 ? 'Ventas: ' + formatCurrency(context.parsed.y) : 'Tickets: ' + formatNumber(context.parsed.y); } } } }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } } } }
+            // 🔥 RENDERIZADO DEL SELECTOR DE MES PARA EL GRÁFICO DIARIO (PÁGINA 4) 🔥
+            const selectorMesDias = document.getElementById('selectorMesDias');
+            selectorMesDias.innerHTML = '';
+            datosMensuales.forEach(d => {
+                selectorMesDias.innerHTML += `<option value="${d.mes}">${d.mes}</option>`;
             });
+            const ultimoMes = datosMensuales[datosMensuales.length - 1].mes;
+            selectorMesDias.value = ultimoMes;
+            
+            // Llamamos a la función para dibujar el gráfico del mes por defecto
+            window.actualizarGraficoDias(ultimoMes);
 
+            // Gráfico PÁGINA 4 (Horas)
             chartHora = new Chart(document.getElementById('horaChart').getContext('2d'), {
                 type: 'bar',
                 data: { labels: labelsHoras, datasets: [ { label: 'Ventas Acumuladas ($)', data: aggrVentasHora, backgroundColor: '#111111', borderRadius: 8, yAxisID: 'y' }, { label: 'Tickets Totales', data: aggrTicketsHora, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' } ] },
@@ -1166,7 +1208,6 @@
                 if (mes === 'Febrero' && esBisiesto(parseInt(anioActual))) numDias = 29;
 
                 for(let i=1; i<=numDias; i++) {
-                    // 🔥 SE CAPTURA EL TIPO DE DÍA 🔥
                     let tipoDia = document.getElementById(`tipo_dia_${i}`) ? document.getElementById(`tipo_dia_${i}`).value : 'normal';
                     tiposDia[i] = tipoDia;
 
@@ -1182,7 +1223,6 @@
                     });
                     if (diaTieneDatos) { grillaDiaria[i] = datosDia; }
 
-                    // 🔥 LÓGICA DE DÍAS OPERATIVOS: Si es "normal", o si se vendió algo igual se cuenta como día activo 🔥
                     if (tipoDia === 'normal' || ventaDiaTotal > 0) {
                         diasOperativosMes++;
                     }
@@ -1198,7 +1238,6 @@
                 }
                 
                 const ticketPromedio = ticketsCalculados > 0 ? (ventasCalculadas / ticketsCalculados) : 0;
-                // 🔥 EL PROMEDIO AHORA DIVIDE POR LOS DÍAS REALMENTE OPERATIVOS 🔥
                 const ticketsDiarios = Math.round(ticketsCalculados / (diasOperativosMes || 1));
                 const colorTema = listadoColores[datosMensuales.length % listadoColores.length];
                 const diagnosticoAutomatico = generarDiagnosticoMensual(ventasCalculadas, ventasMananaCalculadas, ticketsCalculados, unidades);
