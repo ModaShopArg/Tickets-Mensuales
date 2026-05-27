@@ -137,10 +137,9 @@
                 <!-- 🔥 SECCIÓN PLEGABLE PARA DETALLE POR HORA 🔥 -->
                 <details class="col-span-1 md:col-span-2 lg:col-span-6 mt-4 border border-pink-300 rounded-xl bg-white overflow-hidden shadow-sm">
                     <summary class="bg-pink-50 p-3 font-bold text-brand-magenta cursor-pointer hover:bg-pink-100 transition-colors text-sm outline-none">
-                        <i class="fas fa-stopwatch mr-2"></i> Ingresar Detalle por Hora (08:00 a 21:00) - Opcional para Gráfico
+                        <i class="fas fa-stopwatch mr-2"></i> Ingresar Detalle por Hora (08:00 a 21:00) - Opcional para Gráfico de Calor
                     </summary>
                     <div class="p-4 grid grid-cols-2 md:grid-cols-5 gap-3 bg-gray-50 border-t border-pink-200">
-                        <!-- Generado por HTML -->
                         <div class="bg-white p-2 rounded border border-gray-200 shadow-sm text-center">
                             <span class="font-black text-brand-black block mb-1 text-xs">08:00 hs</span>
                             <input type="text" id="h_v_8" placeholder="$ Ventas" class="w-full text-xs p-1 mb-1 border border-pink-300 rounded focus:ring-1 focus:ring-brand-magenta text-center">
@@ -744,7 +743,7 @@
                 const unidades = data.unidades || 0;
                 const upt = data.tickets > 0 ? (unidades / data.tickets).toFixed(2) : '0.00';
                 
-                // Extraer el Pico por Hora para la tarjeta
+                // Extraer el Pico por Hora para la tarjeta de forma segura
                 let horaPicoText = "S/D";
                 let ticketsPicoText = "S/D";
                 if (data.horasData) {
@@ -784,7 +783,6 @@
                                     <div><span class="text-gray-500 text-sm block font-bold">UPT (Art/Ticket)</span><span class="font-bold text-lg">${upt}</span></div>
                                     <div><span class="text-gray-500 text-sm block font-bold">Tickets/Día</span><span class="font-bold text-lg">${data.ticketsDiarios}</span></div>
                                     
-                                    <!-- 🔥 NUEVO: Mostramos las HORAS PICOS del Mes 🔥 -->
                                     <div><span class="text-gray-500 text-sm block font-bold">Pico Venta/Hora</span><span class="font-bold text-base ${theme.textLight}">${horaPicoText}</span></div>
                                     <div><span class="text-gray-500 text-sm block font-bold">Pico Tkts/Hora</span><span class="font-bold text-base">${ticketsPicoText}</span></div>
                                     
@@ -978,6 +976,20 @@
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    plugins: { 
+                        // 🔥 Detalle extra: Tooltips con formato de Moneda para el nuevo gráfico 🔥
+                        tooltip: { 
+                            callbacks: { 
+                                label: function(context) { 
+                                    if (context.datasetIndex === 0) {
+                                        return 'Ventas Acumuladas: ' + formatCurrency(context.parsed.y);
+                                    } else {
+                                        return 'Tickets Acumulados: ' + formatNumber(context.parsed.y);
+                                    }
+                                } 
+                            } 
+                        } 
+                    },
                     scales: {
                         y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } },
                         y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return val + ' tkts'; } } }
