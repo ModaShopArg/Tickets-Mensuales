@@ -1287,7 +1287,9 @@
             horasDinamicas.forEach(h => {
                 let v = horasDataAggr[h];
                 if (v > maxHoraV && v > 0) { maxHoraV = v; picoHora = `${String(h).padStart(2, '0')}:00`; }
-                if (v < minHoraV && v > 0) { minHoraV = v; valleHora = `${String(h).padStart(2, '0')}:00`; }
+                
+                // 🔥 REGLA GERENCIAL: Ignoramos las 21:00hs al buscar el valle, por ser horario de cierre simbólico 🔥
+                if (h !== 21 && v < minHoraV && v > 0) { minHoraV = v; valleHora = `${String(h).padStart(2, '0')}:00`; }
             });
             if (minHoraV === Infinity) { valleHora = picoHora; }
 
