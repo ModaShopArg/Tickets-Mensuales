@@ -82,7 +82,6 @@
                         <option value="Tendens">Local Tendens</option>
                     </select>
                     
-                    <!-- 🔥 SELECTOR DE AÑO LIMPIO 🔥 -->
                     <span class="text-gray-400 mx-2">|</span>
                     <select id="selectorAnio" onchange="cambiarAnio(this.value)" class="bg-transparent border-b-4 border-brand-black text-brand-black cursor-pointer focus:outline-none hover:text-gray-700 transition-colors pb-1">
                         <option value="2025">2025</option>
@@ -94,30 +93,26 @@
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
-                <!-- 🔥 BOTÓN DE SEGURIDAD ESTILIZADO 🔥 -->
                 <button id="btnModo" onclick="toggleModo()" class="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg text-sm font-bold shadow-sm transition-all">
                     <i id="icono-modo" class="fas fa-lock text-gray-500"></i> <span id="texto-modo" class="text-gray-700">Modo Lectura</span>
                 </button>
 
-                <!-- 🔥 BOTÓN EXPORTAR PROPORCIONADO 🔥 -->
                 <button id="btnExport" onclick="exportarPDF()" class="flex items-center gap-2 px-5 py-2.5 bg-brand-black hover:bg-gray-800 border border-brand-black text-white rounded-lg text-sm font-bold shadow-sm transition-all">
                     <i class="fas fa-file-pdf text-brand-magenta"></i> Exportar
                 </button>
 
-                <!-- 🔥 INDICADOR DE NUBE MINIMALISTA (A LA DERECHA) 🔥 -->
                 <div id="cloud-status" class="flex items-center justify-center w-11 h-11 bg-white border border-gray-200 rounded-full shadow-sm cursor-help transition-colors ml-1" title="Conectando...">
                     <i class="fas fa-cloud text-gray-400 text-lg"></i>
                 </div>
             </div>
         </header>
 
-        <!-- 🔥 PANEL DE CARGA DE DATOS (OCULTO EN MODO LECTURA) 🔥 -->
+        <!-- PANEL DE CARGA DE DATOS (OCULTO EN MODO LECTURA) -->
         <div id="panel-admin" class="hidden bg-brand-pinkBg border border-pink-200 rounded-2xl p-6 shadow-sm" data-html2canvas-ignore="true">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                 <h2 class="text-xl font-bold text-brand-black flex items-center">
                     <i class="fas fa-keyboard mr-2 text-brand-magenta"></i> Carga Detallada (Día a Día)
                 </h2>
-                <!-- Botón Empezar desde cero -->
                 <button type="button" onclick="borrarDatosLocal()" class="bg-white text-red-600 hover:bg-red-50 hover:text-red-700 border border-red-200 font-bold py-2 px-4 rounded-lg transition-colors text-sm shadow-sm flex items-center">
                     <i class="fas fa-trash-alt mr-2"></i> Empezar desde cero
                 </button>
@@ -151,7 +146,6 @@
                     </div>
                 </div>
 
-                <!-- GRILLA DE CARGA DÍA A DÍA -->
                 <div class="mt-6 border border-pink-300 rounded-xl bg-white overflow-hidden shadow-sm">
                     <div class="bg-pink-50 p-3 font-bold text-brand-magenta border-b border-pink-200 text-sm flex items-center justify-between">
                         <div><i class="fas fa-table mr-2"></i> Grilla de Ingreso: Día a Día, Hora a Hora</div>
@@ -175,7 +169,6 @@
                                 </tr>
                             </thead>
                             <tbody id="tbody-grilla">
-                                <!-- Se inyectan las filas por Javascript según los días del mes -->
                             </tbody>
                         </table>
                     </div>
@@ -195,7 +188,6 @@
             
             <!-- ======================= PÁGINA 1 ======================= -->
             <div id="pagina-1" class="pb-4">
-                <!-- Global KPIs -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                     <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-magenta card-hover">
                         <div class="flex justify-between items-start">
@@ -223,18 +215,15 @@
                     </div>
                 </div>
 
-                <!-- Desglose Mensual Detallado -->
                 <div class="mt-6">
                     <h2 class="text-2xl font-bold text-brand-black mb-6 flex items-center">
                         <i class="fas fa-calendar-check mr-3 text-brand-magenta"></i> Desglose Mensual Detallado
                     </h2>
                     <div id="monthly-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Se inyectan las tarjetas por JS -->
                     </div>
                 </div>
             </div>
 
-            <!-- ✂️ MURO DE CORTE -->
             <div class="html2pdf__page-break"></div>
 
             <!-- ======================= PÁGINA 2 ======================= -->
@@ -256,7 +245,6 @@
                 </div>
             </div>
 
-            <!-- ✂️ MURO DE CORTE -->
             <div class="html2pdf__page-break"></div>
 
             <!-- ======================= PÁGINA 3 ======================= -->
@@ -280,28 +268,23 @@
                 </div>
             </div>
 
-            <!-- ✂️ MURO DE CORTE -->
             <div class="html2pdf__page-break"></div>
 
             <!-- ======================= PÁGINA 4 (DÍA A DÍA) ======================= -->
             <div id="pagina-4" class="pt-4">
                 <div class="bg-white rounded-xl shadow-sm p-6">
-                    <!-- SELECTOR DE MES PARA EL GRÁFICO DIARIO -->
                     <div class="flex justify-between items-center mb-6 border-b pb-2">
                         <h3 class="text-xl font-bold text-brand-black flex items-center"><i class="fas fa-calendar-day mr-2 text-brand-magenta"></i> Evolución Diaria (Día a Día)</h3>
                         <select id="selectorMesDias" onchange="actualizarGraficoDias(this.value)" class="text-sm font-bold text-brand-magenta bg-transparent border-b-2 border-brand-magenta outline-none cursor-pointer pb-1" title="Seleccionar mes a visualizar">
-                            <!-- Opciones inyectadas por JS -->
                         </select>
                     </div>
                     <div class="relative h-72 w-full overflow-hidden"><canvas id="diasChart"></canvas></div>
                     <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza la línea de tiempo, identificando picos y valles de venta por cada día calendario del mes seleccionado.</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
-                    <!-- 🔥 NUEVO SELECTOR DE MES PARA EL GRÁFICO POR HORAS 🔥 -->
                     <div class="flex justify-between items-center mb-6 border-b pb-2">
                         <h3 class="text-xl font-bold text-brand-black flex items-center"><i class="fas fa-stopwatch mr-2 text-brand-magenta"></i> Productividad por Hora</h3>
                         <select id="selectorMesHoras" onchange="actualizarGraficoHoras(this.value)" class="text-sm font-bold text-brand-magenta bg-transparent border-b-2 border-brand-magenta outline-none cursor-pointer pb-1" title="Seleccionar mes a visualizar">
-                            <!-- Opciones inyectadas por JS -->
                         </select>
                     </div>
                     <div class="relative h-72 w-full overflow-hidden"><canvas id="horaChart"></canvas></div>
@@ -309,12 +292,10 @@
                 </div>
             </div>
 
-            <!-- ✂️ MURO DE CORTE -->
             <div class="html2pdf__page-break"></div>
 
             <!-- ======================= PÁGINA 5 ======================= -->
             <div id="pagina-5" class="pt-4">
-                <!-- Diagnóstico Ejecutivo -->
                 <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white">
                     <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4"><i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo</h2>
                     <div class="bg-[#222222] rounded-xl border border-brand-darkGray hover:border-brand-magenta transition-colors">
@@ -322,7 +303,6 @@
                     </div>
                 </div>
 
-                <!-- Foco y Plan de Acción -->
                 <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white mt-8">
                     <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4"><i class="fas fa-heart mr-3 text-brand-magenta"></i> Foco y Plan de Acción</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -345,93 +325,57 @@
                     </div>
                 </div>
 
-                <!-- 🔥 NUEVO: CALENDARIO COMERCIAL (ARGENTINA) 🔥 -->
+                <!-- CALENDARIO COMERCIAL -->
                 <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white mt-8">
                     <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4"><i class="fas fa-calendar-star mr-3 text-brand-magenta"></i> Calendario Comercial: Accesorios de Moda (ARG)</h2>
                     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                         <div class="bg-[#222222] p-3 rounded-xl border-t-4 border-brand-magenta shadow-sm">
                             <h3 class="font-black text-brand-magenta mb-2 text-sm uppercase tracking-wide">Enero</h3>
-                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold">
-                                <li><i class="fas fa-gift w-4"></i> Reyes Magos (6/1)</li>
-                                <li><i class="fas fa-sun w-4"></i> Liq. de Verano</li>
-                            </ul>
+                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold"><li><i class="fas fa-gift w-4"></i> Reyes Magos (6/1)</li><li><i class="fas fa-sun w-4"></i> Liq. de Verano</li></ul>
                         </div>
                         <div class="bg-[#222222] p-3 rounded-xl border-t-4 border-brand-magenta shadow-sm">
                             <h3 class="font-black text-brand-magenta mb-2 text-sm uppercase tracking-wide">Febrero</h3>
-                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold">
-                                <li><i class="fas fa-heart w-4"></i> San Valentín (14/2)</li>
-                                <li><i class="fas fa-masks-theater w-4"></i> Feriado Carnaval</li>
-                            </ul>
+                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold"><li><i class="fas fa-heart w-4"></i> San Valentín (14/2)</li><li><i class="fas fa-masks-theater w-4"></i> Feriado Carnaval</li></ul>
                         </div>
                         <div class="bg-[#222222] p-3 rounded-xl border-t-4 border-brand-magenta shadow-sm">
                             <h3 class="font-black text-brand-magenta mb-2 text-sm uppercase tracking-wide">Marzo</h3>
-                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold">
-                                <li><i class="fas fa-female w-4"></i> Día de la Mujer (8/3)</li>
-                                <li><i class="fas fa-leaf w-4"></i> Temp. Otoño/Inv.</li>
-                            </ul>
+                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold"><li><i class="fas fa-female w-4"></i> Día Mujer (8/3)</li><li><i class="fas fa-leaf w-4"></i> Temp. Otoño/Inv.</li></ul>
                         </div>
                         <div class="bg-[#222222] p-3 rounded-xl border-t-4 border-brand-magenta shadow-sm">
                             <h3 class="font-black text-brand-magenta mb-2 text-sm uppercase tracking-wide">Abril</h3>
-                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold">
-                                <li><i class="fas fa-egg w-4"></i> Pascuas</li>
-                                <li><i class="fas fa-tshirt w-4"></i> Media Temporada</li>
-                            </ul>
+                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold"><li><i class="fas fa-egg w-4"></i> Pascuas</li><li><i class="fas fa-tshirt w-4"></i> Media Temporada</li></ul>
                         </div>
                         <div class="bg-[#222222] p-3 rounded-xl border-t-4 border-brand-magenta shadow-sm">
                             <h3 class="font-black text-brand-magenta mb-2 text-sm uppercase tracking-wide">Mayo</h3>
-                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold">
-                                <li><i class="fas fa-fire w-4"></i> Hot Sale (ARG)</li>
-                                <li><i class="fas fa-flag w-4"></i> Feriados Nacionales</li>
-                            </ul>
+                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold"><li><i class="fas fa-fire w-4"></i> Hot Sale (ARG)</li><li><i class="fas fa-flag w-4"></i> Feriados Nac.</li></ul>
                         </div>
                         <div class="bg-[#222222] p-3 rounded-xl border-t-4 border-brand-magenta shadow-sm">
                             <h3 class="font-black text-brand-magenta mb-2 text-sm uppercase tracking-wide">Junio</h3>
-                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold">
-                                <li><i class="fas fa-user-tie w-4"></i> Día del Padre</li>
-                                <li><i class="fas fa-snowflake w-4"></i> Inicio de Invierno</li>
-                            </ul>
+                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold"><li><i class="fas fa-user-tie w-4"></i> Día del Padre</li><li><i class="fas fa-snowflake w-4"></i> Inicio Invierno</li></ul>
                         </div>
                         <div class="bg-[#222222] p-3 rounded-xl border-t-4 border-brand-magenta shadow-sm">
                             <h3 class="font-black text-brand-magenta mb-2 text-sm uppercase tracking-wide">Julio</h3>
-                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold">
-                                <li><i class="fas fa-user-friends w-4"></i> Día del Amigo (20/7)</li>
-                                <li><i class="fas fa-tags w-4"></i> Liq. de Invierno</li>
-                            </ul>
+                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold"><li><i class="fas fa-user-friends w-4"></i> Día Amigo (20/7)</li><li><i class="fas fa-tags w-4"></i> Liq. Invierno</li></ul>
                         </div>
                         <div class="bg-[#222222] p-3 rounded-xl border-t-4 border-brand-magenta shadow-sm">
                             <h3 class="font-black text-brand-magenta mb-2 text-sm uppercase tracking-wide">Agosto</h3>
-                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold">
-                                <li><i class="fas fa-child w-4"></i> Día de las Infancias</li>
-                                <li><i class="fas fa-box-open w-4"></i> Remate Stock Inv.</li>
-                            </ul>
+                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold"><li><i class="fas fa-child w-4"></i> Día Infancias</li><li><i class="fas fa-box-open w-4"></i> Remate Stock</li></ul>
                         </div>
                         <div class="bg-[#222222] p-3 rounded-xl border-t-4 border-brand-magenta shadow-sm">
                             <h3 class="font-black text-brand-magenta mb-2 text-sm uppercase tracking-wide">Septiembre</h3>
-                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold">
-                                <li><i class="fas fa-flower w-4"></i> Día Primavera (21/9)</li>
-                                <li><i class="fas fa-glasses w-4"></i> Temp. Prim/Ver.</li>
-                            </ul>
+                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold"><li><i class="fas fa-flower w-4"></i> Día Primavera</li><li><i class="fas fa-glasses w-4"></i> Temp. Prim/Ver.</li></ul>
                         </div>
                         <div class="bg-[#222222] p-3 rounded-xl border-t-4 border-brand-magenta shadow-sm">
                             <h3 class="font-black text-brand-magenta mb-2 text-sm uppercase tracking-wide">Octubre</h3>
-                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold">
-                                <li><i class="fas fa-crown w-4 text-brand-magenta"></i> Día de la Madre</li>
-                                <li><i class="fas fa-ghost w-4"></i> Halloween (Promo)</li>
-                            </ul>
+                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold"><li><i class="fas fa-crown w-4 text-brand-magenta"></i> Día Madre</li><li><i class="fas fa-ghost w-4"></i> Halloween</li></ul>
                         </div>
                         <div class="bg-[#222222] p-3 rounded-xl border-t-4 border-brand-magenta shadow-sm">
                             <h3 class="font-black text-brand-magenta mb-2 text-sm uppercase tracking-wide">Noviembre</h3>
-                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold">
-                                <li><i class="fas fa-laptop w-4"></i> Cyber Monday</li>
-                                <li><i class="fas fa-shopping-bag w-4"></i> Black Friday</li>
-                            </ul>
+                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold"><li><i class="fas fa-laptop w-4"></i> Cyber Monday</li><li><i class="fas fa-shopping-bag w-4"></i> Black Friday</li></ul>
                         </div>
                         <div class="bg-[#222222] p-3 rounded-xl border-t-4 border-brand-magenta shadow-sm">
                             <h3 class="font-black text-brand-magenta mb-2 text-sm uppercase tracking-wide">Diciembre</h3>
-                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold">
-                                <li><i class="fas fa-tree w-4 text-emerald-400"></i> Navidad (Venta Pico)</li>
-                                <li><i class="fas fa-glass-cheers w-4"></i> Año Nuevo</li>
-                            </ul>
+                            <ul class="text-xs text-gray-400 space-y-1.5 font-semibold"><li><i class="fas fa-tree w-4 text-emerald-400"></i> Navidad</li><li><i class="fas fa-glass-cheers w-4"></i> Año Nuevo</li></ul>
                         </div>
                     </div>
                 </div>
@@ -442,7 +386,7 @@
 
     </div>
 
-    <!-- 🔥 SISTEMA GLOBAL DE VENTANAS MODALES 🔥 -->
+    <!-- SISTEMA GLOBAL DE VENTANAS MODALES -->
     <div id="custom-modal" data-html2canvas-ignore="true" class="fixed inset-0 bg-brand-black/60 z-50 hidden flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden modal-animate">
             <div class="p-6">
@@ -452,7 +396,6 @@
                 </div>
                 <p id="modal-message" class="text-gray-600 mb-6 font-semibold whitespace-pre-line"></p>
                 
-                <!-- Caja de Contraseña Oculta por defecto -->
                 <div id="modal-password-container" class="hidden mb-6">
                     <label class="block text-sm font-bold text-gray-700 mb-2">Contraseña de Autorización</label>
                     <input type="password" id="modal-password" class="w-full rounded-lg border border-pink-300 p-3 focus:ring-2 focus:ring-brand-magenta outline-none transition-all shadow-inner" placeholder="Ingresa la clave segura...">
@@ -467,19 +410,14 @@
         </div>
     </div>
 
-    <!-- SCRIPT TIPO MÓDULO PARA FIREBASE Y LÓGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🔥 CONTRASEÑA GLOBAL DEL TABLERO 🔥
         const APP_PASSWORD = "admin";
-        
-        // Estado de Seguridad
         let modoAdmin = false;
 
-        // ================= MOTOR DE MODALES PERSONALIZADOS ================= //
         function showModal({ type, title, message, iconClass, iconBg, confirmText, confirmClass, onConfirm }) {
             const modal = document.getElementById('custom-modal');
             const titleEl = document.getElementById('modal-title');
@@ -575,7 +513,7 @@
             }
         };
 
-        // ================= CONFIGURACIÓN Y VARIABLES GLOBALES ================= //
+        // FIREBASE INIT
         let firebaseConfig;
         if (typeof __firebase_config !== 'undefined') {
             firebaseConfig = JSON.parse(__firebase_config);
@@ -613,35 +551,24 @@
             'Septiembre': 30, 'Octubre': 31, 'Noviembre': 30, 'Diciembre': 31
         };
 
-        function esBisiesto(year) {
-            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-        }
+        function esBisiesto(year) { return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0); }
 
         window.cambiarTipoDia = function(dia, selectElement) {
             const tr = selectElement.closest('tr');
             const tdLabel = document.getElementById(`td_dia_${dia}`);
             if (selectElement.value !== 'normal') {
                 tr.classList.add('bg-gray-100');
-                if(tdLabel) {
-                    tdLabel.classList.add('bg-gray-100');
-                    tdLabel.classList.remove('bg-white');
-                }
+                if(tdLabel) { tdLabel.classList.add('bg-gray-100'); tdLabel.classList.remove('bg-white'); }
             } else {
                 tr.classList.remove('bg-gray-100');
-                if(tdLabel) {
-                    tdLabel.classList.add('bg-white');
-                    tdLabel.classList.remove('bg-gray-100');
-                }
+                if(tdLabel) { tdLabel.classList.add('bg-white'); tdLabel.classList.remove('bg-gray-100'); }
             }
         };
 
         window.cambiarMesGrilla = function(mesSeleccionado) {
             if (!mesSeleccionado) mesSeleccionado = document.getElementById('inputMes').value;
-            
             let numDias = diasPorMes[mesSeleccionado] || 31;
-            if (mesSeleccionado === 'Febrero' && esBisiesto(parseInt(anioActual))) {
-                numDias = 29;
-            }
+            if (mesSeleccionado === 'Febrero' && esBisiesto(parseInt(anioActual))) numDias = 29;
             
             const tbody = document.getElementById('tbody-grilla');
             if(!tbody) return;
@@ -752,6 +679,7 @@
 
         function iniciarEscuchaNube() {
             try {
+                // 🔥 ARREGLO DE FIREBASE: RUTA CORRECTA DE 6 SEGMENTOS 🔥
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboard_compartido', 'mis_datos');
                 
                 onSnapshot(docRef, (documento) => {
@@ -786,6 +714,7 @@
 
         async function guardarEnLaNubeSilencioso() {
             if (!userId) return;
+            // 🔥 ARREGLO DE FIREBASE: RUTA CORRECTA DE 6 SEGMENTOS 🔥
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboard_compartido', 'mis_datos');
             try {
                 await setDoc(docRef, {
@@ -1022,7 +951,6 @@
             });
         };
 
-        // 🔥 NUEVA FUNCIÓN PARA ACTUALIZAR EL GRÁFICO DE HORAS 🔥
         window.actualizarGraficoHoras = function(mesSeleccionado) {
             let datosLocalesAnio = baseDatosLocales[localActual]?.[anioActual] || [];
             let dataMes = datosLocalesAnio.find(d => d.mes === mesSeleccionado);
@@ -1128,9 +1056,8 @@
                     for(let i=1; i<=31; i++) {
                         if(data.grillaDiaria[i]) {
                             let sumaVentaDia = 0;
-                            horasDinamicas.forEach((h, idxHora) => {
-                                let v = data.grillaDiaria[i][h]?.v || 0;
-                                sumaVentaDia += v; 
+                            horasDinamicas.forEach((h) => {
+                                sumaVentaDia += (data.grillaDiaria[i][h]?.v || 0); 
                             });
                             if (sumaVentaDia > maxVDia) { maxVDia = sumaVentaDia; maxDia = `Día ${i}`; }
                         }
@@ -1190,7 +1117,6 @@
             if (chartMixto) chartMixto.destroy(); if (chartTorta) chartTorta.destroy();
             if (chartTurnos) chartTurnos.destroy(); if (chartTrafico) chartTrafico.destroy();
             if (chartCrecimiento) chartCrecimiento.destroy(); if (chartUnidades) chartUnidades.destroy();
-            // No destruimos los de horas y días aquí, lo hacen sus funciones respectivas
 
             const labels = datosMensuales.map(d => d.mes);
             const dataVts = datosMensuales.map(d => d.ventas);
@@ -1200,7 +1126,6 @@
             Chart.defaults.font.family = "'Nunito', sans-serif";
             Chart.defaults.animation = false; 
             
-            // Gráficos PÁGINA 2
             chartMixto = new Chart(document.getElementById('mixedChart').getContext('2d'), {
                 type: 'bar', data: { labels: labels, datasets: [ { label: 'Facturación ($)', data: dataVts, backgroundColor: dynamicBgs, borderRadius: 8, yAxisID: 'y' }, { label: 'Ticket Promedio ($)', data: dataTkts, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' } ] },
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { type: 'linear', position: 'left', ticks: { callback: function(val) { return formatMillones(val); } } }, y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return formatCurrency(val); } } } } }
@@ -1217,7 +1142,6 @@
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return (context.dataset.label + ': ' + formatCurrency(context.parsed.y)); } } } }, scales: { y: { beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } } } }
             });
 
-            // Gráficos PÁGINA 3
             chartTrafico = new Chart(document.getElementById('traficoChart').getContext('2d'), {
                 type: 'line', data: { labels: labels, datasets: [{ label: 'Volumen de Tickets', data: datosMensuales.map(d => d.tickets), borderColor: '#ec008c', backgroundColor: 'rgba(236, 0, 140, 0.1)', borderWidth: 4, tension: 0.4, fill: true, pointBackgroundColor: '#fff', pointBorderColor: '#ec008c', pointBorderWidth: 3, pointRadius: 6 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: function(c) { return 'Tickets: ' + formatNumber(c.parsed.y); } } } }, scales: { y: { beginAtZero: false } } }
@@ -1234,7 +1158,6 @@
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatNumber(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return val + ' art.'; } } } } }
             });
 
-            // 🔥 RENDERIZADO DE LOS SELECTORES PARA PÁGINA 4 🔥
             const selectorMesDias = document.getElementById('selectorMesDias');
             const selectorMesHoras = document.getElementById('selectorMesHoras');
             selectorMesDias.innerHTML = '';
@@ -1248,12 +1171,11 @@
             selectorMesDias.value = ultimoMes;
             selectorMesHoras.value = ultimoMes;
             
-            // Llamamos a las funciones para dibujar los gráficos con el mes por defecto
             window.actualizarGraficoDias(ultimoMes);
             window.actualizarGraficoHoras(ultimoMes);
         }
 
-        // 🔥 CEREBRO IA: ANÁLISIS GERENCIAL PROFUNDO 🔥
+        // 🔥 CEREBRO IA CON REGLAS DE HORARIO CORREGIDAS 🔥
         function generarDiagnosticoAutomatico() {
             let datos = baseDatosLocales[localActual]?.[anioActual] || [];
             if (datos.length === 0) return;
@@ -1288,8 +1210,8 @@
                 let v = horasDataAggr[h];
                 if (v > maxHoraV && v > 0) { maxHoraV = v; picoHora = `${String(h).padStart(2, '0')}:00`; }
                 
-                // 🔥 REGLA GERENCIAL: Ignoramos las 21:00hs al buscar el valle, por ser horario de cierre simbólico 🔥
-                if (h !== 21 && v < minHoraV && v > 0) { minHoraV = v; valleHora = `${String(h).padStart(2, '0')}:00`; }
+                // 🔥 REGLA GERENCIAL: Ignoramos las 12:00hs y las 21:00hs al buscar el valle operativo 🔥
+                if (h !== 21 && h !== 12 && v < minHoraV && v > 0) { minHoraV = v; valleHora = `${String(h).padStart(2, '0')}:00`; }
             });
             if (minHoraV === Infinity) { valleHora = picoHora; }
 
