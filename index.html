@@ -1091,19 +1091,19 @@
                             </div>
                             <div class="p-6 flex-grow">
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                                    <div><span class="text-gray-500 text-sm block font-bold">Venta Total</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ventas)}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold">Ticket Prom.</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ticketPromedio)}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold">Total Tickets</span><span class="font-bold text-lg">${formatNumber(data.tickets)}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold">UPT (Art/Ticket)</span><span class="font-bold text-lg">${upt}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Ingresos totales de este mes.">Venta Total</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ventas)}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Gasto promedio por ticket en este mes.">Ticket Prom.</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ticketPromedio)}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Cantidad de compras realizadas este mes.">Total Tickets</span><span class="font-bold text-lg">${formatNumber(data.tickets)}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Unidades por Ticket: Promedio de artículos que lleva cada cliente.">UPT (Art/Ticket)</span><span class="font-bold text-lg">${upt}</span></div>
                                     
-                                    <div><span class="text-gray-500 text-sm block font-bold">Mejor Día</span><span class="font-bold text-base ${theme.textLight}">${diaPicoText}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold">Hora más fuerte</span><span class="font-bold text-base">${horaPicoText}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold">Venta Diaria</span><span class="font-bold text-base">${formatCurrency(ventaDiariaMes)}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold">Tickets / Día</span><span class="font-bold text-base">${formatNumber(ticketsDiariosMes)}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="El día del mes con mayor volumen de facturación.">Mejor Día</span><span class="font-bold text-base ${theme.textLight}">${diaPicoText}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="La franja horaria que acumuló más ventas en este mes.">Hora más fuerte</span><span class="font-bold text-base">${horaPicoText}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Promedio facturado por cada día operativo del mes.">Venta Diaria</span><span class="font-bold text-base">${formatCurrency(ventaDiariaMes)}</span></div>
+                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Promedio de clientes que compraron por cada día operativo del mes.">Tickets / Día</span><span class="font-bold text-base">${formatNumber(ticketsDiariosMes)}</span></div>
                                     
                                     <div class="col-span-2 md:col-span-4 text-xs text-gray-500 flex items-center justify-between border-t border-gray-100 pt-3 mt-1">
-                                        <div><span class="font-bold text-brand-magenta">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)}</div>
-                                        <div><span class="font-bold text-brand-black">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)}</div>
+                                        <div><span class="font-bold text-brand-magenta cursor-help underline decoration-dashed decoration-pink-300 underline-offset-2" title="Ventas realizadas hasta las 12:00 hs inclusive.">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)}</div>
+                                        <div><span class="font-bold text-brand-black cursor-help underline decoration-dashed decoration-gray-400 underline-offset-2" title="Ventas realizadas desde las 17:00 hs en adelante.">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)}</div>
                                     </div>
                                 </div>
                                 <div class="${theme.light} rounded p-4 border-l-4 ${theme.leftBorder} text-sm text-gray-700">
