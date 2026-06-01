@@ -1135,7 +1135,25 @@
 
                 const upt = dataMes.tickets > 0 ? (dataMes.unidades / dataMes.tickets).toFixed(2) : 0;
                 
-                texto = `Durante el mes de ${dataMes.mes} ${anioActual}, el Local ${localActual} registró una facturación total de ${formatCurrency(dataMes.ventas)}. El ticket promedio mensual se ubicó en ${formatCurrency(dataMes.ticketPromedio)} con un nivel de venta cruzada (UPT) de ${upt} artículos por cliente.\n\n📌 ANÁLISIS OPERATIVO DEL MES:\nEl turno ${turnoFuerte} lideró la tracción de ingresos con el ${pctTurno}% de las ventas totales. El mejor día comercial fue el ${maxDia} (${formatCurrency(maxVDia)}).\n\nEvaluando el mapa de calor horario del mes, la "Zona Caliente" de mayor conversión se dio a las ${maxHora} hs, mientras que el "Valle Operativo" más profundo de la jornada fue a las ${valleHora} hs. Se recomienda enfocar los esfuerzos de reposición en el horario valle y asegurar máxima cobertura de staff en la hora pico.`;
+                // 🔥 REGLA DE ALERTA COMERCIAL (MES SIGUIENTE) 🔥
+                const eventosComerciales = {
+                    'Enero': 'Febrero (San Valentín y Feriado de Carnaval)',
+                    'Febrero': 'Marzo (Día de la Mujer y Temp. Otoño/Invierno)',
+                    'Marzo': 'Abril (Pascuas y Media Temporada)',
+                    'Abril': 'Mayo (Hot Sale ARG y Feriados Nacionales)',
+                    'Mayo': 'Junio (Día del Padre e Inicio de Invierno)',
+                    'Junio': 'Julio (Día del Amigo y Liq. de Invierno)',
+                    'Julio': 'Agosto (Día de las Infancias y Remate de Stock)',
+                    'Agosto': 'Septiembre (Día de la Primavera y Temp. Prim/Verano)',
+                    'Septiembre': 'Octubre (Día de la Madre y Halloween)',
+                    'Octubre': 'Noviembre (Cyber Monday y Black Friday)',
+                    'Noviembre': 'Diciembre (Navidad y Año Nuevo - Venta Pico)',
+                    'Diciembre': 'Enero (Reyes Magos y Liq. de Verano)'
+                };
+                
+                const alertaProximoMes = eventosComerciales[dataMes.mes] ? `\n\n🎯 ALERTA COMERCIAL PREVENTIVA:\nFalta solo 1 mes para los eventos de ${eventosComerciales[dataMes.mes]}. Es el momento ideal para empezar a planificar el stock, armar las campañas de marketing y organizar las vidrieras temáticas.` : '';
+                
+                texto = `Durante el mes de ${dataMes.mes} ${anioActual}, el Local ${localActual} registró una facturación total de ${formatCurrency(dataMes.ventas)}. El ticket promedio mensual se ubicó en ${formatCurrency(dataMes.ticketPromedio)} con un nivel de venta cruzada (UPT) de ${upt} artículos por cliente.\n\n📌 ANÁLISIS OPERATIVO DEL MES:\nEl turno ${turnoFuerte} lideró la tracción de ingresos con el ${pctTurno}% de las ventas totales. El mejor día comercial fue el ${maxDia} (${formatCurrency(maxVDia)}).\n\nEvaluando el mapa de calor horario del mes, la "Zona Caliente" de mayor conversión se dio a las ${maxHora} hs, mientras que el "Valle Operativo" más profundo de la jornada fue a las ${valleHora} hs. Se recomienda enfocar los esfuerzos de reposición en el horario valle y asegurar máxima cobertura de staff en la hora pico.${alertaProximoMes}`;
                 
                 dataMes.diagnosticoExtendido = texto;
             }
