@@ -191,35 +191,42 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                     <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-magenta card-hover">
                         <div class="flex justify-between items-start">
-                            <div><p class="text-sm text-gray-500 font-bold uppercase tracking-wider cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Suma total de ingresos generados en el período seleccionado.">Facturación Total</p><h2 id="kpi-ventas" class="text-3xl font-black text-brand-black mt-2">$0</h2></div>
+                            <div><p class="text-sm text-gray-500 font-bold uppercase tracking-wider cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Suma total de ingresos generados en el mes seleccionado.">Facturación Mensual</p><h2 id="kpi-ventas" class="text-3xl font-black text-brand-black mt-2">$0</h2></div>
                             <i class="fas fa-dollar-sign text-pink-200 text-3xl"></i>
                         </div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-brand-black card-hover">
                         <div class="flex justify-between items-start">
-                            <div><p class="text-sm text-gray-500 font-bold uppercase tracking-wider cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Cantidad total de clientes que compraron. El número entre paréntesis es el promedio por día operativo.">Tráfico (Tickets)</p><h2 id="kpi-tickets" class="text-3xl font-black text-brand-black mt-2">0</h2></div>
+                            <div><p class="text-sm text-gray-500 font-bold uppercase tracking-wider cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Cantidad total de clientes que compraron en el mes. El número entre paréntesis es el promedio por día operativo.">Tráfico (Tickets)</p><h2 id="kpi-tickets" class="text-3xl font-black text-brand-black mt-2">0</h2></div>
                             <i class="fas fa-users text-gray-200 text-3xl"></i>
                         </div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-pink-400 card-hover">
                         <div class="flex justify-between items-start">
-                            <div><p class="text-sm text-gray-500 font-bold uppercase tracking-wider cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Gasto promedio de cada cliente (Facturación total dividida por la cantidad de tickets).">Ticket Prom. Global</p><h2 id="kpi-ticket-prom" class="text-3xl font-black text-brand-black mt-2">$0</h2></div>
+                            <div><p class="text-sm text-gray-500 font-bold uppercase tracking-wider cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Gasto promedio de cada cliente en el mes seleccionado.">Ticket Prom. Mensual</p><h2 id="kpi-ticket-prom" class="text-3xl font-black text-brand-black mt-2">$0</h2></div>
                             <i class="fas fa-receipt text-pink-100 text-3xl"></i>
                         </div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm p-6 border-b-4 border-gray-400 card-hover">
                         <div class="flex justify-between items-start">
-                            <div><p class="text-sm text-gray-500 font-bold uppercase tracking-wider cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Promedio de ingresos por cada día real de trabajo (ignora feriados y domingos cerrados).">Venta Diaria Prom.</p><h2 id="kpi-diaria" class="text-3xl font-black text-brand-black mt-2">$0</h2></div>
+                            <div><p class="text-sm text-gray-500 font-bold uppercase tracking-wider cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Promedio de ingresos por cada día real de trabajo del mes seleccionado.">Venta Diaria Prom.</p><h2 id="kpi-diaria" class="text-3xl font-black text-brand-black mt-2">$0</h2></div>
                             <i class="fas fa-store text-gray-200 text-3xl"></i>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-6">
-                    <h2 class="text-2xl font-bold text-brand-black mb-6 flex items-center">
-                        <i class="fas fa-calendar-check mr-3 text-brand-magenta"></i> Desglose Mensual Detallado
-                    </h2>
-                    <div id="monthly-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 🔥 NUEVO: SELECTOR PRINCIPAL DEL MES 🔥 -->
+                    <div class="flex flex-wrap justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-brand-black flex items-center">
+                            <i class="fas fa-calendar-check mr-3 text-brand-magenta"></i> Resumen del Mes:
+                            <select id="selectorMesGlobal" onchange="cambiarMesGlobal(this.value)" class="ml-3 bg-transparent border-b-4 border-brand-magenta text-brand-magenta cursor-pointer focus:outline-none hover:text-brand-magentaHover transition-colors pb-1 text-2xl font-bold">
+                                <!-- Opciones inyectadas por JS -->
+                            </select>
+                        </h2>
+                    </div>
+                    <div id="monthly-container" class="grid grid-cols-1 gap-6">
+                        <!-- Tarjeta inyectada por JS dinámicamente -->
                     </div>
                 </div>
             </div>
@@ -230,18 +237,18 @@
             <div id="pagina-2" class="pt-4">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
-                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución: Ventas vs Ticket Promedio</h3>
+                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-bar mr-2 text-brand-magenta"></i>Evolución Anual: Ventas vs Ticket Promedio</h3>
                         <div class="relative h-72 w-full overflow-hidden"><canvas id="mixedChart"></canvas></div>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-brand-magenta"></i>Distribución de Ingresos</h3>
+                        <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2"><i class="fas fa-chart-pie mr-2 text-brand-magenta"></i>Distribución de Ingresos (YTD)</h3>
                         <div class="relative h-72 w-full flex justify-center overflow-hidden"><canvas id="pieChart"></canvas></div>
                     </div>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
                     <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center"><i class="fas fa-clock mr-2 text-brand-black"></i> Rendimiento Operativo: Turno Mañana vs. Turno Tarde</h3>
                     <div class="relative h-72 w-full overflow-hidden"><canvas id="turnosChart"></canvas></div>
-                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria de la jornada laboral.</p>
+                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Gráfico comparativo del volumen de ventas generado según la franja horaria a lo largo del año.</p>
                 </div>
             </div>
 
@@ -253,7 +260,7 @@
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center"><i class="fas fa-users mr-2 text-brand-magenta"></i> Evolución de Tráfico (Retención)</h3>
                         <div class="relative h-72 w-full overflow-hidden"><canvas id="traficoChart"></canvas></div>
-                        <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza si el volumen de clientes reales sube o baja, aislando el efecto inflacionario sobre la facturación.</p>
+                        <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Analiza si el volumen de clientes reales sube o baja a lo largo del año.</p>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center"><i class="fas fa-arrow-trend-up mr-2 text-brand-magenta"></i> <span class="cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="El primer mes (ej. Enero) actúa como 'Mes Base'. No muestra barra porque no hay un mes anterior en este año con el cual compararlo para calcular el crecimiento.">Crecimiento Mes a Mes (%)</span></h3>
@@ -264,7 +271,7 @@
                 <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
                     <h3 class="text-xl font-bold text-brand-black mb-6 border-b pb-2 flex items-center"><i class="fas fa-box-open mr-2 text-brand-magenta"></i> Eficiencia de Venta: Unidades y UPT</h3>
                     <div class="relative h-72 w-full overflow-hidden"><canvas id="unidadesChart"></canvas></div>
-                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Mide cuántos artículos compran tus clientes en promedio (UPT). Vital para evaluar el nivel de venta cruzada en el local.</p>
+                    <p class="text-sm text-brand-lightGray font-semibold mt-4 text-center">Evolución de la cantidad de artículos que compran tus clientes en promedio (UPT).</p>
                 </div>
             </div>
 
@@ -275,7 +282,8 @@
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <div class="flex justify-between items-center mb-6 border-b pb-2">
                         <h3 class="text-xl font-bold text-brand-black flex items-center"><i class="fas fa-calendar-day mr-2 text-brand-magenta"></i> Evolución Diaria (Día a Día)</h3>
-                        <select id="selectorMesDias" onchange="actualizarGraficoDias(this.value)" class="text-sm font-bold text-brand-magenta bg-transparent border-b-2 border-brand-magenta outline-none cursor-pointer pb-1" title="Seleccionar mes a visualizar">
+                        <!-- Sincronizado con la selección global -->
+                        <select id="selectorMesDias" onchange="cambiarMesGlobal(this.value)" class="text-sm font-bold text-brand-magenta bg-transparent border-b-2 border-brand-magenta outline-none cursor-pointer pb-1" title="Seleccionar mes a visualizar">
                         </select>
                     </div>
                     <div class="relative h-72 w-full overflow-hidden"><canvas id="diasChart"></canvas></div>
@@ -284,7 +292,8 @@
                 <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
                     <div class="flex justify-between items-center mb-6 border-b pb-2">
                         <h3 class="text-xl font-bold text-brand-black flex items-center"><i class="fas fa-stopwatch mr-2 text-brand-magenta"></i> Productividad por Hora</h3>
-                        <select id="selectorMesHoras" onchange="actualizarGraficoHoras(this.value)" class="text-sm font-bold text-brand-magenta bg-transparent border-b-2 border-brand-magenta outline-none cursor-pointer pb-1" title="Seleccionar mes a visualizar">
+                        <!-- Sincronizado con la selección global -->
+                        <select id="selectorMesHoras" onchange="cambiarMesGlobal(this.value)" class="text-sm font-bold text-brand-magenta bg-transparent border-b-2 border-brand-magenta outline-none cursor-pointer pb-1" title="Seleccionar mes a visualizar">
                         </select>
                     </div>
                     <div class="relative h-72 w-full overflow-hidden"><canvas id="horaChart"></canvas></div>
@@ -296,8 +305,20 @@
 
             <!-- ======================= PÁGINA 5 ======================= -->
             <div id="pagina-5" class="pt-4">
+                <!-- 🔥 NUEVO: DIAGNÓSTICO EJECUTIVO DUAL 🔥 -->
                 <div class="bg-brand-black rounded-2xl shadow-xl p-8 text-white">
-                    <h2 class="text-2xl font-bold mb-6 flex items-center border-b border-brand-darkGray pb-4"><i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo</h2>
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 border-b border-brand-darkGray pb-4 gap-4">
+                        <h2 class="text-2xl font-bold flex items-center">
+                            <i class="fas fa-comment-dots mr-3 text-brand-magenta"></i> Diagnóstico Ejecutivo <span id="diag-subtitle" class="text-lg text-brand-lightGray ml-3 font-normal">(Mensual)</span>
+                        </h2>
+                        <!-- Botones para alternar entre Mensual y Anual -->
+                        <button onclick="mostrarDiagnosticoAnual()" id="btnDiagAnual" data-html2canvas-ignore="true" class="bg-brand-darkGray hover:bg-brand-magenta text-white text-sm px-4 py-2 rounded-lg transition-colors font-bold shadow-sm border border-gray-600 flex items-center shrink-0">
+                            <i class="fas fa-globe mr-2"></i> Diagnóstico Ejecutivo Anual
+                        </button>
+                        <button onclick="cambiarMesGlobal(document.getElementById('selectorMesGlobal').value)" id="btnDiagMensual" data-html2canvas-ignore="true" class="hidden bg-brand-darkGray hover:bg-brand-magenta text-white text-sm px-4 py-2 rounded-lg transition-colors font-bold shadow-sm border border-gray-600 flex items-center shrink-0">
+                            <i class="fas fa-calendar-day mr-2"></i> Diagnóstico Ejecutivo Mensual
+                        </button>
+                    </div>
                     <div class="bg-[#222222] rounded-xl border border-brand-darkGray hover:border-brand-magenta transition-colors">
                         <div id="texto-diagnostico" onblur="guardarDiagnostico(this.innerText)" class="text-gray-300 leading-relaxed outline-none rounded-xl p-6 transition-all min-h-[100px] whitespace-pre-wrap" title="El diagnóstico se bloqueará en Modo Lectura">[Sincronizando diagnóstico...]</div>
                     </div>
@@ -413,10 +434,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const APP_PASSWORD = "admin";
         let modoAdmin = false;
+        let modoDiagnostico = 'mensual'; // 🔥 Controla qué diagnóstico se está viendo 🔥
 
         function showModal({ type, title, message, iconClass, iconBg, confirmText, confirmClass, onConfirm }) {
             const modal = document.getElementById('custom-modal');
@@ -679,7 +701,6 @@
 
         function iniciarEscuchaNube() {
             try {
-                // 🔥 ARREGLO DE FIREBASE: RUTA CORRECTA DE 6 SEGMENTOS 🔥
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboard_compartido', 'mis_datos');
                 
                 onSnapshot(docRef, (documento) => {
@@ -693,10 +714,6 @@
                         guardarEnLaNubeSilencioso();
                     }
                     actualizarStatusNube('Sincronizado correctamente', '');
-                    
-                    if(!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
-                    document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual][anioActual] || '[Esperando datos...]';
-                    
                     renderDashboard();
                 }, (error) => {
                     console.error("❌ Error leyendo nube:", error);
@@ -714,7 +731,6 @@
 
         async function guardarEnLaNubeSilencioso() {
             if (!userId) return;
-            // 🔥 ARREGLO DE FIREBASE: RUTA CORRECTA DE 6 SEGMENTOS 🔥
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboard_compartido', 'mis_datos');
             try {
                 await setDoc(docRef, {
@@ -737,8 +753,6 @@
         window.cambiarLocal = function(nuevoLocal) {
             localActual = nuevoLocal;
             document.title = `Tickets PVS - ${localActual} ${anioActual}`;
-            if(!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
-            document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual][anioActual] || '[Esperando datos...]';
             renderDashboard();
         };
 
@@ -746,15 +760,22 @@
             anioActual = nuevoAnio;
             document.title = `Tickets PVS - ${localActual} ${anioActual}`;
             window.cambiarMesGrilla(); 
-            
-            if(!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
-            document.getElementById('texto-diagnostico').innerText = diagnosticosLocales[localActual][anioActual] || '[Esperando datos...]';
             renderDashboard();
         };
 
+        // 🔥 GESTOR DE GUARDADO DUAL DEL DIAGNÓSTICO (Manual) 🔥
         window.guardarDiagnostico = function(texto) {
-            if(!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
-            diagnosticosLocales[localActual][anioActual] = texto;
+            if (modoDiagnostico === 'anual') {
+                if(!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
+                diagnosticosLocales[localActual][anioActual] = texto;
+            } else {
+                let mesActual = document.getElementById('selectorMesGlobal').value;
+                let datosLocalesAnio = baseDatosLocales[localActual]?.[anioActual] || [];
+                let dataMes = datosLocalesAnio.find(d => d.mes === mesActual);
+                if (dataMes) {
+                    dataMes.diagnosticoExtendido = texto;
+                }
+            }
             guardarEnLaNube();
         };
 
@@ -915,10 +936,101 @@
             document.getElementById('formCarga').scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
 
+        // 🔥 CONTROLADOR MAESTRO DEL REPORTE MENSUAL 🔥
+        window.cambiarMesGlobal = function(mesSeleccionado) {
+            let datosLocalesAnio = baseDatosLocales[localActual]?.[anioActual] || [];
+            let dataMes = datosLocalesAnio.find(d => d.mes === mesSeleccionado);
+            if (!dataMes) return;
+
+            // Sincronizar todos los selectores visualmente
+            const selDias = document.getElementById('selectorMesDias');
+            const selHoras = document.getElementById('selectorMesHoras');
+            const selGlobal = document.getElementById('selectorMesGlobal');
+            if (selDias && selDias.value !== mesSeleccionado) selDias.value = mesSeleccionado;
+            if (selHoras && selHoras.value !== mesSeleccionado) selHoras.value = mesSeleccionado;
+            if (selGlobal && selGlobal.value !== mesSeleccionado) selGlobal.value = mesSeleccionado;
+
+            // 1. ACTUALIZAR LOS 4 KPIS GLOBALES PARA EL MES SELECCIONADO
+            document.getElementById('periodo-text').innerText = `Mes Analizado: ${dataMes.mes} ${anioActual}`;
+            
+            const diasOperativosMes = dataMes.diasOperativos || 30;
+            const ventaDiariaMes = dataMes.ventas / diasOperativosMes;
+            const ticketsDiariosMes = Math.round(dataMes.tickets / diasOperativosMes);
+
+            document.getElementById('kpi-ventas').innerText = formatMillones(dataMes.ventas);
+            document.getElementById('kpi-tickets').innerHTML = `${formatNumber(dataMes.tickets)} <span class="text-base text-gray-500 font-bold ml-1 tracking-normal">(${formatNumber(ticketsDiariosMes)}/día)</span>`;
+            document.getElementById('kpi-ticket-prom').innerText = formatCurrency(dataMes.ticketPromedio);
+            document.getElementById('kpi-diaria').innerText = formatCurrency(ventaDiariaMes);
+
+            // 2. RENDERIZAR LA TARJETA DE DESGLOSE DE ESE MES
+            const container = document.getElementById('monthly-container');
+            const theme = colores[dataMes.colorTema || listadoColores[0]];
+            const upt = dataMes.tickets > 0 ? (dataMes.unidades / dataMes.tickets).toFixed(2) : '0.00';
+            
+            let maxVDia = -1; let maxDia = "S/D";
+            let maxVHora = -1; let maxHora = "S/D";
+            
+            if (dataMes.grillaDiaria) {
+                for(let i=1; i<=31; i++) {
+                    if(dataMes.grillaDiaria[i]) {
+                        let sumaVentaDia = 0;
+                        horasDinamicas.forEach((h) => { sumaVentaDia += (dataMes.grillaDiaria[i][h]?.v || 0); });
+                        if (sumaVentaDia > maxVDia) { maxVDia = sumaVentaDia; maxDia = `Día ${i}`; }
+                    }
+                }
+                horasDinamicas.forEach((h) => {
+                    let sumHora = 0;
+                    for(let i=1; i<=31; i++) { if(dataMes.grillaDiaria[i]) sumHora += (dataMes.grillaDiaria[i][h]?.v || 0); }
+                    if (sumHora > maxVHora) { maxVHora = sumHora; maxHora = h.toString().padStart(2, '0') + ":00"; }
+                });
+            }
+
+            const diagnosticoVisual = generarDiagnosticoMensual(dataMes.ventas, dataMes.ventasManana, dataMes.tickets, dataMes.unidades);
+            const editButton = modoAdmin ? 
+                `<button onclick="editarMes('${dataMes.mes}')" data-html2canvas-ignore="true" class="text-sm font-bold text-brand-magenta hover:text-white hover:bg-brand-magenta bg-white px-3 py-1 rounded-lg shadow-sm border border-brand-magenta transition-colors"><i class="fas fa-edit mr-1"></i> Editar Día a Día</button>` : '';
+
+            container.innerHTML = `
+                <div style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 16px;">
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-full border border-gray-100">
+                        <div class="${theme.light} p-4 border-b ${theme.border} flex justify-between items-center">
+                            <h3 class="text-xl font-bold ${theme.textDark}">📊 Detalle Operativo: ${dataMes.mes} ${anioActual}</h3>
+                            ${editButton}
+                        </div>
+                        <div class="p-6 flex-grow">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Ingresos totales de este mes.">Venta Total</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(dataMes.ventas)}</span></div>
+                                <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Gasto promedio por ticket en este mes.">Ticket Prom.</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(dataMes.ticketPromedio)}</span></div>
+                                <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Cantidad de compras realizadas este mes.">Total Tickets</span><span class="font-bold text-lg">${formatNumber(dataMes.tickets)}</span></div>
+                                <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Unidades por Ticket: Promedio de artículos que lleva cada cliente.">UPT (Art/Ticket)</span><span class="font-bold text-lg">${upt}</span></div>
+                                
+                                <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="El día del mes con mayor volumen de facturación.">Mejor Día</span><span class="font-bold text-base ${theme.textLight}">${maxDia} (${formatCurrency(maxVDia)})</span></div>
+                                <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="La franja horaria que acumuló más ventas en este mes.">Hora más fuerte</span><span class="font-bold text-base">${maxHora}</span></div>
+                                <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Promedio facturado por cada día operativo del mes.">Venta Diaria</span><span class="font-bold text-base">${formatCurrency(ventaDiariaMes)}</span></div>
+                                <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Promedio de clientes que compraron por cada día operativo del mes.">Tickets / Día</span><span class="font-bold text-base">${formatNumber(ticketsDiariosMes)}</span></div>
+                                
+                                <div class="col-span-2 md:col-span-4 text-xs text-gray-500 flex items-center justify-between border-t border-gray-100 pt-3 mt-1">
+                                    <div><span class="font-bold text-brand-magenta cursor-help underline decoration-dashed decoration-pink-300 underline-offset-2" title="Ventas realizadas hasta las 12:00 hs inclusive.">☀️ Mañana:</span> ${formatCurrency(dataMes.ventasManana)}</div>
+                                    <div><span class="font-bold text-brand-black cursor-help underline decoration-dashed decoration-gray-400 underline-offset-2" title="Ventas realizadas desde las 17:00 hs en adelante.">🌙 Tarde:</span> ${formatCurrency(dataMes.ventas - dataMes.ventasManana)}</div>
+                                </div>
+                            </div>
+                            <div class="${theme.light} rounded p-4 border-l-4 ${theme.leftBorder} text-sm text-gray-700">
+                                <strong>Mini Diagnóstico:</strong> ${diagnosticoVisual}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+            // 3. ACTUALIZAR GRÁFICOS DIARIOS Y HORARIOS DEL MES
+            actualizarGraficoDias(mesSeleccionado);
+            actualizarGraficoHoras(mesSeleccionado);
+
+            // 4. ACTUALIZAR EL TEXTO DEL DIAGNÓSTICO EJECUTIVO (A MODO MENSUAL)
+            mostrarDiagnosticoMensual(dataMes);
+        };
+
         window.actualizarGraficoDias = function(mesSeleccionado) {
             let datosLocalesAnio = baseDatosLocales[localActual]?.[anioActual] || [];
             let dataMes = datosLocalesAnio.find(d => d.mes === mesSeleccionado);
-            
             if (!dataMes) return;
 
             let numDias = diasPorMes[mesSeleccionado] || 31;
@@ -954,7 +1066,6 @@
         window.actualizarGraficoHoras = function(mesSeleccionado) {
             let datosLocalesAnio = baseDatosLocales[localActual]?.[anioActual] || [];
             let dataMes = datosLocalesAnio.find(d => d.mes === mesSeleccionado);
-            
             if (!dataMes) return;
 
             let aggrVentasHora = new Array(10).fill(0);
@@ -983,6 +1094,71 @@
             });
         };
 
+        // 🔥 FUNCIONES DE DIAGNÓSTICO (MENSUAL Y ANUAL) 🔥
+        window.mostrarDiagnosticoMensual = function(dataMes) {
+            modoDiagnostico = 'mensual';
+            const diagSubtitle = document.getElementById('diag-subtitle');
+            if (diagSubtitle) diagSubtitle.innerText = `(Mensual: ${dataMes.mes})`;
+            
+            const btnAnual = document.getElementById('btnDiagAnual');
+            const btnMensual = document.getElementById('btnDiagMensual');
+            if (btnAnual) btnAnual.classList.remove('hidden');
+            if (btnMensual) btnMensual.classList.add('hidden');
+            
+            let texto = dataMes.diagnosticoExtendido;
+            if (!texto) {
+                const ventasTarde = dataMes.ventas - dataMes.ventasManana;
+                const turnoFuerte = ventasTarde > dataMes.ventasManana ? 'Tarde' : 'Mañana';
+                const pctTurno = dataMes.ventas > 0 ? ((Math.max(ventasTarde, dataMes.ventasManana) / dataMes.ventas) * 100).toFixed(1) : 0;
+                
+                let maxVDia = -1; let maxDia = "S/D";
+                let maxVHora = -1; let maxHora = "S/D";
+                let minVHora = Infinity; let valleHora = "S/D";
+                
+                if (dataMes.grillaDiaria) {
+                    for(let i=1; i<=31; i++) {
+                        if(dataMes.grillaDiaria[i]) {
+                            let sumaVentaDia = 0;
+                            horasDinamicas.forEach((h) => { sumaVentaDia += (dataMes.grillaDiaria[i][h]?.v || 0); });
+                            if (sumaVentaDia > maxVDia) { maxVDia = sumaVentaDia; maxDia = `Día ${i}`; }
+                        }
+                    }
+                    horasDinamicas.forEach((h) => {
+                        let sumHora = 0;
+                        for(let i=1; i<=31; i++) { if(dataMes.grillaDiaria[i]) sumHora += (dataMes.grillaDiaria[i][h]?.v || 0); }
+                        if (sumHora > maxVHora) { maxVHora = sumHora; maxHora = `${String(h).padStart(2, '0')}:00`; }
+                        // REGLA: Ignoramos cierres (12 y 21hs)
+                        if (h !== 21 && h !== 12 && sumHora < minVHora && sumHora > 0) { minVHora = sumHora; valleHora = `${String(h).padStart(2, '0')}:00`; }
+                    });
+                }
+                if (minVHora === Infinity) valleHora = maxHora;
+
+                const upt = dataMes.tickets > 0 ? (dataMes.unidades / dataMes.tickets).toFixed(2) : 0;
+                
+                texto = `Durante el mes de ${dataMes.mes} ${anioActual}, el Local ${localActual} registró una facturación total de ${formatCurrency(dataMes.ventas)}. El ticket promedio mensual se ubicó en ${formatCurrency(dataMes.ticketPromedio)} con un nivel de venta cruzada (UPT) de ${upt} artículos por cliente.\n\n📌 ANÁLISIS OPERATIVO DEL MES:\nEl turno ${turnoFuerte} lideró la tracción de ingresos con el ${pctTurno}% de las ventas totales. El mejor día comercial fue el ${maxDia} (${formatCurrency(maxVDia)}).\n\nEvaluando el mapa de calor horario del mes, la "Zona Caliente" de mayor conversión se dio a las ${maxHora} hs, mientras que el "Valle Operativo" más profundo de la jornada fue a las ${valleHora} hs. Se recomienda enfocar los esfuerzos de reposición en el horario valle y asegurar máxima cobertura de staff en la hora pico.`;
+                
+                dataMes.diagnosticoExtendido = texto;
+            }
+            
+            const txtBox = document.getElementById('texto-diagnostico');
+            if(txtBox) txtBox.innerText = texto;
+        };
+
+        window.mostrarDiagnosticoAnual = function() {
+            modoDiagnostico = 'anual';
+            const diagSubtitle = document.getElementById('diag-subtitle');
+            if (diagSubtitle) diagSubtitle.innerText = `(Histórico Anual)`;
+            
+            const btnAnual = document.getElementById('btnDiagAnual');
+            const btnMensual = document.getElementById('btnDiagMensual');
+            if (btnAnual) btnAnual.classList.add('hidden');
+            if (btnMensual) btnMensual.classList.remove('hidden');
+
+            let texto = diagnosticosLocales[localActual]?.[anioActual] || '[No hay datos suficientes para un diagnóstico anual. Carga un mes para generarlo.]';
+            const txtBox = document.getElementById('texto-diagnostico');
+            if(txtBox) txtBox.innerText = texto;
+        };
+
         function renderDashboard() {
             if (!datosSincronizados) return; 
 
@@ -1008,112 +1184,33 @@
                 document.getElementById('kpi-tickets').innerText = '0';
                 document.getElementById('kpi-ticket-prom').innerText = '$0';
                 document.getElementById('kpi-diaria').innerText = '$0';
-                document.getElementById('monthly-container').innerHTML = `<div class="col-span-1 md:col-span-2 text-center p-8 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300 font-bold">Aún no hay datos cargados para el ${anioActual}. Utiliza el Modo Administrador para agregar el primer mes.</div>`;
+                document.getElementById('monthly-container').innerHTML = `<div class="text-center p-8 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300 font-bold">Aún no hay datos cargados para el ${anioActual}. Utiliza el Modo Administrador para agregar el primer mes.</div>`;
                 
                 if (chartMixto) chartMixto.destroy(); if (chartTorta) chartTorta.destroy();
                 if (chartTurnos) chartTurnos.destroy(); if (chartTrafico) chartTrafico.destroy();
                 if (chartCrecimiento) chartCrecimiento.destroy(); if (chartUnidades) chartUnidades.destroy();
                 if (chartHora) chartHora.destroy(); if (chartDias) chartDias.destroy();
                 
+                document.getElementById('selectorMesGlobal').innerHTML = '';
                 document.getElementById('selectorMesDias').innerHTML = '';
                 document.getElementById('selectorMesHoras').innerHTML = '';
                 return;
             }
 
-            let totalVentas = 0; let totalTickets = 0; let totalDiasOperativosGlobal = 0;
-            datosMensuales.forEach(d => { 
-                totalVentas += d.ventas; 
-                totalTickets += d.tickets; 
-                totalDiasOperativosGlobal += (d.diasOperativos || 30); 
-            });
-            const ticketPromedioGlobal = totalTickets > 0 ? (totalVentas / totalTickets) : 0;
-            const ventaDiariaGlobal = totalVentas / (totalDiasOperativosGlobal || 1); 
-            const ticketsDiariosGlobal = Math.round(totalTickets / (totalDiasOperativosGlobal || 1));
-
-            document.getElementById('periodo-text').innerText = `${datosMensuales[0].mes} - ${datosMensuales[datosMensuales.length-1].mes} ${anioActual}`;
-            document.getElementById('kpi-ventas').innerText = formatMillones(totalVentas);
-            document.getElementById('kpi-tickets').innerHTML = `${formatNumber(totalTickets)} <span class="text-base text-gray-500 font-bold ml-1 tracking-normal">(${formatNumber(ticketsDiariosGlobal)}/día)</span>`;
-            document.getElementById('kpi-ticket-prom').innerText = formatCurrency(ticketPromedioGlobal);
-            document.getElementById('kpi-diaria').innerText = formatCurrency(ventaDiariaGlobal);
-
-            const container = document.getElementById('monthly-container');
-            container.innerHTML = ''; 
-            
-            datosMensuales.forEach((data, index) => {
-                if (!colores[data.colorTema]) { data.colorTema = listadoColores[index % listadoColores.length]; }
-                const theme = colores[data.colorTema];
-                const unidades = data.unidades || 0;
-                const upt = data.tickets > 0 ? (unidades / data.tickets).toFixed(2) : '0.00';
-                
-                const ventaDiariaMes = data.ventas / (data.diasOperativos || 30);
-                const ticketsDiariosMes = Math.round(data.tickets / (data.diasOperativos || 30));
-
-                let horaPicoText = "S/D";
-                let diaPicoText = "S/D";
-                
-                if (data.grillaDiaria) {
-                    let maxVDia = -1; let maxDia = "";
-                    for(let i=1; i<=31; i++) {
-                        if(data.grillaDiaria[i]) {
-                            let sumaVentaDia = 0;
-                            horasDinamicas.forEach((h) => {
-                                sumaVentaDia += (data.grillaDiaria[i][h]?.v || 0); 
-                            });
-                            if (sumaVentaDia > maxVDia) { maxVDia = sumaVentaDia; maxDia = `Día ${i}`; }
-                        }
-                    }
-                    if (maxVDia > 0) diaPicoText = `${maxDia} (${formatCurrency(maxVDia)})`;
-
-                    let maxVHora = -1; let maxHora = "";
-                    horasDinamicas.forEach((h) => {
-                        let sumHora = 0;
-                        for(let i=1; i<=31; i++) {
-                            if(data.grillaDiaria[i]) { sumHora += (data.grillaDiaria[i][h]?.v || 0); }
-                        }
-                        if (sumHora > maxVHora) { maxVHora = sumHora; maxHora = h.toString().padStart(2, '0') + ":00"; }
-                    });
-                    if (maxVHora > 0) horaPicoText = `${maxHora}`;
-                }
-
-                const diagnosticoVisual = generarDiagnosticoMensual(data.ventas, data.ventasManana, data.tickets, unidades);
-                
-                const editButton = modoAdmin ? 
-                    `<button onclick="editarMes('${data.mes}')" data-html2canvas-ignore="true" class="text-sm font-bold text-brand-magenta hover:text-white hover:bg-brand-magenta bg-white px-3 py-1 rounded-lg shadow-sm border border-brand-magenta transition-colors">
-                        <i class="fas fa-edit mr-1"></i> Editar Día a Día
-                    </button>` : '';
-
-                container.innerHTML += `
-                    <div style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 16px;">
-                        <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
-                            <div class="${theme.light} p-4 border-b ${theme.border} flex justify-between items-center">
-                                <h3 class="text-xl font-bold ${theme.textDark}">📊 ${data.mes} ${anioActual}</h3>
-                                ${editButton}
-                            </div>
-                            <div class="p-6 flex-grow">
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Ingresos totales de este mes.">Venta Total</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ventas)}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Gasto promedio por ticket en este mes.">Ticket Prom.</span><span class="font-black text-lg ${theme.textLight}">${formatCurrency(data.ticketPromedio)}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Cantidad de compras realizadas este mes.">Total Tickets</span><span class="font-bold text-lg">${formatNumber(data.tickets)}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Unidades por Ticket: Promedio de artículos que lleva cada cliente.">UPT (Art/Ticket)</span><span class="font-bold text-lg">${upt}</span></div>
-                                    
-                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="El día del mes con mayor volumen de facturación.">Mejor Día</span><span class="font-bold text-base ${theme.textLight}">${diaPicoText}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="La franja horaria que acumuló más ventas en este mes.">Hora más fuerte</span><span class="font-bold text-base">${horaPicoText}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Promedio facturado por cada día operativo del mes.">Venta Diaria</span><span class="font-bold text-base">${formatCurrency(ventaDiariaMes)}</span></div>
-                                    <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Promedio de clientes que compraron por cada día operativo del mes.">Tickets / Día</span><span class="font-bold text-base">${formatNumber(ticketsDiariosMes)}</span></div>
-                                    
-                                    <div class="col-span-2 md:col-span-4 text-xs text-gray-500 flex items-center justify-between border-t border-gray-100 pt-3 mt-1">
-                                        <div><span class="font-bold text-brand-magenta cursor-help underline decoration-dashed decoration-pink-300 underline-offset-2" title="Ventas realizadas hasta las 12:00 hs inclusive.">☀️ Mañana:</span> ${formatCurrency(data.ventasManana)}</div>
-                                        <div><span class="font-bold text-brand-black cursor-help underline decoration-dashed decoration-gray-400 underline-offset-2" title="Ventas realizadas desde las 17:00 hs en adelante.">🌙 Tarde:</span> ${formatCurrency(data.ventas - data.ventasManana)}</div>
-                                    </div>
-                                </div>
-                                <div class="${theme.light} rounded p-4 border-l-4 ${theme.leftBorder} text-sm text-gray-700">
-                                    <strong>Diagnóstico:</strong> ${diagnosticoVisual}
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
+            // Actualizar Opciones de los Selectores Mensuales
+            const selectorMesGlobal = document.getElementById('selectorMesGlobal');
+            const selectorMesDias = document.getElementById('selectorMesDias');
+            const selectorMesHoras = document.getElementById('selectorMesHoras');
+            selectorMesGlobal.innerHTML = '';
+            selectorMesDias.innerHTML = '';
+            selectorMesHoras.innerHTML = '';
+            datosMensuales.forEach(d => {
+                selectorMesGlobal.innerHTML += `<option value="${d.mes}">${d.mes}</option>`;
+                selectorMesDias.innerHTML += `<option value="${d.mes}">${d.mes}</option>`;
+                selectorMesHoras.innerHTML += `<option value="${d.mes}">${d.mes}</option>`;
             });
 
+            // LIMPIAR GRÁFICOS ANUALES Y REDIBUJAR
             if (chartMixto) chartMixto.destroy(); if (chartTorta) chartTorta.destroy();
             if (chartTurnos) chartTurnos.destroy(); if (chartTrafico) chartTrafico.destroy();
             if (chartCrecimiento) chartCrecimiento.destroy(); if (chartUnidades) chartUnidades.destroy();
@@ -1126,6 +1223,7 @@
             Chart.defaults.font.family = "'Nunito', sans-serif";
             Chart.defaults.animation = false; 
             
+            // Gráficos PÁGINA 2 (Anuales/YTD)
             chartMixto = new Chart(document.getElementById('mixedChart').getContext('2d'), {
                 type: 'bar', data: { labels: labels, datasets: [ { label: 'Facturación ($)', data: dataVts, backgroundColor: dynamicBgs, borderRadius: 8, yAxisID: 'y' }, { label: 'Ticket Promedio ($)', data: dataTkts, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' } ] },
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { type: 'linear', position: 'left', ticks: { callback: function(val) { return formatMillones(val); } } }, y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return formatCurrency(val); } } } } }
@@ -1142,6 +1240,7 @@
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return (context.dataset.label + ': ' + formatCurrency(context.parsed.y)); } } } }, scales: { y: { beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } } } }
             });
 
+            // Gráficos PÁGINA 3 (Anuales/YTD)
             chartTrafico = new Chart(document.getElementById('traficoChart').getContext('2d'), {
                 type: 'line', data: { labels: labels, datasets: [{ label: 'Volumen de Tickets', data: datosMensuales.map(d => d.tickets), borderColor: '#ec008c', backgroundColor: 'rgba(236, 0, 140, 0.1)', borderWidth: 4, tension: 0.4, fill: true, pointBackgroundColor: '#fff', pointBorderColor: '#ec008c', pointBorderWidth: 3, pointRadius: 6 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: function(c) { return 'Tickets: ' + formatNumber(c.parsed.y); } } } }, scales: { y: { beginAtZero: false } } }
@@ -1158,24 +1257,13 @@
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatNumber(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return val + ' art.'; } } } } }
             });
 
-            const selectorMesDias = document.getElementById('selectorMesDias');
-            const selectorMesHoras = document.getElementById('selectorMesHoras');
-            selectorMesDias.innerHTML = '';
-            selectorMesHoras.innerHTML = '';
-            datosMensuales.forEach(d => {
-                selectorMesDias.innerHTML += `<option value="${d.mes}">${d.mes}</option>`;
-                selectorMesHoras.innerHTML += `<option value="${d.mes}">${d.mes}</option>`;
-            });
-            
+            // DISPARAR LA VISTA MENSUAL POR DEFECTO (Último mes cargado)
             const ultimoMes = datosMensuales[datosMensuales.length - 1].mes;
-            selectorMesDias.value = ultimoMes;
-            selectorMesHoras.value = ultimoMes;
-            
-            window.actualizarGraficoDias(ultimoMes);
-            window.actualizarGraficoHoras(ultimoMes);
+            selectorMesGlobal.value = ultimoMes;
+            cambiarMesGlobal(ultimoMes);
         }
 
-        // 🔥 CEREBRO IA CON REGLAS DE HORARIO CORREGIDAS 🔥
+        // 🔥 GENERADOR DEL DIAGNÓSTICO ANUAL (Se guarda en BD) 🔥
         function generarDiagnosticoAutomatico() {
             let datos = baseDatosLocales[localActual]?.[anioActual] || [];
             if (datos.length === 0) return;
@@ -1210,7 +1298,6 @@
                 let v = horasDataAggr[h];
                 if (v > maxHoraV && v > 0) { maxHoraV = v; picoHora = `${String(h).padStart(2, '0')}:00`; }
                 
-                // 🔥 REGLA GERENCIAL: Ignoramos las 12:00hs y las 21:00hs al buscar el valle operativo 🔥
                 if (h !== 21 && h !== 12 && v < minHoraV && v > 0) { minHoraV = v; valleHora = `${String(h).padStart(2, '0')}:00`; }
             });
             if (minHoraV === Infinity) { valleHora = picoHora; }
@@ -1232,18 +1319,18 @@
             if (totalUnidades > 0) { texto += ` El nivel de ventas cruzadas (UPT) promedió ${uptPromedio.toFixed(2)} artículos por cliente.\n\n`; }
             else { texto += `\n\n`; }
 
-            texto += `📌 ANÁLISIS DE JORNADA Y HORARIOS:\n`;
-            texto += `El turno ${mejorTurno} lidera la tracción de ingresos, representando un ${porcentajeMejorTurno.toFixed(1)}% de las ventas totales. Evaluando el mapa de calor operativo de todo el período, el pico máximo de productividad histórica se produce a las ${picoHora} hs. Esta es la "Zona Caliente" del local, donde se debe garantizar el 100% de cobertura del staff en salón y cajas para maximizar la conversión y evitar pérdidas por demoras.\n\n`;
-            texto += `Por el contrario, la franja de las ${valleHora} hs representa el "Valle Operativo" de menor rendimiento en el local. Se recomienda fuertemente destinar este horario de bajo movimiento para tareas de reposición de stock, mantenimiento, o bien impulsar el tráfico mediante estrategias agresivas de marketing como ofertas relámpago o "Happy Hours".`;
+            texto += `📌 ANÁLISIS DE JORNADA Y HORARIOS (AÑO):\n`;
+            texto += `El turno ${mejorTurno} lidera la tracción de ingresos anuales, representando un ${porcentajeMejorTurno.toFixed(1)}% de las ventas totales. Evaluando el mapa de calor operativo del año, el pico máximo de productividad histórica se produce a las ${picoHora} hs. Esta es la "Zona Caliente" del local.\n\n`;
+            texto += `Por el contrario, la franja de las ${valleHora} hs representa el "Valle Operativo" de menor rendimiento histórico en el local. Se recomienda fuertemente destinar este horario de bajo movimiento para tareas de reposición de stock, mantenimiento, o bien impulsar el tráfico mediante estrategias agresivas de marketing.`;
 
             if (!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
-            document.getElementById('texto-diagnostico').innerText = texto;
             diagnosticosLocales[localActual][anioActual] = texto;
-            guardarEnLaNube(); 
             
-            let cajaDiagnostico = document.getElementById('texto-diagnostico').parentElement;
-            cajaDiagnostico.classList.add('ring-2', 'ring-brand-magenta', 'bg-[#222222]');
-            setTimeout(() => { cajaDiagnostico.classList.remove('ring-2', 'ring-brand-magenta', 'bg-[#222222]'); }, 500);
+            // Si estaba viendo el anual, lo actualiza visualmente
+            if (modoDiagnostico === 'anual') {
+                document.getElementById('texto-diagnostico').innerText = texto;
+            }
+            guardarEnLaNube(); 
         }
 
         window.agregarNuevoMes = function(event) {
@@ -1321,8 +1408,8 @@
                     }
 
                     guardarEnLaNube();
-                    generarDiagnosticoAutomatico();
-                    renderDashboard();
+                    generarDiagnosticoAutomatico(); // Genera y guarda el anual histórico
+                    renderDashboard(); // Esto repopula el listado y setea el selector en el último mes
                     
                     const btn = document.getElementById('btnAgregar');
                     if (btn) {
@@ -1364,16 +1451,14 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xl mr-3 text-brand-magenta"></i> Generando PDF...';
             
             const element = document.getElementById('pdf-export-area');
-            const labels = datosLocalesAnio.map(d => d.mes);
+            const mesSelec = document.getElementById('selectorMesGlobal').value || 'Reporte';
             
             const opt = {
                 margin:       [10, 10, 10, 10], 
-                filename:     `Reporte_${localActual}_${anioActual}_${labels[0]}_a_${labels[labels.length-1]}.pdf`,
+                filename:     `Reporte_${localActual}_${mesSelec}_${anioActual}.pdf`,
                 image:        { type: 'jpeg', quality: 1 },
-                // 🔥 FIX 1: scrollY y windowWidth aseguran que siempre se renderice como PC de escritorio
                 html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0, windowWidth: 1280 },
                 jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' },
-                // 🔥 FIX 2: Quitamos "before: '.nueva-pagina'". Ahora respetará los cortes de hoja oficiales.
                 pagebreak:    { mode: ['css', 'legacy'] } 
             };
 
