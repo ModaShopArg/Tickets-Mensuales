@@ -1370,9 +1370,11 @@
                 margin:       [10, 10, 10, 10], 
                 filename:     `Reporte_${localActual}_${anioActual}_${labels[0]}_a_${labels[labels.length-1]}.pdf`,
                 image:        { type: 'jpeg', quality: 1 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: 1366 },
+                // 🔥 FIX 1: scrollY y windowWidth aseguran que siempre se renderice como PC de escritorio
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0, windowWidth: 1280 },
                 jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' },
-                pagebreak:    { mode: ['css', 'legacy'], before: '.nueva-pagina' } 
+                // 🔥 FIX 2: Quitamos "before: '.nueva-pagina'". Ahora respetará los cortes de hoja oficiales.
+                pagebreak:    { mode: ['css', 'legacy'] } 
             };
 
             html2pdf().set(opt).from(element).save().then(() => { btn.innerHTML = originalText; });
