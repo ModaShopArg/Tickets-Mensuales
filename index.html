@@ -1236,7 +1236,7 @@
             const labels = datosMensuales.map(d => d.mes);
             const dataVts = datosMensuales.map(d => d.ventas);
             const dataTkts = datosMensuales.map(d => d.ticketPromedio);
-            const dynamicBgs = labels.map((_, i) => listadoColores[i % listadoColores.length] === 'magenta' ? '#ec008c' : listadoColores[i % listadoColores.length] === 'black' ? '#111111' : listadoColores[i % listadoColores.length] === 'pink' ? '#f472b6' : '#666666'); 
+            const dynamicBgs = datosMensuales.map(d => colores[d.colorTema].bg);
 
             Chart.defaults.font.family = "'Nunito', sans-serif";
             Chart.defaults.animation = false; 
