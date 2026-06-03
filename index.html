@@ -942,7 +942,6 @@
 
             const container = document.getElementById('monthly-container');
             
-            // 🔥 SOLUCIÓN: Forzamos dinámicamente que el color de la tarjeta coincida con el índice de la paleta de 12
             const indexColor = datosLocalesAnio.findIndex(d => d.mes === mesSeleccionado);
             const colorPaletaCorrecto = listadoColores[indexColor % listadoColores.length];
             const theme = colores[colorPaletaCorrecto];
@@ -1034,10 +1033,14 @@
 
             if (chartDias) chartDias.destroy();
             
+            // 🔥 SOLUCIÓN: Color del gráfico diario según la paleta del mes
+            const indexColor = datosLocalesAnio.findIndex(d => d.mes === mesSeleccionado);
+            const colorMes = colores[listadoColores[indexColor % listadoColores.length]].bg;
+
             const labelsDias = Array.from({length: numDias}, (_, i) => `Día ${i + 1}`);
             chartDias = new Chart(document.getElementById('diasChart').getContext('2d'), {
                 type: 'bar',
-                data: { labels: labelsDias, datasets: [ { label: 'Ventas Acumuladas ($)', data: aggrVentasDia, backgroundColor: '#ec008c', borderRadius: 4, yAxisID: 'y' }, { label: 'Tickets Totales', data: aggrTicketsDia, type: 'line', borderColor: '#111111', backgroundColor: '#111111', borderWidth: 3, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 2, pointRadius: 4, yAxisID: 'y1' } ] },
+                data: { labels: labelsDias, datasets: [ { label: 'Ventas Acumuladas ($)', data: aggrVentasDia, backgroundColor: colorMes, borderRadius: 4, yAxisID: 'y' }, { label: 'Tickets Totales', data: aggrTicketsDia, type: 'line', borderColor: '#111111', backgroundColor: '#111111', borderWidth: 3, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 2, pointRadius: 4, yAxisID: 'y1' } ] },
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return context.datasetIndex === 0 ? 'Ventas: ' + formatCurrency(context.parsed.y) : 'Tickets: ' + formatNumber(context.parsed.y); } } } }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } } } }
             });
         };
@@ -1066,9 +1069,13 @@
 
             if (chartHora) chartHora.destroy();
             
+            // 🔥 SOLUCIÓN: Color del gráfico horario según la paleta del mes
+            const indexColor = datosLocalesAnio.findIndex(d => d.mes === mesSeleccionado);
+            const colorMes = colores[listadoColores[indexColor % listadoColores.length]].bg;
+
             chartHora = new Chart(document.getElementById('horaChart').getContext('2d'), {
                 type: 'bar',
-                data: { labels: labelsHoras, datasets: [ { label: 'Ventas Acumuladas ($)', data: aggrVentasHora, backgroundColor: '#111111', borderRadius: 8, yAxisID: 'y' }, { label: 'Tickets Totales', data: aggrTicketsHora, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' } ] },
+                data: { labels: labelsHoras, datasets: [ { label: 'Ventas Acumuladas ($)', data: aggrVentasHora, backgroundColor: colorMes, borderRadius: 8, yAxisID: 'y' }, { label: 'Tickets Totales', data: aggrTicketsHora, type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' } ] },
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return context.datasetIndex === 0 ? 'Ventas: ' + formatCurrency(context.parsed.y) : 'Tickets: ' + formatNumber(context.parsed.y); } } } }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } } } }
             });
         };
@@ -1105,7 +1112,6 @@
                         let sumHora = 0;
                         for(let i=1; i<=31; i++) { if(dataMes.grillaDiaria[i]) sumHora += (dataMes.grillaDiaria[i][h]?.v || 0); }
                         if (sumHora > maxVHora) { maxVHora = sumHora; maxHora = `${String(h).padStart(2, '0')}:00`; }
-                        // 🔥 REGLA GERENCIAL: Ignoramos cierres de las 12hs y 21hs 🔥
                         if (h !== 21 && h !== 12 && sumHora < minVHora && sumHora > 0) { minVHora = sumHora; valleHora = `${String(h).padStart(2, '0')}:00`; }
                     });
                 }
@@ -1212,7 +1218,6 @@
             const dataVts = datosMensuales.map(d => d.ventas);
             const dataTkts = datosMensuales.map(d => d.ticketPromedio);
             
-            // 🔥 SOLUCIÓN: Asignación forzada y dinámica en vivo de la nueva paleta de 12 colores
             datosMensuales.forEach((data, index) => {
                 data.colorTema = listadoColores[index % listadoColores.length];
             });
@@ -1237,19 +1242,20 @@
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return (context.dataset.label + ': ' + formatCurrency(context.parsed.y)); } } } }, scales: { y: { beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } } } }
             });
 
+            // 🔥 SOLUCIÓN PÁGINA 3: Aplicar la paleta de 12 colores a los gráficos de Tráfico, Crecimiento y Unidades
             chartTrafico = new Chart(document.getElementById('traficoChart').getContext('2d'), {
-                type: 'line', data: { labels: labels, datasets: [{ label: 'Volumen de Tickets', data: datosMensuales.map(d => d.tickets), borderColor: '#ec008c', backgroundColor: 'rgba(236, 0, 140, 0.1)', borderWidth: 4, tension: 0.4, fill: true, pointBackgroundColor: '#fff', pointBorderColor: '#ec008c', pointBorderWidth: 3, pointRadius: 6 }] },
+                type: 'line', data: { labels: labels, datasets: [{ label: 'Volumen de Tickets', data: datosMensuales.map(d => d.tickets), borderColor: '#94a3b8', backgroundColor: 'rgba(148, 163, 184, 0.2)', borderWidth: 3, tension: 0.4, fill: true, pointBackgroundColor: dynamicBgs, pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 7, pointHoverRadius: 9 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: function(c) { return 'Tickets: ' + formatNumber(c.parsed.y); } } } }, scales: { y: { beginAtZero: false } } }
             });
 
             const dataCrecimiento = datosMensuales.map((d, i) => i === 0 ? 0 : ((d.ventas - datosMensuales[i-1].ventas) / datosMensuales[i-1].ventas) * 100);
             chartCrecimiento = new Chart(document.getElementById('crecimientoChart').getContext('2d'), {
-                type: 'bar', data: { labels: labels, datasets: [{ label: 'Crecimiento vs Mes Anterior (%)', data: dataCrecimiento, backgroundColor: dataCrecimiento.map(val => val >= 0 ? '#ec008c' : '#333333'), borderRadius: 6 }] },
+                type: 'bar', data: { labels: labels, datasets: [{ label: 'Crecimiento vs Mes Anterior (%)', data: dataCrecimiento, backgroundColor: dynamicBgs, borderRadius: 6 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: function(c) { return c.dataIndex === 0 ? "Mes Base" : `Variación: ${c.parsed.y >= 0 ? '+' : ''}${c.parsed.y.toFixed(1)}%`; } } } }, scales: { y: { ticks: { callback: function(val) { return val + '%'; } } } } }
             });
 
             chartUnidades = new Chart(document.getElementById('unidadesChart').getContext('2d'), {
-                type: 'bar', data: { labels: labels, datasets: [ { label: 'Unidades Vendidas', data: datosMensuales.map(d => d.unidades || 0), backgroundColor: '#333333', borderRadius: 8, yAxisID: 'y' }, { label: 'UPT (Art. por Ticket)', data: datosMensuales.map(d => d.tickets > 0 ? ((d.unidades || 0) / d.tickets).toFixed(2) : 0), type: 'line', borderColor: '#ec008c', backgroundColor: '#ec008c', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' } ] },
+                type: 'bar', data: { labels: labels, datasets: [ { label: 'Unidades Vendidas', data: datosMensuales.map(d => d.unidades || 0), backgroundColor: dynamicBgs, borderRadius: 8, yAxisID: 'y' }, { label: 'UPT (Art. por Ticket)', data: datosMensuales.map(d => d.tickets > 0 ? ((d.unidades || 0) / d.tickets).toFixed(2) : 0), type: 'line', borderColor: '#111111', backgroundColor: '#111111', borderWidth: 4, tension: 0.3, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointRadius: 6, yAxisID: 'y1' } ] },
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: function(val) { return formatNumber(val); } } }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(val) { return val + ' art.'; } } } } }
             });
 
@@ -1292,7 +1298,6 @@
                 let v = horasDataAggr[h];
                 if (v > maxHoraV && v > 0) { maxHoraV = v; picoHora = `${String(h).padStart(2, '0')}:00`; }
                 
-                // 🔥 REGLA GERENCIAL: Ignoramos las 12:00hs y las 21:00hs al buscar el valle operativo 🔥
                 if (h !== 21 && h !== 12 && v < minHoraV && v > 0) { minHoraV = v; valleHora = `${String(h).padStart(2, '0')}:00`; }
             });
             if (minHoraV === Infinity) { valleHora = picoHora; }
@@ -1402,8 +1407,8 @@
                     }
 
                     guardarEnLaNube();
-                    generarDiagnosticoAutomatico();
-                    renderDashboard();
+                    generarDiagnosticoAutomatico(); 
+                    renderDashboard(); 
                     
                     const btn = document.getElementById('btnAgregar');
                     if (btn) {
