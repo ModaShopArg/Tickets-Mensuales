@@ -1033,7 +1033,6 @@
 
             if (chartDias) chartDias.destroy();
             
-            // 🔥 SOLUCIÓN: Color del gráfico diario según la paleta del mes
             const indexColor = datosLocalesAnio.findIndex(d => d.mes === mesSeleccionado);
             const colorMes = colores[listadoColores[indexColor % listadoColores.length]].bg;
 
@@ -1069,7 +1068,6 @@
 
             if (chartHora) chartHora.destroy();
             
-            // 🔥 SOLUCIÓN: Color del gráfico horario según la paleta del mes
             const indexColor = datosLocalesAnio.findIndex(d => d.mes === mesSeleccionado);
             const colorMes = colores[listadoColores[indexColor % listadoColores.length]].bg;
 
@@ -1100,11 +1098,17 @@
                 let maxVHora = -1; let maxHora = "S/D";
                 let minVHora = Infinity; let valleHora = "S/D";
                 
+                // 🔥 NUEVA LÓGICA: Cálculo de Horas Muertas Diarias 🔥
+                let horasActivas = 0;
+                
                 if (dataMes.grillaDiaria) {
                     for(let i=1; i<=31; i++) {
                         if(dataMes.grillaDiaria[i]) {
                             let sumaVentaDia = 0;
-                            horasDinamicas.forEach((h) => { sumaVentaDia += (dataMes.grillaDiaria[i][h]?.v || 0); });
+                            horasDinamicas.forEach((h) => { 
+                                sumaVentaDia += (dataMes.grillaDiaria[i][h]?.v || 0); 
+                                if ((dataMes.grillaDiaria[i][h]?.t || 0) > 0) horasActivas++;
+                            });
                             if (sumaVentaDia > maxVDia) { maxVDia = sumaVentaDia; maxDia = `Día ${i}`; }
                         }
                     }
@@ -1112,6 +1116,7 @@
                         let sumHora = 0;
                         for(let i=1; i<=31; i++) { if(dataMes.grillaDiaria[i]) sumHora += (dataMes.grillaDiaria[i][h]?.v || 0); }
                         if (sumHora > maxVHora) { maxVHora = sumHora; maxHora = `${String(h).padStart(2, '0')}:00`; }
+                        // Regla gerencial: se ignoran las 12hs y las 21hs para el valle
                         if (h !== 21 && h !== 12 && sumHora < minVHora && sumHora > 0) { minVHora = sumHora; valleHora = `${String(h).padStart(2, '0')}:00`; }
                     });
                 }
@@ -1119,6 +1124,13 @@
 
                 const upt = dataMes.tickets > 0 ? (dataMes.unidades / dataMes.tickets).toFixed(2) : 0;
                 
+                // Cálculo de horas muertas
+                let diasOperativos = dataMes.diasOperativos || 30;
+                let horasPosiblesTotales = diasOperativos * horasDinamicas.length;
+                let horasMuertasTotales = Math.max(0, horasPosiblesTotales - horasActivas);
+                let horasMuertasPorDia = (horasMuertasTotales / diasOperativos).toFixed(1);
+                
+                // 🔥 REGLA DE ALERTA COMERCIAL 🔥
                 const eventosComerciales = {
                     'Enero': 'Febrero (San Valentín y Feriado de Carnaval)',
                     'Febrero': 'Marzo (Día de la Mujer y Temp. Otoño/Invierno)',
@@ -1136,7 +1148,7 @@
                 
                 const alertaProximoMes = eventosComerciales[dataMes.mes] ? `\n\n🎯 ALERTA COMERCIAL PREVENTIVA:\nFalta solo 1 mes para los eventos de ${eventosComerciales[dataMes.mes]}. Es el momento ideal para empezar a planificar el stock, armar las campañas de marketing y organizar las vidrieras temáticas.` : '';
                 
-                texto = `Durante el mes de ${dataMes.mes} ${anioActual}, el Local ${localActual} registró una facturación total de ${formatCurrency(dataMes.ventas)}. El ticket promedio mensual se ubicó en ${formatCurrency(dataMes.ticketPromedio)} con un nivel de venta cruzada (UPT) de ${upt} artículos por cliente.\n\n📌 ANÁLISIS OPERATIVO DEL MES:\nEl turno ${turnoFuerte} lideró la tracción de ingresos con el ${pctTurno}% de las ventas totales. El mejor día comercial fue el ${maxDia} (${formatCurrency(maxVDia)}).\n\nEvaluando el mapa de calor horario del mes, la "Zona Caliente" de mayor conversión se dio a las ${maxHora} hs, mientras que el "Valle Operativo" más profundo de la jornada fue a las ${valleHora} hs. Se recomienda enfocar los esfuerzos de reposición en el horario valle y asegurar máxima cobertura de staff en la hora pico.${alertaProximoMes}`;
+                texto = `Durante el mes de ${dataMes.mes} ${anioActual}, el Local ${localActual} registró una facturación total de ${formatCurrency(dataMes.ventas)}. El ticket promedio mensual se ubicó en ${formatCurrency(dataMes.ticketPromedio)} con un nivel de venta cruzada (UPT) de ${upt} artículos por cliente.\n\n📌 ANÁLISIS OPERATIVO DEL MES:\nEl turno ${turnoFuerte} lideró la tracción de ingresos con el ${pctTurno}% de las ventas totales. El mejor día comercial fue el ${maxDia} (${formatCurrency(maxVDia)}).\n\nEvaluando el mapa de calor horario del mes, la "Zona Caliente" de mayor conversión se dio a las ${maxHora} hs, mientras que el "Valle Operativo" más profundo de la jornada fue a las ${valleHora} hs. Como dato de eficiencia de tráfico, el local promedió ${horasMuertasPorDia} horas por día operativo sin registrar tickets (horas muertas). Se recomienda enfocar los esfuerzos de reposición en el horario valle y asegurar máxima cobertura de staff en la hora pico.${alertaProximoMes}`;
                 
                 dataMes.diagnosticoExtendido = texto;
             }
@@ -1218,6 +1230,7 @@
             const dataVts = datosMensuales.map(d => d.ventas);
             const dataTkts = datosMensuales.map(d => d.ticketPromedio);
             
+            // Forzamos el color de la paleta
             datosMensuales.forEach((data, index) => {
                 data.colorTema = listadoColores[index % listadoColores.length];
             });
@@ -1242,7 +1255,7 @@
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return (context.dataset.label + ': ' + formatCurrency(context.parsed.y)); } } } }, scales: { y: { beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } } } }
             });
 
-            // 🔥 SOLUCIÓN PÁGINA 3: Aplicar la paleta de 12 colores a los gráficos de Tráfico, Crecimiento y Unidades
+            // Aplicar la paleta de 12 colores a los gráficos restantes
             chartTrafico = new Chart(document.getElementById('traficoChart').getContext('2d'), {
                 type: 'line', data: { labels: labels, datasets: [{ label: 'Volumen de Tickets', data: datosMensuales.map(d => d.tickets), borderColor: '#94a3b8', backgroundColor: 'rgba(148, 163, 184, 0.2)', borderWidth: 3, tension: 0.4, fill: true, pointBackgroundColor: dynamicBgs, pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 7, pointHoverRadius: 9 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: function(c) { return 'Tickets: ' + formatNumber(c.parsed.y); } } } }, scales: { y: { beginAtZero: false } } }
@@ -1271,15 +1284,21 @@
             let totalVentas = 0; let totalVentasManana = 0; let totalTickets = 0; let totalUnidades = 0;
             let horasDataAggr = { 8:0, 9:0, 10:0, 11:0, 12:0, 17:0, 18:0, 19:0, 20:0, 21:0 };
 
+            // 🔥 NUEVA LÓGICA: Horas Muertas Anuales 🔥
+            let totalDiasOperativosAnual = 0;
+            let horasActivasAnual = 0;
+
             datos.forEach(d => { 
                 totalVentas += d.ventas; totalVentasManana += d.ventasManana; 
                 totalTickets += d.tickets; totalUnidades += (d.unidades || 0);
+                totalDiasOperativosAnual += (d.diasOperativos || 30);
                 
                 if (d.grillaDiaria) {
                     for(let i=1; i<=31; i++) {
                         if(d.grillaDiaria[i]) {
                             horasDinamicas.forEach(h => {
                                 horasDataAggr[h] += (d.grillaDiaria[i][h]?.v || 0);
+                                if ((d.grillaDiaria[i][h]?.t || 0) > 0) horasActivasAnual++;
                             });
                         }
                     }
@@ -1294,10 +1313,15 @@
 
             let maxHoraV = -1; let picoHora = "S/D";
             let minHoraV = Infinity; let valleHora = "S/D";
+            
+            // Cálculo Horas Muertas Anuales
+            let totalPosiblesHorasAnual = totalDiasOperativosAnual * horasDinamicas.length;
+            let horasMuertasTotalesAnual = Math.max(0, totalPosiblesHorasAnual - horasActivasAnual);
+            let horasMuertasPorDiaAnual = totalDiasOperativosAnual > 0 ? (horasMuertasTotalesAnual / totalDiasOperativosAnual).toFixed(1) : 0;
+
             horasDinamicas.forEach(h => {
                 let v = horasDataAggr[h];
                 if (v > maxHoraV && v > 0) { maxHoraV = v; picoHora = `${String(h).padStart(2, '0')}:00`; }
-                
                 if (h !== 21 && h !== 12 && v < minHoraV && v > 0) { minHoraV = v; valleHora = `${String(h).padStart(2, '0')}:00`; }
             });
             if (minHoraV === Infinity) { valleHora = picoHora; }
