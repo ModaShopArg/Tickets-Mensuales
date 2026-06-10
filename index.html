@@ -950,12 +950,16 @@
             
             let maxVDia = -1; let maxDia = "S/D";
             let maxVHora = -1; let maxHora = "S/D";
+            let horasActivas = 0; // 🔥 NUEVO 🔥
             
             if (dataMes.grillaDiaria) {
                 for(let i=1; i<=31; i++) {
                     if(dataMes.grillaDiaria[i]) {
                         let sumaVentaDia = 0;
-                        horasDinamicas.forEach((h) => { sumaVentaDia += (dataMes.grillaDiaria[i][h]?.v || 0); });
+                        horasDinamicas.forEach((h) => { 
+                            sumaVentaDia += (dataMes.grillaDiaria[i][h]?.v || 0); 
+                            if ((dataMes.grillaDiaria[i][h]?.t || 0) > 0) horasActivas++; // 🔥 NUEVO 🔥
+                        });
                         if (sumaVentaDia > maxVDia) { maxVDia = sumaVentaDia; maxDia = `Día ${i}`; }
                     }
                 }
@@ -965,6 +969,11 @@
                     if (sumHora > maxVHora) { maxVHora = sumHora; maxHora = h.toString().padStart(2, '0') + ":00"; }
                 });
             }
+
+            // 🔥 NUEVO: Cálculo Visual de Horas Muertas 🔥
+            let horasPosibles = diasOperativosMes * horasDinamicas.length;
+            let horasMuertasTotales = Math.max(0, horasPosibles - horasActivas);
+            let horasMuertasPorDia = (horasMuertasTotales / diasOperativosMes).toFixed(1);
 
             const diagnosticoVisual = generarDiagnosticoMensual(dataMes.ventas, dataMes.ventasManana, dataMes.tickets, dataMes.unidades);
             const editButton = modoAdmin ? 
@@ -989,9 +998,14 @@
                                 <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Promedio facturado por cada día operativo del mes.">Venta Diaria</span><span class="font-bold text-base">${formatCurrency(ventaDiariaMes)}</span></div>
                                 <div><span class="text-gray-500 text-sm block font-bold cursor-help underline decoration-dashed decoration-gray-300 underline-offset-4" title="Promedio de clientes que compraron por cada día operativo del mes.">Tickets / Día</span><span class="font-bold text-base">${formatNumber(ticketsDiariosMes)}</span></div>
                                 
-                                <div class="col-span-2 md:col-span-4 text-xs text-gray-500 flex items-center justify-between border-t border-gray-100 pt-3 mt-1">
-                                    <div><span class="font-bold text-brand-magenta cursor-help underline decoration-dashed decoration-pink-300 underline-offset-2" title="Ventas realizadas hasta las 12:00 hs inclusive.">☀️ Mañana:</span> ${formatCurrency(dataMes.ventasManana)}</div>
-                                    <div><span class="font-bold text-brand-black cursor-help underline decoration-dashed decoration-gray-400 underline-offset-2" title="Ventas realizadas desde las 17:00 hs en adelante.">🌙 Tarde:</span> ${formatCurrency(dataMes.ventas - dataMes.ventasManana)}</div>
+                                <div class="col-span-2 md:col-span-4 text-xs text-gray-500 flex flex-col md:flex-row items-start md:items-center justify-between border-t border-gray-100 pt-3 mt-1 gap-3">
+                                    <div class="flex gap-4">
+                                        <div><span class="font-bold text-brand-magenta cursor-help underline decoration-dashed decoration-pink-300 underline-offset-2" title="Ventas realizadas hasta las 12:00 hs inclusive.">☀️ Mañana:</span> ${formatCurrency(dataMes.ventasManana)}</div>
+                                        <div><span class="font-bold text-brand-black cursor-help underline decoration-dashed decoration-gray-400 underline-offset-2" title="Ventas realizadas desde las 17:00 hs en adelante.">🌙 Tarde:</span> ${formatCurrency(dataMes.ventas - dataMes.ventasManana)}</div>
+                                    </div>
+                                    <div class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg border border-red-100 shadow-sm">
+                                        <span class="font-bold cursor-help underline decoration-dashed decoration-red-300 underline-offset-2" title="Promedio de horas por día operativo donde no se emitió ningún ticket (Tiempo Ocioso).">⏳ Horas Muertas:</span> <span class="font-black text-sm">${horasMuertasPorDia} hs/día</span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="${theme.light} rounded p-4 border-l-4 ${theme.leftBorder} text-sm text-gray-700">
