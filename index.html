@@ -1321,7 +1321,7 @@
 
             texto += `📌 ANÁLISIS DE JORNADA Y HORARIOS (AÑO):\n`;
             texto += `El turno ${mejorTurno} lidera la tracción de ingresos anuales, representando un ${porcentajeMejorTurno.toFixed(1)}% de las ventas totales. Evaluando el mapa de calor operativo del año, el pico máximo de productividad histórica se produce a las ${picoHora} hs. Esta es la "Zona Caliente" del local.\n\n`;
-            texto += `Por el contrario, la franja de las ${valleHora} hs representa el "Valle Operativo" de menor rendimiento histórico en el local. Se recomienda fuertemente destinar este horario de bajo movimiento para tareas de reposición de stock, mantenimiento, o bien impulsar el tráfico mediante estrategias agresivas de marketing.`;
+            texto += `Por el contrario, la franja de las ${valleHora} hs representa el "Valle Operativo" de menor rendimiento histórico en el local. A nivel anual, el local promedió ${horasMuertasPorDiaAnual} horas diarias sin emisión de tickets. Se recomienda fuertemente destinar este horario de bajo movimiento para tareas de reposición de stock, mantenimiento, o bien impulsar el tráfico mediante estrategias agresivas de marketing.`;
 
             if (!diagnosticosLocales[localActual]) diagnosticosLocales[localActual] = {};
             diagnosticosLocales[localActual][anioActual] = texto;
