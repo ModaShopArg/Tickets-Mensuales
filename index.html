@@ -950,7 +950,7 @@
             
             let maxVDia = -1; let maxDia = "S/D";
             let maxVHora = -1; let maxHora = "S/D";
-            let horasActivas = 0; // 🔥 NUEVO 🔥
+            let horasActivas = 0; 
             
             if (dataMes.grillaDiaria) {
                 for(let i=1; i<=31; i++) {
@@ -958,7 +958,7 @@
                         let sumaVentaDia = 0;
                         horasDinamicas.forEach((h) => { 
                             sumaVentaDia += (dataMes.grillaDiaria[i][h]?.v || 0); 
-                            if ((dataMes.grillaDiaria[i][h]?.t || 0) > 0) horasActivas++; // 🔥 NUEVO 🔥
+                            if ((dataMes.grillaDiaria[i][h]?.t || 0) > 0) horasActivas++; 
                         });
                         if (sumaVentaDia > maxVDia) { maxVDia = sumaVentaDia; maxDia = `Día ${i}`; }
                     }
@@ -970,7 +970,7 @@
                 });
             }
 
-            // 🔥 NUEVO: Cálculo Visual de Horas Muertas 🔥
+            // Cálculo Visual de Horas Muertas
             let horasPosibles = diasOperativosMes * horasDinamicas.length;
             let horasMuertasTotales = Math.max(0, horasPosibles - horasActivas);
             let horasMuertasPorDia = (horasMuertasTotales / diasOperativosMes).toFixed(1);
@@ -1112,7 +1112,6 @@
                 let maxVHora = -1; let maxHora = "S/D";
                 let minVHora = Infinity; let valleHora = "S/D";
                 
-                // 🔥 NUEVA LÓGICA: Cálculo de Horas Muertas Diarias 🔥
                 let horasActivas = 0;
                 
                 if (dataMes.grillaDiaria) {
@@ -1130,7 +1129,6 @@
                         let sumHora = 0;
                         for(let i=1; i<=31; i++) { if(dataMes.grillaDiaria[i]) sumHora += (dataMes.grillaDiaria[i][h]?.v || 0); }
                         if (sumHora > maxVHora) { maxVHora = sumHora; maxHora = `${String(h).padStart(2, '0')}:00`; }
-                        // Regla gerencial: se ignoran las 12hs y las 21hs para el valle
                         if (h !== 21 && h !== 12 && sumHora < minVHora && sumHora > 0) { minVHora = sumHora; valleHora = `${String(h).padStart(2, '0')}:00`; }
                     });
                 }
@@ -1138,13 +1136,11 @@
 
                 const upt = dataMes.tickets > 0 ? (dataMes.unidades / dataMes.tickets).toFixed(2) : 0;
                 
-                // Cálculo de horas muertas
                 let diasOperativos = dataMes.diasOperativos || 30;
                 let horasPosiblesTotales = diasOperativos * horasDinamicas.length;
                 let horasMuertasTotales = Math.max(0, horasPosiblesTotales - horasActivas);
                 let horasMuertasPorDia = (horasMuertasTotales / diasOperativos).toFixed(1);
                 
-                // 🔥 REGLA DE ALERTA COMERCIAL 🔥
                 const eventosComerciales = {
                     'Enero': 'Febrero (San Valentín y Feriado de Carnaval)',
                     'Febrero': 'Marzo (Día de la Mujer y Temp. Otoño/Invierno)',
@@ -1244,7 +1240,6 @@
             const dataVts = datosMensuales.map(d => d.ventas);
             const dataTkts = datosMensuales.map(d => d.ticketPromedio);
             
-            // Forzamos el color de la paleta
             datosMensuales.forEach((data, index) => {
                 data.colorTema = listadoColores[index % listadoColores.length];
             });
@@ -1269,7 +1264,6 @@
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: function(context) { return (context.dataset.label + ': ' + formatCurrency(context.parsed.y)); } } } }, scales: { y: { beginAtZero: true, ticks: { callback: function(val) { return formatMillones(val); } } } } }
             });
 
-            // Aplicar la paleta de 12 colores a los gráficos restantes
             chartTrafico = new Chart(document.getElementById('traficoChart').getContext('2d'), {
                 type: 'line', data: { labels: labels, datasets: [{ label: 'Volumen de Tickets', data: datosMensuales.map(d => d.tickets), borderColor: '#94a3b8', backgroundColor: 'rgba(148, 163, 184, 0.2)', borderWidth: 3, tension: 0.4, fill: true, pointBackgroundColor: dynamicBgs, pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 7, pointHoverRadius: 9 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: function(c) { return 'Tickets: ' + formatNumber(c.parsed.y); } } } }, scales: { y: { beginAtZero: false } } }
@@ -1298,7 +1292,6 @@
             let totalVentas = 0; let totalVentasManana = 0; let totalTickets = 0; let totalUnidades = 0;
             let horasDataAggr = { 8:0, 9:0, 10:0, 11:0, 12:0, 17:0, 18:0, 19:0, 20:0, 21:0 };
 
-            // 🔥 NUEVA LÓGICA: Horas Muertas Anuales 🔥
             let totalDiasOperativosAnual = 0;
             let horasActivasAnual = 0;
 
@@ -1328,10 +1321,12 @@
             let maxHoraV = -1; let picoHora = "S/D";
             let minHoraV = Infinity; let valleHora = "S/D";
             
-            // Cálculo Horas Muertas Anuales
             let totalPosiblesHorasAnual = totalDiasOperativosAnual * horasDinamicas.length;
             let horasMuertasTotalesAnual = Math.max(0, totalPosiblesHorasAnual - horasActivasAnual);
             let horasMuertasPorDiaAnual = totalDiasOperativosAnual > 0 ? (horasMuertasTotalesAnual / totalDiasOperativosAnual).toFixed(1) : 0;
+            
+            // 🔥 NUEVA MÉTRICA: Número de tickets promedio diarios (Anual) 🔥
+            let ticketsDiariosPromedioAnual = totalDiasOperativosAnual > 0 ? Math.round(totalTickets / totalDiasOperativosAnual) : 0;
 
             horasDinamicas.forEach(h => {
                 let v = horasDataAggr[h];
@@ -1353,7 +1348,7 @@
                 else if (crecimiento < 0) { texto += `A corto plazo, el mes de ${ultimoMes.mes} experimentó una contracción del ${Math.abs(crecimiento).toFixed(1)}% frente a ${mesAnterior.mes}. `; } 
             }
 
-            texto += `El ticket promedio global se sitúa en ${formatCurrency(ticketPromedio)}.`;
+            texto += `El ticket promedio global se sitúa en ${formatCurrency(ticketPromedio)} (con un volumen de ${ticketsDiariosPromedioAnual} tickets diarios promedio).`;
             if (totalUnidades > 0) { texto += ` El nivel de ventas cruzadas (UPT) promedió ${uptPromedio.toFixed(2)} artículos por cliente.\n\n`; }
             else { texto += `\n\n`; }
 
